@@ -153,7 +153,7 @@ end
 local function cvarsetup()
 	SetCVar("statusTextDisplay", "BOTH")
 	SetCVar("screenshotQuality", 8)
-	SetCVar("cameraDistanceMaxZoomFactor", 2.6)
+	SetCVar("cameraDistanceMaxZoomFactor", not T.classic and 2.6 or 3.4)
 	SetCVar("showTutorials", 0)
 	SetCVar("gameTip", "0")
 	SetCVar("UberTooltips", 1)
@@ -173,12 +173,14 @@ local function cvarsetup()
 	SetCVar("buffDurations", 1)
 	SetCVar("autoOpenLootHistory", 0)
 	SetCVar("violenceLevel", 5)
-	--beta SetCVar("lossOfControl", 0)
-	--beta SetCVar("threatWarning", 3)
+	if not T.classic then
+	SetCVar("lossOfControl", 0)
+	SetCVar("threatWarning", 3)
+	SetCVar("nameplateShowSelf", 0)
+	end
 	SetCVar('SpamFilter', 0)
 	SetCVar("ShowClassColorInNameplate", 1)
 	SetCVar("autoSelfCast", 1)
-	--beta SetCVar("nameplateShowSelf", 0)
 	SetCVar("nameplateShowFriendlyNPCs",1)
 end
 
@@ -2753,7 +2755,7 @@ maxsteps = 7
 local step7 = function()
 	SavedOptionsPerChar.Install = true
 	sb:SetValue(7)
-	PlaySoundFile("Sound\\interface\\LevelUp.wav")
+	PlaySound(888)
 	header:SetText("4. Success!")
 	text1:SetText("Installation is complete.")
 	text2:SetText("Please click the 'Finish' button to reload the UI.")
@@ -2918,7 +2920,7 @@ end
 
 local OnLogon = CreateFrame("Frame")
 OnLogon:RegisterEvent("PLAYER_LOGIN")
-OnLogon:SetScript("OnEvent", function(self, event)
+OnLogon:SetScript("OnEvent", function(self)
 	self:UnregisterEvent("PLAYER_LOGIN")
 
 	-- Create empty CVar if they doesn't exist
@@ -2994,7 +2996,7 @@ end)
 --	Popups
 ----------------------------------------------------------------------------------------
 
-StaticPopupDialogs.SKADAINST_UI = {
+StaticPopupDialogs.SKAINST_UI = {
 	text = "Install settings for Skada",
 	button1 = ACCEPT,
 	button2 = CANCEL,
@@ -3095,8 +3097,8 @@ SLASH_SET_BTLine1 = "/vbtline"
 SlashCmdList.SET_BTLine = function() StaticPopup_Show("SET_BT") end
 
 -- Setup Skada Windows
-SLASH_SKADA1 = "/skadasetup_ui"
-SlashCmdList.SKADA = function() StaticPopup_Show("SKADAINST_UI") end
+SLASH_SKA1 = "/skasetup_ui"
+SlashCmdList.SKA = function() StaticPopup_Show("SKAINST_UI") end
 
 SLASH_CONFIGURE1 = "/resetui"
 SlashCmdList.CONFIGURE = function() StaticPopup_Show("RESET_UI") end

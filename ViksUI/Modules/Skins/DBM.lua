@@ -10,9 +10,9 @@ local backdrop = {
 }
 
 local DBMSkin = CreateFrame("Frame")
-DBMSkin:RegisterEvent("PLAYER_ENTERING_WORLD")
+DBMSkin:RegisterEvent("PLAYER_LOGIN")
 DBMSkin:RegisterEvent("ADDON_LOADED")
-DBMSkin:SetScript("OnEvent", function(self, event, addon)
+DBMSkin:SetScript("OnEvent", function()
 	if IsAddOnLoaded("DBM-Core") then
 		local function SkinBars(self)
 			for bar in self:GetBarIterator() do
@@ -143,24 +143,24 @@ DBMSkin:SetScript("OnEvent", function(self, event, addon)
 				end
 			end
 		end
-		
-		if DBM ~= nil then
-		hooksecurefunc(DBT, "CreateBar", SkinBars)
+		if DBM then
+			hooksecurefunc(DBT, "CreateBar", SkinBars)
 
-		hooksecurefunc(DBM.RangeCheck, "Show", function()
-			if DBMRangeCheck then
-				DBMRangeCheck:SetTemplate("Transparent")
-			end
-			if DBMRangeCheckRadar then
-				DBMRangeCheckRadar:SetTemplate("Transparent")
-			end
-		end)
+			hooksecurefunc(DBM.RangeCheck, "Show", function()
+				if DBMRangeCheck then
+					DBMRangeCheck:SetTemplate("Transparent")
+				end
+				if DBMRangeCheckRadar then
+					DBMRangeCheckRadar:SetTemplate("Transparent")
+				end
+			end)
 
-		hooksecurefunc(DBM.InfoFrame, "Show", function()
-			DBMInfoFrame:SetTemplate("Transparent")
-		end)
+			hooksecurefunc(DBM.InfoFrame, "Show", function()
+				if DBMInfoFrame then
+					DBMInfoFrame:SetTemplate("Transparent")
+				end
+			end)
 		end
-
 		local replace = string.gsub
 		local old = RaidNotice_AddMessage
 		RaidNotice_AddMessage = function(noticeFrame, textString, colorInfo)

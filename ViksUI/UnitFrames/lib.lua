@@ -1855,6 +1855,7 @@ lib.ReadyCheck = function(self)
 end
 
 lib.PhaseIndicatord = function(self)
+if IsClassicBuild() then return end
 local picon = self.Health:CreateTexture(nil, 'OVERLAY')
 picon:SetPoint('TOPRIGHT', self, 'TOPRIGHT', -2, 0)
 picon:SetSize(14, 14)

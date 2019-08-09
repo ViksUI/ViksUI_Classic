@@ -63,6 +63,18 @@ T.CheckChat = function(warning)
 end
 
 ----------------------------------------------------------------------------------------
+--	Player's level check
+----------------------------------------------------------------------------------------
+local function CheckLevel()
+	local playerLevel = UnitLevel("player")
+	if T.level ~= playerLevel then T.level = playerLevel end
+end
+local LevelUpdater = CreateFrame("Frame")
+LevelUpdater:RegisterEvent("PLAYER_LEVEL_UP")
+LevelUpdater:RegisterEvent("PLAYER_LEVEL_CHANGED")
+LevelUpdater:SetScript("OnEvent", CheckLevel)
+
+----------------------------------------------------------------------------------------
 --	Player's role check
 ----------------------------------------------------------------------------------------
 local isCaster = {
@@ -961,7 +973,7 @@ T.PreUpdatePower = function(power, unit)
 	end
 end
 
-T.PostUpdatePower = function(power, unit, cur, min, max)
+T.PostUpdatePower = function(power, unit, cur, _, max)
 	if unit and unit:find("arena%dtarget") then return end
 	local self = power:GetParent()
 	local pType, pToken = UnitPowerType(unit)
@@ -1174,7 +1186,7 @@ local setBarTicks = function(Castbar, numTicks)
 	end
 end
 
-T.PostCastStart = function(Castbar, unit, name)
+T.PostCastStart = function(Castbar, unit)
 	Castbar.channeling = false
 	if unit == "vehicle" then unit = "player" end
 
@@ -1258,8 +1270,7 @@ T.PostCastStart = function(Castbar, unit, name)
 	end
 end
 
-
-T.PostChannelStart = function(Castbar, unit, name)
+T.PostChannelStart = function(Castbar, unit)
 	Castbar.channeling = true
 	if unit == "vehicle" then unit = "player" end
 
@@ -1535,7 +1546,7 @@ T.CreateAuraWatchIcon = function(self, icon)
 	icon.overlay:SetTexture()
 end
 
-T.CreateAuraWatch = function(self, unit)
+T.CreateAuraWatch = function(self)
 	local auras = CreateFrame("Frame", nil, self)
 	auras:SetPoint("TOPLEFT", self.Health, 0, 0)
 	auras:SetPoint("BOTTOMRIGHT", self.Health, 0, 0)
@@ -1549,19 +1560,19 @@ T.CreateAuraWatch = function(self, unit)
 	local buffs = {}
 
 	if T.RaidBuffs["ALL"] then
-		for key, value in pairs(T.RaidBuffs["ALL"]) do
+		for _, value in pairs(T.RaidBuffs["ALL"]) do
 			tinsert(buffs, value)
 		end
 	end
 
 	if T.RaidBuffs[T.class] then
-		for key, value in pairs(T.RaidBuffs[T.class]) do
+		for _, value in pairs(T.RaidBuffs[T.class]) do
 			tinsert(buffs, value)
 		end
 	end
 
 	if buffs then
-		for key, spell in pairs(buffs) do
+		for _, spell in pairs(buffs) do
 			local icon = CreateFrame("Frame", nil, auras)
 			icon.spellID = spell[1]
 			icon.anyUnit = spell[4]

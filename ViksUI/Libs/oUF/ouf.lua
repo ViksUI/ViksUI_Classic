@@ -11,7 +11,7 @@ local Private = oUF.Private
 local argcheck = Private.argcheck
 local error = Private.error
 local print = Private.print
-local unitExists = Private.unitExists
+local UnitExists = Private.UnitExists
 
 local styles, style = {}
 local callback, objects, headers = {}, {}, {}
@@ -58,10 +58,10 @@ local function updateActiveUnit(self, event, unit)
 		modUnit = 'vehicle'
 	end
 
-	if(not unitExists(modUnit)) then return end
+	if(not UnitExists(modUnit)) then return end
 
 	-- Change the active unit and run a full update.
-	if(Private.UpdateUnits(self, modUnit, realUnit)) then
+	if Private.UpdateUnits(self, modUnit, realUnit) then
 		self:UpdateAllElements('RefreshUnit')
 
 		return true
@@ -193,8 +193,7 @@ for k, v in next, {
 	--]]
 	UpdateAllElements = function(self, event)
 		local unit = self.unit
-
-		if(not unitExists(unit)) then return end
+		if(not UnitExists(unit)) then return end
 
 		assert(type(event) == 'string', "Invalid argument 'event' in UpdateAllElements.")
 
@@ -273,7 +272,7 @@ local function initObject(unit, style, styleFunc, header, ...)
 		table.insert(objects, object)
 
 		-- We have to force update the frames when PEW fires.
-		object:RegisterEvent('PLAYER_ENTERING_WORLD', object.UpdateAllElements, true)
+		object:RegisterEvent('PLAYER_ENTERING_WORLD', object.UpdateAllElements)
 
 		-- Handle the case where someone has modified the unitsuffix attribute in
 		-- oUF-initialConfigFunction.
@@ -285,13 +284,14 @@ local function initObject(unit, style, styleFunc, header, ...)
 			if not IsClassicBuild() then
 				object:RegisterEvent('UNIT_ENTERED_VEHICLE', updateActiveUnit)
 				object:RegisterEvent('UNIT_EXITED_VEHICLE', updateActiveUnit)
+				object:RegisterEvent('UNIT_EXITING_VEHICLE', updateActiveUnit)
 			end
 
 			-- We don't need to register UNIT_PET for the player unit. We register it
 			-- mainly because UNIT_EXITED_VEHICLE and UNIT_ENTERED_VEHICLE doesn't always
 			-- have pet information when they fire for party and raid units.
 			if(objectUnit ~= 'player') then
-				object:RegisterEvent('UNIT_PET', updatePet)
+				object:RegisterEvent('UNIT_PET', updatePet, true)
 			end
 		end
 
@@ -312,9 +312,8 @@ local function initObject(unit, style, styleFunc, header, ...)
 				oUF:HandleUnit(object)
 			end
 		else
-			-- update the frame when its prev unit is replaced with a new one
-			-- updateRaid relies on UnitGUID to detect the unit change
-			object:RegisterEvent('GROUP_ROSTER_UPDATE', updateRaid, true)
+			-- Used to update frames when they change position in a group.
+			object:RegisterEvent('GROUP_ROSTER_UPDATE', object.UpdateAllElements)
 
 			if(num > 1) then
 				if(object:GetParent() == header) then
@@ -334,12 +333,7 @@ local function initObject(unit, style, styleFunc, header, ...)
 		styleFunc(object, objectUnit, not header)
 
 		object:HookScript('OnAttributeChanged', onAttributeChanged)
-
-		-- NAME_PLATE_UNIT_ADDED fires after the frame is shown, so there's no
-		-- need to call UAE multiple times
-		if(not object.isNamePlate) then
-			object:SetScript('OnShow', onShow)
-		end
+		object:SetScript('OnShow', onShow)
 
 		activeElements[object] = {}
 		for element in next, elements do
@@ -351,7 +345,7 @@ local function initObject(unit, style, styleFunc, header, ...)
 		end
 
 		-- Make Clique kinda happy
-		if(not object.isNamePlate) then
+		if not object.isNamePlate then
 			_G.ClickCastFrames = ClickCastFrames or {}
 			ClickCastFrames[object] = true
 		end
@@ -750,7 +744,6 @@ function oUF:SpawnNamePlates(namePrefix, nameplateCallback, nameplateCVars)
 	argcheck(nameplateCallback, 3, 'function', 'nil')
 	argcheck(nameplateCVars, 4, 'table', 'nil')
 	if(not style) then return error('Unable to create frame. No styles have been registered.') end
-	if(oUF_NamePlateDriver) then return error('oUF nameplate driver has already been initialized.') end
 
 	local style = style
 	local prefix = namePrefix or generateName()
@@ -765,7 +758,7 @@ function oUF:SpawnNamePlates(namePrefix, nameplateCallback, nameplateCVars)
 		end
 	end)
 
-	local eventHandler = CreateFrame('Frame', 'oUF_NamePlateDriver')
+	local eventHandler = CreateFrame('Frame')
 	eventHandler:RegisterEvent('NAME_PLATE_UNIT_ADDED')
 	eventHandler:RegisterEvent('NAME_PLATE_UNIT_REMOVED')
 	eventHandler:RegisterEvent('PLAYER_TARGET_CHANGED')
@@ -789,14 +782,13 @@ function oUF:SpawnNamePlates(namePrefix, nameplateCallback, nameplateCVars)
 			end
 		elseif(event == 'PLAYER_TARGET_CHANGED') then
 			local nameplate = C_NamePlate.GetNamePlateForUnit('target')
-			if(nameplateCallback) then
-				nameplateCallback(nameplate and nameplate.unitFrame, event, 'target')
+			if(nameplate) then
+
+				nameplate.unitFrame:UpdateAllElements(event)
 			end
 
-			-- UAE is called after the callback to reduce the number of
-			-- ForceUpdate calls layout devs have to do themselves
-			if(nameplate) then
-				nameplate.unitFrame:UpdateAllElements(event)
+			if(nameplateCallback) then
+				nameplateCallback(nameplate and nameplate.unitFrame, event, 'target')
 			end
 		elseif(event == 'NAME_PLATE_UNIT_ADDED' and unit) then
 			local nameplate = C_NamePlate.GetNamePlateForUnit(unit)
@@ -817,19 +809,17 @@ function oUF:SpawnNamePlates(namePrefix, nameplateCallback, nameplateCVars)
 			end
 
 			nameplate.unitFrame:SetAttribute('unit', unit)
+			nameplate.unitFrame:UpdateAllElements(event)
 
 			if(nameplateCallback) then
 				nameplateCallback(nameplate.unitFrame, event, unit)
 			end
-
-			-- UAE is called after the callback to reduce the number of
-			-- ForceUpdate calls layout devs have to do themselves
-			nameplate.unitFrame:UpdateAllElements(event)
 		elseif(event == 'NAME_PLATE_UNIT_REMOVED' and unit) then
 			local nameplate = C_NamePlate.GetNamePlateForUnit(unit)
 			if(not nameplate) then return end
 
 			nameplate.unitFrame:SetAttribute('unit', nil)
+			nameplate.unitFrame:UpdateAllElements(event)
 
 			if(nameplateCallback) then
 				nameplateCallback(nameplate.unitFrame, event, unit)

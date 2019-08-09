@@ -160,4 +160,4 @@ local function LoadSkin()
 	end
 end
 
-tinsert(T.SkinFuncs["ShestakUI"], LoadSkin)
+tinsert(T.SkinFuncs["ViksUI"], LoadSkin)

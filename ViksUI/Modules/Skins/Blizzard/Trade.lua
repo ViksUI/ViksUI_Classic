@@ -107,4 +107,4 @@ local function LoadSkin()
 	TradeHighlightRecipientEnchant:SetFrameStrata("HIGH")
 end
 
-tinsert(T.SkinFuncs["ShestakUI"], LoadSkin)
+tinsert(T.SkinFuncs["ViksUI"], LoadSkin)

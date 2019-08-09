@@ -79,4 +79,4 @@ local function LoadSkin()
 	hooksecurefunc("QuestFrameGreetingPanel_OnShow", UpdateGreetingPanel)
 end
 
-tinsert(T.SkinFuncs["ShestakUI"], LoadSkin)
+tinsert(T.SkinFuncs["ViksUI"], LoadSkin)

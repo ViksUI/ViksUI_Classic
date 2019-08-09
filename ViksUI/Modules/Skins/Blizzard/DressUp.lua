@@ -48,4 +48,4 @@ local function LoadSkin()
 	T.SkinEditBox(WardrobeOutfitEditFrame.EditBox)
 end
 
-tinsert(T.SkinFuncs["ShestakUI"], LoadSkin)
+tinsert(T.SkinFuncs["ViksUI"], LoadSkin)

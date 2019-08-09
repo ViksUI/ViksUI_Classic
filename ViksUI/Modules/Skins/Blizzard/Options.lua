@@ -188,6 +188,7 @@ local function LoadSkin()
 		"AudioOptionsVoicePanelVoiceChatMicVolume",
 		"AudioOptionsVoicePanelVoiceChatMicSensitivity",
 		"AudioOptionsVoicePanelVoiceChatVolume",
+		"AudioOptionsVoicePanelVoiceChatDucking",
 		"RaidGraphics_Quality",
 		"RaidGraphics_ViewDistanceSlider",
 		"RaidGraphics_EnvironmentalDetailSlider",
@@ -235,4 +236,4 @@ local function LoadSkin()
 	T.SkinDropDownBox(AudioOptionsVoicePanelChatModeDropdown, 183)
 end
 
-tinsert(T.SkinFuncs["ShestakUI"], LoadSkin)
+tinsert(T.SkinFuncs["ViksUI"], LoadSkin)

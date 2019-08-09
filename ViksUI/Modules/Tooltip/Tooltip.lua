@@ -57,7 +57,7 @@ end
 -- Extra tooltip's skin
 local frame = CreateFrame("Frame")
 frame:RegisterEvent("PLAYER_LOGIN")
-frame:SetScript("OnEvent", function(self, event, addon)
+frame:SetScript("OnEvent", function(self)
 	if not IsAddOnLoaded("Auc-Advanced") then return end
 
 	local LT = LibStub("LibExtraTip-1")

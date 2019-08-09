@@ -33,10 +33,12 @@ end
 PP(C.datatext.Wowtime, Text)
 
 -- Check Invasion Status
+if not T.classic then
 local invIndex = {
 	[1] = {title = "Legion Invasion", duration = 66600, maps = {630, 641, 650, 634}, timeTable = {4, 3, 2, 1, 4, 2, 3, 1, 2, 4, 1, 3}, baseTime = 1517274000}, -- 1/30 9:00 [1]
 	[2] = {title = "Battle for Azeroth Invasion", duration = 68400, maps = {862, 863, 864, 896, 942, 895}, timeTable = {4, 1, 6, 2, 5, 3}, baseTime = 1544691600}, -- 12/13 17:00 [1]
 }
+end
 
 local mapAreaPoiIDs = {
 	[630] = 5175,
@@ -95,7 +97,6 @@ local function addTitle(text)
 		title = true
 	end
 end
-
 local int = 1
 local function Update(self, t)
 	local pendingCalendarInvites = 0 --// BETA CalendarGetNumPendingInvites()
@@ -165,28 +166,30 @@ Stat:SetScript("OnEnter", function(self)
 	GameTooltip:SetOwner(self, "ANCHOR_BOTTOMLEFT", -4, 16)
 	GameTooltip:ClearLines()
 
-	local c = 0
-	for i,q in ipairs({52840,52834,52835,52837,52839,52838}) do if (IsQuestFlaggedCompleted(q)) then c=c+1 end end
-	GameTooltip:AddDoubleLine( L_STATS_SEALS .. ": ", c)
-	
-	for index, value in ipairs(invIndex) do
-		title = false
-		addTitle(value.title)
-		local timeLeft, zoneName = CheckInvasion(index)
-		local nextTime = GetNextTime(value.baseTime, index)
-		if timeLeft then
-			timeLeft = timeLeft / 60
-			if timeLeft < 60 then
-				r,g,b = 1, 0, 0
-			else
-				r,g,b = 0, 1, 0
+	if not T.classic then
+		local c = 0
+		for i,q in ipairs({52840,52834,52835,52837,52839,52838}) do if (IsQuestFlaggedCompleted(q)) then c=c+1 end end
+		GameTooltip:AddDoubleLine( L_STATS_SEALS .. ": ", c)
+		
+		for index, value in ipairs(invIndex) do
+			title = false
+			addTitle(value.title)
+			local timeLeft, zoneName = CheckInvasion(index)
+			local nextTime = GetNextTime(value.baseTime, index)
+			if timeLeft then
+				timeLeft = timeLeft / 60
+				if timeLeft < 60 then
+					r,g,b = 1, 0, 0
+				else
+					r,g,b = 0, 1, 0
+				end
+				GameTooltip:AddDoubleLine('Current Invasion '..zoneName, string.format('%.2d:%.2d', timeLeft / 60, timeLeft % 60), 1, 1, 1, r, g, b)
 			end
-			GameTooltip:AddDoubleLine('Current Invasion '..zoneName, string.format('%.2d:%.2d', timeLeft / 60, timeLeft % 60), 1, 1, 1, r, g, b)
-		end
-		if C['datatext']['Time24'] then
-			GameTooltip:AddDoubleLine("Next Invasion "..GetNextLocation(nextTime, index), date("%d.%m / %H:%M", nextTime), 1, 1, 1, 1, 1, 1)
-		else
-			GameTooltip:AddDoubleLine('Next Invasion '..GetNextLocation(nextTime, index), date('%m/%d %H:%M', nextTime), 1, 1, 1, 1, 1, 1)
+			if C['datatext']['Time24'] then
+				GameTooltip:AddDoubleLine("Next Invasion "..GetNextLocation(nextTime, index), date("%d.%m / %H:%M", nextTime), 1, 1, 1, 1, 1, 1)
+			else
+				GameTooltip:AddDoubleLine('Next Invasion '..GetNextLocation(nextTime, index), date('%m/%d %H:%M', nextTime), 1, 1, 1, 1, 1, 1)
+			end
 		end
 	end
 
@@ -251,26 +254,29 @@ Stat:SetScript("OnEnter", function(self)
 		end
 		end
 	end
-	local addedLine
-	for i = 1, GetNumSavedWorldBosses() do
-		local name, _, reset = GetSavedWorldBossInfo(i)
-		local function fmttime(sec,table)
-		local table = table or {}
-		local d,h,m,s = ChatFrame_TimeBreakDown(floor(sec))
-		local string = gsub(gsub(format(" %dd %dh %dm "..((d==0 and h==0) and "%ds" or ""),d,h,m,s)," 0[dhms]"," "),"%s+"," ")
-		local string = strtrim(gsub(string, "([dhms])", {d=table.days or "d",h=table.hours or "h",m=table.minutes or "m",s=table.seconds or "s"})," ")
-		return strmatch(string,"^%s*$") and "0"..(table.seconds or L"s") or string
-		end
-		if reset then
-			if not addedLine then
-				GameTooltip:AddLine(" ")
-				GameTooltip:AddLine(RAID_INFO_WORLD_BOSS, tr, tg, tb)
-				addedLine = true
+	
+	if not T.classic then
+		local addedLine
+		for i = 1, GetNumSavedWorldBosses() do
+			local name, _, reset = GetSavedWorldBossInfo(i)
+			local function fmttime(sec,table)
+			local table = table or {}
+			local d,h,m,s = ChatFrame_TimeBreakDown(floor(sec))
+			local string = gsub(gsub(format(" %dd %dh %dm "..((d==0 and h==0) and "%ds" or ""),d,h,m,s)," 0[dhms]"," "),"%s+"," ")
+			local string = strtrim(gsub(string, "([dhms])", {d=table.days or "d",h=table.hours or "h",m=table.minutes or "m",s=table.seconds or "s"})," ")
+			return strmatch(string,"^%s*$") and "0"..(table.seconds or L"s") or string
 			end
-			GameTooltip:AddDoubleLine(name, fmttime(reset), 1, 1, 1, 1, 1, 1)
+			if reset then
+				if not addedLine then
+					GameTooltip:AddLine(" ")
+					GameTooltip:AddLine(RAID_INFO_WORLD_BOSS, tr, tg, tb)
+					addedLine = true
+				end
+				GameTooltip:AddDoubleLine(name, fmttime(reset), 1, 1, 1, 1, 1, 1)
+			end
 		end
+		GameTooltip:Show()
 	end
-	GameTooltip:Show()
 end)
 
 Stat:SetScript("OnLeave", function() GameTooltip:Hide() end)

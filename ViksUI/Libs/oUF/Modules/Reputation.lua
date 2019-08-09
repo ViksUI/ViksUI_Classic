@@ -69,7 +69,7 @@ end
 oUF.Tags.SharedEvents.UPDATE_FACTION = true
 oUF.colors.reaction[MAX_REPUTATION_REACTION + 1] = {0, 0.5, 0.9} -- paragon color
 
--- Changed tooltip for ShestakUI
+-- Changed tooltip for ViksUI
 local function UpdateTooltip(element)
 	local cur, max, name, _, standingID, standingText, pendingReward = GetReputation()
 	local rewardAtlas = pendingReward and "|A:ParagonReputation_Bag:0:0:0:0|a" or ""
@@ -84,7 +84,7 @@ end
 
 local function OnEnter(element)
 	element:SetAlpha(element.inAlpha)
-	GameTooltip:SetOwner(element, "ANCHOR_BOTTOM", 0, -5)	-- ShestakUI
+	GameTooltip:SetOwner(element, "ANCHOR_BOTTOM", 0, -5)	-- ViksUI
 	element:UpdateTooltip()
 end
 
@@ -126,7 +126,7 @@ local function Update(self, event, unit)
 		if(element.colorStanding) then
 			local colors = self.colors.reaction[standingID]
 			element:SetStatusBarColor(colors[1], colors[2], colors[3])
-			element.bg:SetVertexColor(colors[1], colors[2], colors[3], 0.2)	-- ShestakUI
+			element.bg:SetVertexColor(colors[1], colors[2], colors[3], 0.2)	-- ViksUI
 		end
 
 		if(element.Reward) then

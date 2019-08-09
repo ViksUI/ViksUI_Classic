@@ -36,4 +36,4 @@ local function LoadSkin()
 	AddonListForceLoad:SetSize(25, 25)
 end
 
-tinsert(T.SkinFuncs["ShestakUI"], LoadSkin)
+tinsert(T.SkinFuncs["ViksUI"], LoadSkin)

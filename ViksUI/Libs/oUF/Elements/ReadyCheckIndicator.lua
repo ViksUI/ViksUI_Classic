@@ -2,7 +2,7 @@ local _, ns = ...
 local oUF = ns.oUF
 local Private = oUF.Private
 
-local unitExists = Private.unitExists
+local UnitExists = Private.UnitExists
 
 local function OnFinished(self)
 	local element = self:GetParent()
@@ -32,7 +32,7 @@ local function Update(self, event)
 	end
 
 	local status = GetReadyCheckStatus(unit)
-	if(unitExists(unit) and status) then
+	if(UnitExists(unit) and status) then
 		if(status == 'ready') then
 			element:SetTexture(element.readyTexture)
 		elseif(status == 'notready') then

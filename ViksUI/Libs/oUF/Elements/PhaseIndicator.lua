@@ -1,4 +1,4 @@
-if not IsClassicBuild() then return end
+if IsClassicBuild() then return end
 --[[
 # Element: Phasing Indicator
 

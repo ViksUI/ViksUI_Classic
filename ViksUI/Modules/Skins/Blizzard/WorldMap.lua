@@ -188,4 +188,4 @@ local function LoadSkin()
 	WorldMapBountyBoard(WorldMapFrame.overlayFrames[3])
 end
 
-tinsert(T.SkinFuncs["ShestakUI"], LoadSkin)
+tinsert(T.SkinFuncs["ViksUI"], LoadSkin)

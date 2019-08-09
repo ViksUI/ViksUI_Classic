@@ -8,19 +8,21 @@
 	<Script file="Artifact.lua"/>
 	<Script file="Auction.lua"/>
 	<Script file="Azerite.lua"/>
+	<Script file="AzeriteEssence.lua"/>
 	<Script file="AzeriteRespec.lua"/>
 	<Script file="BarberShop.lua"/>
+	<Script file="BFAMissions.lua"/>
 	<Script file="Binding.lua"/>
 	<Script file="BlackMarket.lua"/>
 	<Script file="BonusRoll.lua"/>
 	<Script file="Bubbles.lua"/>
 	<Script file="Calendar.lua"/>
-	<Script file="Channels.lua"/>
 	<Script file="Character.lua"/>
+	<Script file="Channels.lua"/>
 	<Script file="ChatConfig.lua"/>
 	<Script file="Collections.lua"/>
-	<Script file="Communities.lua"/>
 	<Script file="Container.lua"/>
+	<Script file="Communities.lua"/>	
 	<Script file="Contribution.lua"/>
 	<Script file="DebugTools.lua"/>
 	<Script file="DeathRecap.lua"/>
@@ -31,6 +33,7 @@
 	<Script file="Garrison.lua"/>
 	<Script file="GMSurvey.lua"/>
 	<Script file="Gossip.lua"/>
+	<Script file="Greeting.lua"/>
 	<Script file="Guild.lua"/>
 	<Script file="GuildBank.lua"/>
 	<Script file="GuildControl.lua"/>
@@ -42,6 +45,8 @@
 	<Script file="ItemSocketing.lua"/>
 	<Script file="ItemText.lua"/>
 	<Script file="ItemUpgrade.lua"/>
+	<Script file='IslandPartyPose.lua'/>
+	<Script file='IslandQueue.lua'/>
 	<Script file="Loot.lua"/>
 	<Script file="LossOfControl.lua"/>
 	<Script file="MacClient.lua"/>
@@ -57,12 +62,13 @@
 	<Script file="ProductChoice.lua"/>
 	<Script file="PvE.lua"/>
 	<Script file="PvP.lua"/>
+	<Script file="PvPMatch.lua"/>
 	<Script file="Quest.lua"/>
 	<Script file="QuestChoice.lua"/>
 	<Script file="QuestLog.lua"/>
 	<Script file="Raid.lua"/>
 	<Script file="RaidInfo.lua"/>
-	<Script file="Scrapping.lua"/>
+	<Script file="ScrappingMachine.lua"/>
 	<Script file="SpellBook.lua"/>
 	<Script file="Tabard.lua"/>
 	<Script file="Talent.lua"/>
@@ -76,5 +82,5 @@
 	<Script file="VoidStorage.lua"/>
 	<Script file="Warboard.lua"/>
 	<Script file="WorldMap.lua"/>
-	<Script file="WorldState.lua"/>
+	<!--Script file="WorldState.lua"/-->
 </Ui>

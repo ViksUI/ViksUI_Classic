@@ -2,6 +2,31 @@ local T, C, L, _ = unpack(select(2, ...))
 if not T.classic then return end
 
 ----------------------------------------------------------------------------------------
+--	Max Camera Distance
+----------------------------------------------------------------------------------------
+local OnLogon = CreateFrame("Frame")
+OnLogon:RegisterEvent("PLAYER_ENTERING_WORLD")
+OnLogon:SetScript("OnEvent", function()
+	SetCVar("cameraDistanceMaxZoomFactor", 3.4)
+end)
+
+----------------------------------------------------------------------------------------
+--	Message for BG Queues (temporary)
+----------------------------------------------------------------------------------------
+local hasShown = false
+
+local PvPMessage = CreateFrame("Frame")
+PvPMessage:RegisterEvent("UPDATE_BATTLEFIELD_STATUS")
+PvPMessage:SetScript("OnEvent", function()
+	if not hasShown and StaticPopup_Visible("CONFIRM_BATTLEFIELD_ENTRY") then
+		hasShown = true
+		print("|cffffff00".."There is an issue with entering BGs from the StaticPopupDialog. Please enter by right clicking the minimap icon.".."|r")
+	else
+		hasShown = false
+	end
+end)
+
+----------------------------------------------------------------------------------------
 --	NOOP / Pass Functions not found in Classic
 ----------------------------------------------------------------------------------------
 GetCurrencyInfo = _G.GetCurrencyInfo or T.dummy
@@ -39,6 +64,9 @@ end
 ShowFriends = _G.ShowFriends or function()
 	return C_FriendList.ShowFriends()
 end
+
+-- SaveBindings removed in WoW Classic build 30901
+SaveBindings = _G.SaveBindings or _G.AttemptToSaveBindings
 
 ----------------------------------------------------------------------------------------
 --	Classic Bugs
@@ -350,9 +378,9 @@ GetSpellRank = function(spellID)
 	end
 end
 
-local OldGetSpelInfo = GetSpellInfo
+local OldGetSpellInfo = _G.GetSpellInfo
 GetSpellInfo = function(spellID)
-	local name, rank, icon, castTime, minRange, maxRange, spellId = OldGetSpelInfo(spellID)
+	local name, rank, icon, castTime, minRange, maxRange, spellId = OldGetSpellInfo(spellID)
 	rank = rank or GetSpellRank(spellID)
 	return name, rank, icon, castTime, minRange, maxRange, spellId
 end

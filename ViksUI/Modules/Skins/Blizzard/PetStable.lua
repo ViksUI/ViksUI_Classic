@@ -61,4 +61,4 @@ local function LoadSkin()
 	PetStableDietTexture:SkinIcon()
 end
 
-tinsert(T.SkinFuncs["ShestakUI"], LoadSkin)
+tinsert(T.SkinFuncs["ViksUI"], LoadSkin)

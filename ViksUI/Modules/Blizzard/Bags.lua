@@ -9,6 +9,8 @@ local BAGS_BANK = T.classic and {-1, 5, 6, 7, 8, 9, 10} or {-1, 5, 6, 7, 8, 9, 1
 local ST_NORMAL = 1
 local ST_FISHBAG = 2
 local ST_SPECIAL = 3
+local ST_QUIVER = 4
+local ST_SOULBAG = 5
 local bag_bars = 0
 local unusable
 
@@ -46,7 +48,7 @@ for k = 0, 20 do
 	subs[k + 1] = GetItemSubClassInfo(LE_ITEM_CLASS_WEAPON, k)
 end
 
-for i, subclass in ipairs(unusable[1]) do
+for _, subclass in ipairs(unusable[1]) do
 	unusable[subs[subclass+1]] = true
 end
 
@@ -132,7 +134,6 @@ local function Stuffing_OnShow()
 	Stuffing:Layout()
 	Stuffing:SearchReset()
 	PlaySound(SOUNDKIT.IG_BACKPACK_OPEN)
-	collectgarbage("collect")
 end
 
 local function StuffingBank_OnHide()
@@ -198,12 +199,11 @@ end
 local trashButton = {}
 local trashBag = {}
 
--- Tooltip used for scanning
-local scanner = CreateFrame("GameTooltip", "iLvlScanningTooltip", nil, "GameTooltipTemplate")
-local scannerName = scanner:GetName()
-
 -- Tooltip and scanning by Phanx @ http://www.wowinterface.com/forums/showthread.php?p=271406
 local S_ITEM_LEVEL = "^" .. gsub(_G.ITEM_LEVEL, "%%d", "(%%d+)")
+
+local scanner = CreateFrame("GameTooltip", "BagScanningTooltip", nil, "GameTooltipTemplate")
+local scannerName = scanner:GetName()
 
 local ItemDB = {}
 
@@ -890,6 +890,7 @@ function Stuffing:InitBags()
 	self.buttons = {}
 	self.bags = {}
 	self.bagframe_buttons = {}
+	self.bags_num = {}				   
 
 	local f = self:CreateBagFrame("Bags")
 	f:SetScript("OnShow", Stuffing_OnShow)
@@ -1107,6 +1108,7 @@ function Stuffing:Layout(isBank)
 
 			slots = slots + GetContainerNumSlots(i)
 		end
+		self.bags_num[i] = x				  
 	end
 
 	rows = floor(slots / cols)
@@ -1384,6 +1386,16 @@ function Stuffing:BAG_UPDATE(id)
 	self:BagSlotUpdate(id)
 end
 
+function Stuffing:BAG_UPDATE_DELAYED(id)
+	for _, i in ipairs(BAGS_BACKPACK) do
+		local numSlots = GetContainerNumSlots(i)
+		if self.bags_num[i] and self.bags_num[i] ~= numSlots then
+			self:Layout()
+			return
+		end
+	end
+end
+
 function Stuffing:ITEM_LOCK_CHANGED(bag, slot)
 	if slot == nil then return end
 	for _, v in ipairs(self.buttons) do
@@ -1431,6 +1443,7 @@ function Stuffing:BAG_CLOSED(id)
 		table.remove(self.bags, id)
 		b:Hide()
 		table.insert(trashBag, #trashBag + 1, b)
+		self.bags_num[id] = -1						
 	end
 
 	while true do
@@ -1453,11 +1466,13 @@ function Stuffing:BAG_CLOSED(id)
 			break
 		end
 	end
-	Stuffing_Close()
+	if id > 4 then
+		Stuffing_Close() -- prevent graphical bug with empty slots
+	end
 end
 
 function Stuffing:BAG_UPDATE_COOLDOWN()
-	for i, v in pairs(self.buttons) do
+	for _, v in pairs(self.buttons) do
 		self:UpdateCooldowns(v)
 	end
 end
@@ -1574,7 +1589,7 @@ function Stuffing:SortBags()
 
 					local n, _, q, iL, rL, c1, c2, _, Sl = GetItemInfo(itemLink)
 					-- Hearthstone
-					if n == GetItemInfo(6948) or n == GetItemInfo(110560) then
+					if n == GetItemInfo(6948) or n == GetItemInfo(110560) or n == GetItemInfo(140192) then
 						q = 9
 					end
 					-- Fix for battle pets
@@ -1638,17 +1653,17 @@ function Stuffing:Restack()
 
 	Stuffing_Open()
 
-	for i, v in pairs(self.buttons) do
+	for _, v in pairs(self.buttons) do
 		if InBags(v.bag) then
 			local _, cnt, _, _, _, _, clink = GetContainerItemInfo(v.bag, v.slot)
 			if clink then
 				local n, _, _, _, _, _, _, s = GetItemInfo(clink)
 
 				if n and cnt ~= s then
-					if not st[n] then
-						st[n] = {{item = v, size = cnt, max = s}}
+					if not st[clink] then
+						st[clink] = {{item = v, size = cnt, max = s}}
 					else
-						table.insert(st[n], {item = v, size = cnt, max = s})
+						table.insert(st[clink], {item = v, size = cnt, max = s})
 					end
 				end
 			end
@@ -1657,7 +1672,7 @@ function Stuffing:Restack()
 
 	local did_restack = false
 
-	for i, v in pairs(st) do
+	for _, v in pairs(st) do
 		if #v > 1 then
 			for j = 2, #v, 2 do
 				local a, b = v[j - 1], v[j]

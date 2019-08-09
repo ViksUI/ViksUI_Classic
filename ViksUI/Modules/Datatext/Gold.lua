@@ -39,59 +39,61 @@ if not C.datatext.Gold or C.datatext.Gold == 0 then return end
 		return cash
 	end	
 
-local function Currency(id, weekly, capped)
-	local name, amount, tex, week, weekmax, maxed, discovered = GetCurrencyInfo(id)
+if not T.classic then
+	local function Currency(id, weekly, capped)
+		local name, amount, tex, week, weekmax, maxed, discovered = GetCurrencyInfo(id)
 
-	local r, g, b = 1, 1, 1
-	for i = 1, GetNumWatchedTokens() do
-		local _, _, _, itemID = GetBackpackCurrencyInfo( i )
-		if id == itemID then r, g, b = .77, .12, .23 end
-	end
+		local r, g, b = 1, 1, 1
+		for i = 1, GetNumWatchedTokens() do
+			local _, _, _, itemID = GetBackpackCurrencyInfo( i )
+			if id == itemID then r, g, b = .77, .12, .23 end
+		end
 
-	if (amount == 0 and r == 1) then return end
-	if weekly then
-		if discovered then GameTooltip:AddDoubleLine("\124T" .. tex .. ":12\124t " .. name, "Current: " .. amount .. " - " .. WEEKLY .. ": " .. week .. " / " .. weekmax, r, g, b, r, g, b) end
-	elseif capped  then
-		if id == 392 then maxed = 4000 end
-		if discovered then GameTooltip:AddDoubleLine("\124T" .. tex .. ":12\124t " .. name, amount .. " / " .. maxed, r, g, b, r, g, b) end
-	else
-		if discovered then GameTooltip:AddDoubleLine("\124T" .. tex .. ":12\124t " .. name, amount, r, g, b, r, g, b) end
+		if (amount == 0 and r == 1) then return end
+		if weekly then
+			if discovered then GameTooltip:AddDoubleLine("\124T" .. tex .. ":12\124t " .. name, "Current: " .. amount .. " - " .. WEEKLY .. ": " .. week .. " / " .. weekmax, r, g, b, r, g, b) end
+		elseif capped  then
+			if id == 392 then maxed = 4000 end
+			if discovered then GameTooltip:AddDoubleLine("\124T" .. tex .. ":12\124t " .. name, amount .. " / " .. maxed, r, g, b, r, g, b) end
+		else
+			if discovered then GameTooltip:AddDoubleLine("\124T" .. tex .. ":12\124t " .. name, amount, r, g, b, r, g, b) end
+		end
 	end
 end
 	
-	local function OnEvent(self, event)
-		if event == "PLAYER_ENTERING_WORLD" then
-			OldMoney = GetMoney()
-		end
-		
-		local NewMoney	= GetMoney()
-		local Change = NewMoney-OldMoney -- Positive if we gain money
-		
-		if OldMoney>NewMoney then		-- Lost Money
-			Spent = Spent - Change
-		else							-- Gained Moeny
-			Profit = Profit + Change
-		end
-		
-		Text:SetText(formatMoney(NewMoney))
-		-- Setup Money Tooltip
-		self:SetAllPoints(Text)
+local function OnEvent(self, event)
+	if event == "PLAYER_ENTERING_WORLD" then
+		OldMoney = GetMoney()
+	end
+	
+	local NewMoney	= GetMoney()
+	local Change = NewMoney-OldMoney -- Positive if we gain money
+	
+	if OldMoney>NewMoney then		-- Lost Money
+		Spent = Spent - Change
+	else							-- Gained Moeny
+		Profit = Profit + Change
+	end
+	
+	Text:SetText(formatMoney(NewMoney))
+	-- Setup Money Tooltip
+	self:SetAllPoints(Text)
 
-		local realm = GetRealmName();
-		local name  = UnitName("player");				
-		if (SavedStats == nil) then SavedStats = {}; end
-		if (SavedStats.gold == nil) then SavedStats.gold = {}; end
-		if (SavedStats.gold[realm]==nil) then SavedStats.gold[realm]={}; end
-		SavedStats.gold[realm][name] = GetMoney();
-		OldMoney = NewMoney
+	local realm = GetRealmName();
+	local name  = UnitName("player");				
+	if (SavedStats == nil) then SavedStats = {}; end
+	if (SavedStats.gold == nil) then SavedStats.gold = {}; end
+	if (SavedStats.gold[realm]==nil) then SavedStats.gold[realm]={}; end
+	SavedStats.gold[realm][name] = GetMoney();
+	OldMoney = NewMoney
 end
 
-	Stat:RegisterEvent("PLAYER_MONEY")
-	Stat:RegisterEvent("SEND_MAIL_MONEY_CHANGED")
-	Stat:RegisterEvent("SEND_MAIL_COD_CHANGED")
-	Stat:RegisterEvent("PLAYER_TRADE_MONEY")
-	Stat:RegisterEvent("TRADE_MONEY_CHANGED")
-	Stat:RegisterEvent("PLAYER_ENTERING_WORLD")
+Stat:RegisterEvent("PLAYER_MONEY")
+Stat:RegisterEvent("SEND_MAIL_MONEY_CHANGED")
+Stat:RegisterEvent("SEND_MAIL_COD_CHANGED")
+Stat:RegisterEvent("PLAYER_TRADE_MONEY")
+Stat:RegisterEvent("TRADE_MONEY_CHANGED")
+Stat:RegisterEvent("PLAYER_ENTERING_WORLD")
 
 	
 Stat:SetScript("OnEvent", OnEvent)
@@ -158,7 +160,7 @@ Stat:SetScript("OnEnter", function(self)
 		Currency(402)
 	end
 
-	if C.datatext.CurrProfessions then
+	if C.datatext.CurrProfessions and not T.classic then
 		GameTooltip:AddLine(" ")
 		GameTooltip:AddLine("Profession Token")
 		Currency(910) 					--Secret of Draenor Alchemy
@@ -169,20 +171,20 @@ Stat:SetScript("OnEnter", function(self)
 
 	end
 
-	if C.datatext.CurrRaid then
+	if C.datatext.CurrRaid and not T.classic then
 		GameTooltip:AddLine(" ")
 		GameTooltip:AddLine("Raid")
 		Currency(1273, false, true)	-- Seal of Broken Fate
 		Currency(1580, false, true)	-- Seal of Wartorn Fate
 	end
 
-	if C.datatext.CurrPvP then
+	if C.datatext.CurrPvP and not T.classic then
 		GameTooltip:AddLine(" ")
 		GameTooltip:AddLine(PVP_FLAG)
 		Currency(1587)				-- War Supplies
 	end
 
-	if C.datatext.CurrMiscellaneous then
+	if C.datatext.CurrMiscellaneous and not T.classic then
 		GameTooltip:AddLine(" ")
 		GameTooltip:AddLine(MISCELLANEOUS)
 		Currency(515)					-- Darkmoon Prize Ticket
@@ -190,6 +192,7 @@ Stat:SetScript("OnEnter", function(self)
 		Currency(1565)					-- Rich Azerite Fragment
 		GameTooltip:AddLine(" ")
 		Currency(1220)					-- Order Resources
+		Currency(1721)					-- Prismatic Manapearl
 		Currency(1560)					-- War Resources
 		Currency(1716)					-- Honorbound Service Medal
 		Currency(1717)					-- 7th Legion Service Medal

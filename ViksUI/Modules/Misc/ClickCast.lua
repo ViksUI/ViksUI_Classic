@@ -23,7 +23,7 @@ SpellBinder.sbOpen = false
 SpellBinder.spellbuttons = {}
 
 ClickCastFrames = _G.ClickCastFrames or {}
-for i, v in pairs({
+for _, v in pairs({
 	"PlayerFrame", "PetFrame",
 	-- Party members
 	"PartyMemberFrame1", "PartyMemberFrame2", "PartyMemberFrame3", "PartyMemberFrame4", "PartyMemberFrame5",
@@ -46,13 +46,13 @@ for i, v in pairs({
 	if _G[v] then ClickCastFrames[_G[v]] = true end
 end
 
-hooksecurefunc("CreateFrame", function(ftype, name, parent, template)
+hooksecurefunc("CreateFrame", function(_, name, _, template)
 	if template and template:find("SecureUnitButtonTemplate") then
 		ClickCastFrames[_G[name]] = true
 	end
 end)
 
-hooksecurefunc("CompactUnitFrame_SetUpFrame", function(frame, ...)
+hooksecurefunc("CompactUnitFrame_SetUpFrame", function(frame)
 	if frame.IsForbidden and frame:IsForbidden() then
 		return
 	end
@@ -134,7 +134,7 @@ SpellBinder.makeSpellsList = function(self, scroll, delete)
 			bf.fs:SetText(spell.modifier..spell.origbutton)
 			bf.fs:SetPoint("RIGHT", bf.delete, "LEFT", -4, 0)
 
-			for frame, j in pairs(ClickCastFrames) do
+			for frame in pairs(ClickCastFrames) do
 				local f
 				if frame and type(frame) == "table" then f = frame:GetName() end
 				if f and DB.frames[frame] then
@@ -169,7 +169,7 @@ SpellBinder.makeSpellsList = function(self, scroll, delete)
 end
 
 SpellBinder.makeFramesList = function(self)
-	for frame, value in pairs(ClickCastFrames) do
+	for frame in pairs(ClickCastFrames) do
 		local v
 		if frame and type(frame) == "table" then v = frame:GetName() end
 		if C.misc.click_cast_filter ~= true then
@@ -189,6 +189,7 @@ SpellBinder.ToggleButtons = function()
 				local spellname = GetSpellBookItemName(slot, SpellBookFrame.bookType)
 				if spellname then
 					SpellBinder.spellbuttons[i]:Show()
+					AutoCastShine_AutoCastStart(SpellBinder.spellbuttons[i])
 				end
 			end
 		end
@@ -245,10 +246,9 @@ hooksecurefunc(SpellBookFrame, "Hide", function()
 end)
 
 SpellBinder.DeleteSpell = function()
-	local count = table.getn(DB.spells)
 	for i, spell in ipairs(DB.spells) do
 		if spell.checked then
-			for frame, j in pairs(ClickCastFrames) do
+			for frame in pairs(ClickCastFrames) do
 				local f
 				if frame and type(frame) == "table" then f = frame:GetName() end
 				if f then
@@ -293,7 +293,7 @@ local addSpell = function(self, button)
 				button = SecureButton_GetButtonSuffix(button)
 			end
 
-			for i, v in pairs(DB.spells) do if v.spell == spellname then return end end
+			for _, v in pairs(DB.spells) do if v.spell == spellname then return end end
 
 			tinsert(DB.spells, {["id"] = slot, ["modifier"] = modifier, ["button"] = button, ["spell"] = spellname, ["rank"] = rank, ["texture"] = texture, ["origbutton"] = originalbutton,})
 			SpellBinder:makeSpellsList(ScrollSpells.child, false)
@@ -330,7 +330,7 @@ SpellBinder:RegisterEvent("PLAYER_ENTERING_WORLD")
 SpellBinder:RegisterEvent("PLAYER_LOGIN")
 SpellBinder:RegisterEvent("ZONE_CHANGED_NEW_AREA")
 SpellBinder:RegisterEvent("ZONE_CHANGED")
-SpellBinder:SetScript("OnEvent", function(self, event, ...)
+SpellBinder:SetScript("OnEvent", function(self, event)
 	if event == "PLAYER_LOGIN" then
 		SavedBindings = _G.SavedBindings or {}
 		SavedBindings[UnitName("player")] = _G.SavedBindings[UnitName("player")] or {}
@@ -348,8 +348,6 @@ SpellBinder:SetScript("OnEvent", function(self, event, ...)
 			button:RegisterForClicks("AnyDown")
 			button:SetAllPoints(parent)
 			button:SetScript("OnClick", addSpell)
-
-			AutoCastShine_AutoCastStart(button)
 
 			button:Hide()
 			SpellBinder.spellbuttons[i] = button

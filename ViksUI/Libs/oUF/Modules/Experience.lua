@@ -72,7 +72,7 @@ local function GetValues()
 	return cur, max, perc, rested, restedPerc, level, isHonor
 end
 
--- Changed tooltip for ShestakUI
+-- Changed tooltip for ViksUI
 local function UpdateTooltip()
 	local cur, max, perc, rested, restedPerc, _, isHonor = GetValues()
 
@@ -90,7 +90,7 @@ end
 
 local function OnEnter(element)
 	element:SetAlpha(element.inAlpha)
-	GameTooltip:SetOwner(element, "ANCHOR_BOTTOM", 0, -5)	-- ShestakUI
+	GameTooltip:SetOwner(element, "ANCHOR_BOTTOM", 0, -5)	-- ViksUI
 	element:UpdateTooltip()
 end
 
@@ -128,6 +128,7 @@ local function UpdateColor(element, isHonor, isRested)
 
 	local r, g, b = unpack(colors[isRested and 2 or 1])
 	element:SetStatusBarColor(r, g, b)
+	element.bg:SetVertexColor(r, g, b, 0.2) -- ViksUI
 	if(element.SetAnimatedTextureColors) then
 		element:SetAnimatedTextureColors(r, g, b)
 	end

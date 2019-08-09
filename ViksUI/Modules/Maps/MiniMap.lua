@@ -16,8 +16,11 @@ end
 ----------------------------------------------------------------------------------------
 --	Shape, location and scale
 ----------------------------------------------------------------------------------------
--- Kill Minimap Cluster
-MinimapCluster:Kill()
+-- Disable Minimap Cluster
+MinimapCluster:EnableMouse(false)
+if T.classic then
+	MinimapCluster:Kill()
+end
 
 -- Parent Minimap into our frame
 Minimap:SetParent(MinimapAnchor)

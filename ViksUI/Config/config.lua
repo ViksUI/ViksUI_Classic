@@ -112,8 +112,9 @@ C["automation"] = {
 	["accept_invite"] = false,					-- Auto accept invite
 	["decline_duel"] = true,					-- Auto decline duel
 	["accept_quest"] = false,					-- Auto accept quests(if hold shift or alt, auto accept is disable)
-	["auto_collapse"] = false,					-- Auto collapse WatchFrame in instance
-	["auto_collapse_login"] = false,				-- Auto collapse WatchFrame on login
+	["auto_collapse"] = true,					-- Auto collapse WatchFrame in instance
+	["auto_collapse_login"] = true,				-- Auto collapse WatchFrame on login
+	["auto_collapse_reload"] = true,			-- Auto collapse WatchFrame on reloads
 	["skip_cinematic"] = false,					-- Auto skip cinematics/movies
 	["auto_role"] = false,						-- Auto set your role
 	["cancel_bad_buffs"] = false,				-- Auto cancel various buffs
@@ -317,6 +318,8 @@ C["minimap"] = {
 	["bg_map_stylization"] = true,			-- BG map stylization
 	["minimb1"] = true,						-- Background for Minimap bottom right
 	["minimb2"] = true,						-- Background for Minimap bottom left
+	["zoneMapMultilplier"] = 1,				-- Multiplier for zoneMap (NOT scale)
+	["zoneMapScale"] = 1, 					-- Scale zonemap
 }
 
 if T.classic then
@@ -740,7 +743,7 @@ C["actionbar"] = {
 	-- Bottom bars
 	["bottombars"] = 2,							-- Number of action bars on the bottom (1, 2 or 3)
 	-- Right bars
-	["rightbars"] = 3,							-- Number of action bars on right (0, 1, 2 or 3)
+	["rightbars"] = 2,							-- Number of action bars on right (0, 1, 2 or 3)
 	["rightbars_mouseover"] = true,				-- Right bars on mouseover
 	-- Pet bar
 	["petbar_hide"] = false,					-- Hide pet bar
@@ -795,7 +798,7 @@ C["position"] = {
 	["bn_popup"] = {"BOTTOMLEFT", ChatFrame1, "TOPLEFT", -3, 24},					-- Battle.net popup
 	["achievement"] = {"TOP", UIParent, "TOP", 0, -21},								-- Achievements frame
 	["tooltip"] = {"TOPLEFT", UIParent, "TOPLEFT", 2, -20},							-- Tooltip
-	["attempt"] = {"TOP", UIParent, "TOP", 0, -25},									-- Attempts frame
+	["uiwidget"] = {"TOP", UIParent, "TOP", 0, -25},								-- UIWidget frame
 	["capture_bar"] = {"TOP", UIParent, "TOP", 0, 3},								-- BG capture bars
 	["vehicle"] = {"TOP", UIParent, "TOP", 0, -30},									-- Vehicle frame
 	["ghost"] = {"TOP", UIParent, "TOP", 0, -30},									-- Ghost frame
@@ -819,7 +822,7 @@ C["position"] = {
 	["alt_power_bar"] = {"TOP", UIParent, "TOP", 0, -21},							-- Alt power bar
 	["talking_head"] = {"TOP", UIParent, "TOP", 0, -21},							-- Talking Head
 	-- ActionBar positions
-	["bottom_bars"] = {"BOTTOM", UIParent, "BOTTOM", 0, 20},						-- Bottom bars
+	["bottom_bars"] = {"BOTTOM", UIParent, "BOTTOM", 0, 40},						-- Bottom bars
 	["right_bars"] = {"BOTTOMRIGHT", UIParent, "BOTTOMRIGHT", -21, 330},			-- Right bars
 	["pet_horizontal"] = {"BOTTOMRIGHT", UIParent, "BOTTOM", -175, 167},			-- Horizontal pet bar
 	["stance_bar"] = {"BOTTOMRIGHT", UIParent, "BOTTOM", -202, 167},				-- Stance bar

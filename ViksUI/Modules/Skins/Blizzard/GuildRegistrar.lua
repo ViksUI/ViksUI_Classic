@@ -35,4 +35,4 @@ local function LoadSkin()
 	AvailableServicesText:SetShadowColor(0, 0, 0)
 end
 
-tinsert(T.SkinFuncs["ShestakUI"], LoadSkin)
+tinsert(T.SkinFuncs["ViksUI"], LoadSkin)

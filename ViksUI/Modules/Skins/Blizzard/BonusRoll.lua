@@ -55,4 +55,4 @@ local function LoadSkin()
 	T.SkinHelpBox(BonusRollFrame.PromptFrame.EncounterJournalLinkButtonHelp)
 end
 
-tinsert(T.SkinFuncs["ShestakUI"], LoadSkin)
+tinsert(T.SkinFuncs["ViksUI"], LoadSkin)

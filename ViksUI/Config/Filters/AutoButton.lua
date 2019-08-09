@@ -68,6 +68,9 @@ T.ABItems = {
 	130260, -- Thaedris' Elixir
 	140257, -- Advanced Telemancy Beacon
 	142401, -- Telemancy Orbs
+	168482, -- Benthic Sealant
+	168253, -- Fathom Hook
+	169816, -- Quasi-Faceted Scanner
 }
 
 T.ABEquipedItems = {

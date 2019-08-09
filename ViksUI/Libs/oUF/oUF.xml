@@ -7,10 +7,10 @@
 	<Script file="factory.lua"/>
 	<Script file="blizzard.lua"/>
 	<Script file="units.lua"/>
-	<Script file="colors.lua"/>
+	<Script file="Colors.lua"/>
 
 	<Script file="Elements\AdditionalPower.lua"/>
-	<!--Script file="Elements\AlternativePower.lua"/-->
+	<Script file="Elements\AlternativePower.lua"/>
 	<Script file="Elements\AssistantIndicator.lua"/>
 	<Script file="Elements\Aura.lua"/>
 	<Script file="Elements\CastBar.lua"/>
@@ -21,7 +21,7 @@
 	<Script file="Elements\HealPrediction.lua"/>
 	<Script file="Elements\Health.lua"/>
 	<Script file="Elements\LeaderIndicator.lua"/>
-	<!--Script file="Elements\PhaseIndicator.lua"/-->
+	<Script file="Elements\PhaseIndicator.lua"/>
 	<Script file="Elements\Portraits.lua"/>
 	<Script file="Elements\Power.lua"/>
 	<Script file="Elements\PowerPrediction.lua"/>

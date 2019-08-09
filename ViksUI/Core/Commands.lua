@@ -17,13 +17,17 @@ SLASH_TICKET1 = "/gm"
 SLASH_TICKET2 = "/гм"
 SLASH_TICKET3 = "/пь"
 
-SlashCmdList.JOURNAL = function() ToggleEncounterJournal() end
-SLASH_JOURNAL1 = "/ej"
-SLASH_JOURNAL2 = "/уо"
+if not T.classic then
+	SlashCmdList.JOURNAL = function() ToggleEncounterJournal() end
+	SLASH_JOURNAL1 = "/ej"
+	SLASH_JOURNAL2 = "/уо"
+end
 
-SlashCmdList.ROLECHECK = function() InitiateRolePoll() end
-SLASH_ROLECHECK1 = "/role"
-SLASH_ROLECHECK2 = "/кщду"
+if not T.classic then
+	SlashCmdList.ROLECHECK = function() InitiateRolePoll() end
+	SLASH_ROLECHECK1 = "/role"
+	SLASH_ROLECHECK2 = "/кщду"
+end
 
 SlashCmdList.CLEARCOMBAT = function() CombatLogClearEntries() end
 SLASH_CLEARCOMBAT1 = "/clc"
@@ -133,32 +137,36 @@ SLASH_PARTYTORAID4 = "/сщтмуке"
 ----------------------------------------------------------------------------------------
 --	Instance teleport
 ----------------------------------------------------------------------------------------
-SlashCmdList.INSTTELEPORT = function()
-	local inInstance = IsInInstance()
-	if inInstance then
-		LFGTeleport(true)
-	else
-		LFGTeleport()
+if not T.classic then
+	SlashCmdList.INSTTELEPORT = function()
+		local inInstance = IsInInstance()
+		if inInstance then
+			LFGTeleport(true)
+		else
+			LFGTeleport()
+		end
 	end
+	SLASH_INSTTELEPORT1 = "/teleport"
+	SLASH_INSTTELEPORT2 = "/еудузщке"
 end
-SLASH_INSTTELEPORT1 = "/teleport"
-SLASH_INSTTELEPORT2 = "/еудузщке"
 
 ----------------------------------------------------------------------------------------
 --	Spec switching(by Monolit)
 ----------------------------------------------------------------------------------------
-SlashCmdList.SPEC = function(spec)
-	if T.level >= SHOW_SPEC_LEVEL then
-		if GetSpecialization() ~= tonumber(spec) then
-			SetSpecialization(spec)
+if not T.classic then
+	SlashCmdList.SPEC = function(spec)
+		if T.level >= SHOW_SPEC_LEVEL then
+			if GetSpecialization() ~= tonumber(spec) then
+				SetSpecialization(spec)
+			end
+		else
+			print("|cffffff00"..format(FEATURE_BECOMES_AVAILABLE_AT_LEVEL, SHOW_SPEC_LEVEL).."|r")
 		end
-	else
-		print("|cffffff00"..format(FEATURE_BECOMES_AVAILABLE_AT_LEVEL, SHOW_SPEC_LEVEL).."|r")
 	end
+	SLASH_SPEC1 = "/ss"
+	SLASH_SPEC2 = "/spec"
+	SLASH_SPEC3 = "/ыы"
 end
-SLASH_SPEC1 = "/ss"
-SLASH_SPEC2 = "/spec"
-SLASH_SPEC3 = "/ыы"
 
 ----------------------------------------------------------------------------------------
 --	Demo mode for DBM
@@ -289,6 +297,7 @@ SLASH_CLEAR_CHAT2 = "/сдуфк"
 ----------------------------------------------------------------------------------------
 --	Test Blizzard Alerts
 ----------------------------------------------------------------------------------------
+if not T.classic then
 SlashCmdList.TEST_ACHIEVEMENT = function()
 	PlaySound(SOUNDKIT.LFG_REWARDS)
 	if not AchievementFrame then
@@ -313,7 +322,7 @@ SlashCmdList.TEST_ACHIEVEMENT = function()
 end
 SLASH_TEST_ACHIEVEMENT1 = "/tach"
 SLASH_TEST_ACHIEVEMENT2 = "/ефср"
-
+end
 
 ----------------------------------------------------------------------------------------
 --	CHAT SWITCH
@@ -416,21 +425,23 @@ SLASH_CHAT_USWITCH1 = "/chatU"
 ----------------------------------------------------------------------------------------
 --	Test Blizzard Extra Action Button
 ----------------------------------------------------------------------------------------
-SlashCmdList.TEST_EXTRABUTTON = function()
-	if ExtraActionBarFrame:IsShown() then
-		ExtraActionBarFrame:Hide()
-	else
-		ExtraActionBarFrame:Show()
-		ExtraActionBarFrame:SetAlpha(1)
-		ExtraActionButton1:Show()
-		ExtraActionButton1:SetAlpha(1)
-		ExtraActionButton1.icon:SetTexture("Interface\\Icons\\spell_deathknight_breathofsindragosa")
-		ExtraActionButton1.icon:Show()
-		ExtraActionButton1.icon:SetAlpha(1)
+if not T.classic then
+	SlashCmdList.TEST_EXTRABUTTON = function()
+		if ExtraActionBarFrame:IsShown() then
+			ExtraActionBarFrame:Hide()
+		else
+			ExtraActionBarFrame:Show()
+			ExtraActionBarFrame:SetAlpha(1)
+			ExtraActionButton1:Show()
+			ExtraActionButton1:SetAlpha(1)
+			ExtraActionButton1.icon:SetTexture("Interface\\Icons\\spell_deathknight_breathofsindragosa")
+			ExtraActionButton1.icon:Show()
+			ExtraActionButton1.icon:SetAlpha(1)
+		end
 	end
+	SLASH_TEST_EXTRABUTTON1 = "/teb"
+	SLASH_TEST_EXTRABUTTON2 = "/еуи"
 end
-SLASH_TEST_EXTRABUTTON1 = "/teb"
-SLASH_TEST_EXTRABUTTON2 = "/еуи"
 
 ----------------------------------------------------------------------------------------
 --	Grid on screen

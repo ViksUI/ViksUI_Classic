@@ -241,4 +241,4 @@ local function LoadSkin()
 	_G["InterfaceOptionsFrameTab2"].SetWidth = T.dummy
 end
 
-tinsert(T.SkinFuncs["ShestakUI"], LoadSkin)
+tinsert(T.SkinFuncs["ViksUI"], LoadSkin)

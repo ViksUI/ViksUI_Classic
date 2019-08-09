@@ -14,4 +14,4 @@ local function LoadSkin()
 	T.SkinNextPrevButton(ProductChoiceFrame.Inset.PrevPageButton)
 end
 
-tinsert(T.SkinFuncs["ShestakUI"], LoadSkin)
+tinsert(T.SkinFuncs["ViksUI"], LoadSkin)

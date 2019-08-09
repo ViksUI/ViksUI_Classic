@@ -89,6 +89,7 @@ local function LoadSkin()
 	T.SkinCheckBox(LFGListApplicationDialog.HealerButton.CheckButton)
 	T.SkinCheckBox(LFGListApplicationDialog.DamagerButton.CheckButton)
 
+	LFDQueueFrameRoleButtonTank.cover:Kill()
 	local scrollbars = {
 		"ScenarioQueueFrameSpecificScrollFrameScrollBar",
 		"LFGListApplicationViewerScrollFrameScrollBar",
@@ -325,6 +326,7 @@ local function LoadSkin()
 	LFGListFrame.EntryCreation:StripTextures()
 	LFGListFrame.EntryCreation.Description:StripTextures()
 	LFGListApplicationDialogDescription:StripTextures()
+	LFGListInviteDialog:StripTextures()
 	LFGListInviteDialog:SetTemplate("Transparent")
 	LFGListInviteDialog.AcknowledgeButton:SkinButton()
 	LFGListInviteDialog.AcceptButton:SkinButton()
@@ -384,7 +386,7 @@ local function LoadSkin()
 	LFGListApplicationViewerScrollFrameScrollBar:SetPoint("BOTTOMLEFT", LFGListFrame.ApplicationViewer.Inset, "BOTTOMRIGHT", 0, 14)
 end
 
-tinsert(T.SkinFuncs["ShestakUI"], LoadSkin)
+tinsert(T.SkinFuncs["ViksUI"], LoadSkin)
 
 local function LoadSecondarySkin()
 	ChallengesFrameInset:StripTextures()

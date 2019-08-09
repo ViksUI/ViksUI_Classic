@@ -37,6 +37,7 @@ local latency = modules.Latency
 local memory = modules.Memory
 local durability = modules.Durability
 local gold = modules.Gold
+local gold2 = modules.Gold2
 local clock = modules.Clock
 local location = modules.Location
 local coords = modules.Coords
@@ -58,21 +59,42 @@ local function RegEvents(f, l) for _, e in ipairs{strsplit(" ", l)} do f:Registe
 local ls, coordX, coordY, conf, Coords = CreateFrame("Frame"), 0, 0, {}
 RegEvents(ls, "ADDON_LOADED PLAYER_REGEN_DISABLED PLAYER_REGEN_ENABLED")
 ls:SetScript("OnEvent", function(_, event, addon)
-	if event == "ADDON_LOADED" and addon == "ShestakUI" then
+	if event == "ADDON_LOADED" and addon == "ViksUI" then
 		if not SavedStats then SavedStats = {} end
 		if not SavedStats[realm] then SavedStats[realm] = {} end
 		if not SavedStats[realm][char] then SavedStats[realm][char] = {} end
 		conf = SavedStats[realm][char]
 
 		-- true/false defaults for autosell and autorepair
-		if conf.AutoSell == nil then conf.AutoSell = true end
-		if conf.AutoRepair == nil then conf.AutoRepair = true end
-		if conf.AutoGuildRepair == nil then conf.AutoGuildRepair = true end
+		if conf.AutoSell == nil then conf.AutoSell = false end
+		if conf.AutoRepair == nil then conf.AutoRepair = false end
+		if conf.AutoGuildRepair == nil then conf.AutoGuildRepair = false end
+		if conf.AutoSell == true then conf.AutoSell = false end
+		if conf.AutoRepair == true then conf.AutoRepair = false end
+		if conf.AutoGuildRepair == true then conf.AutoGuildRepair = false end
 	end
 end)
 
 -- Config missing?
 if not modules then return end
+
+local mapRects, tempVec2D = {}, CreateVector2D(0, 0)
+local function GetPlayerMapPos(mapID)
+	tempVec2D.x, tempVec2D.y = UnitPosition("player")
+	if not tempVec2D.x then return end
+
+	local mapRect = mapRects[mapID]
+	if not mapRect then
+		mapRect = {
+			select(2, C_Map.GetWorldPosFromMapPos(mapID, CreateVector2D(0, 0))),
+			select(2, C_Map.GetWorldPosFromMapPos(mapID, CreateVector2D(1, 1)))}
+		mapRect[2]:Subtract(mapRect[1])
+		mapRects[mapID] = mapRect
+	end
+	tempVec2D:Subtract(mapRect[1])
+
+	return (tempVec2D.y/mapRect[2].y), (tempVec2D.x/mapRect[2].x)
+end
 
 if modules and ((coords and coords.enabled) or (location and location.enabled)) then
 	ls:SetScript("OnUpdate", function(self, elapsed)
@@ -80,19 +102,15 @@ if modules and ((coords and coords.enabled) or (location and location.enabled)) 
 		if self.elapsed >= 0.2 then
 			local unitMap = C_Map.GetBestMapForUnit("player")
 
-			if unitMap then
-				local GetPlayerMapPosition = C_Map.GetPlayerMapPosition(C_Map.GetBestMapForUnit("player"), "player")
-
-				if GetPlayerMapPosition then
-					coordX, coordY = C_Map.GetPlayerMapPosition(C_Map.GetBestMapForUnit("player"), "player"):GetXY()
-				end
+			if unitMap then						
+				coordX, coordY = GetPlayerMapPos(unitMap)
 			end
 
 			self.elapsed = 0
 		end
 	end)
 
-	function Coords() return format(coords and coords.fmt or "%d, %d", coordX * 100, coordY * 100) end
+	function Coords() return format(coords and coords.fmt or "%d, %d", coordX and coordX * 100, coordY and coordY * 100) end
 end
 
 -- Set profile
@@ -139,7 +157,7 @@ local function fmttime(sec, t)
 	return strmatch(string, "^%s*$") and "0"..abbr(t, "second") or string
 end
 
-function gradient(perc)
+local function gradient(perc)
 	perc = perc > 1 and 1 or perc < 0 and 0 or perc -- Stay between 0-1
 	local seg, relperc = math.modf(perc*2)
 	local r1, g1, b1, r2, g2, b2 = select(seg * 3 + 1, 1, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0) -- R -> Y -> G
@@ -209,24 +227,26 @@ function SlashCmdList.LSTATS()
 		slprint(L_STATS_MEMORY, L_STATS_RC_COLLECTS_GARBAGE)
 	end
 	if friends.enabled or guild.enabled then
-		slprint(format("%s/%s", FRIENDS, GUILD), L_STATS_VIEW_NOTES, L_STATS_CHANGE_SORTING)
+		slprint(format("%s/%s", FRIENDS,GUILD), L_STATS_VIEW_NOTES, L_STATS_CHANGE_SORTING)
 	end
 	if durability.enabled then
-		slprint(DURABILITY, L_STATS_OPEN_CHARACTER, L_STATS_RC_AUTO_REPAIRING1, L_STATS_RC_AUTO_REPAIRING2, L_STATS_EQUIPMENT_CHANGER)
+		slprint(DURABILITY, L_STATS_OPEN_CHARACTER, L_STATS_RC_AUTO_REPAIRING, L_STATS_EQUIPMENT_CHANGER)
 	end
 	if experience.enabled then
 		slprint(format("%s/%s/%s", COMBAT_XP_GAIN, TIME_PLAYED_MSG, FACTION), L_STATS_RC_EXPERIENCE, L_STATS_WATCH_FACTIONS, L_STATS_TOOLTIP_EXPERIENCE, L_STATS_TOOLTIP_TIME_PLAYED)
 	end
-	if talents.enabled then
-		slprint(TALENTS, L_STATS_OPEN_TALENT, L_STATS_RC_TALENT)
-	end
+
 	if location.enabled or coords.enabled then
 		slprint(L_STATS_LOCATION, L_STATS_WORLD_MAP, L_STATS_INSERTS_COORDS)
 	end
-	if gold.enabled then
-		slprint(strtrim(gsub(MONEY, "%%d", "")), L_STATS_OPEN_CURRENCY, L_STATS_RC_AUTO_SELLING, L_STATS_NEED_TO_SELL, L_STATS_WATCH_CURRENCY)
+
+	if talents.enabled then
+		slprint(TALENTS, L_STATS_OPEN_TALENT, L_STATS_RC_TALENT)
 	end
-	print("|cffBCEE68", format(L_STATS_OTHER_OPTIONS, "|cff66C6FFShestakUI\\Config\\DataText.lua").."|r")
+	if gold.enabled then
+		slprint(strtrim(gsub(MONEY, "%%d", "")), L_STATS_OPEN_CURRENCY, L_STATS_RC_AUTO_SELLING, L_STATS_NOT_TO_SELL, L_STATS_WATCH_CURRENCY)
+	end
+	print("|cffBCEE68", format(L_STATS_OTHER_OPTIONS, "|cff66C6FFViksUI\\Config\\DataText.lua").."|r")
 end
 
 CreateFrame("Frame", "LSMenus", UIParent, "UIDropDownMenuTemplate")
@@ -296,7 +316,6 @@ if memory.enabled then
 			end, update = 5,
 		},
 		OnEnter = function(self)
-			collectgarbage()
 			self.hovered = true
 			GameTooltip:SetOwner(self, "ANCHOR_NONE")
 			GameTooltip:ClearAllPoints()
@@ -685,6 +704,7 @@ if gold.enabled then
 					Currency(1716)	-- Honorbound Service Medal
 					Currency(1717)	-- 7th Legion Service Medal
 					Currency(1718)	-- Titan Residuum
+					Currency(1721)	-- Prismatic Manapearl
 					Currency(1560)	-- War Resources
 					Currency(1710)	-- Seafarer's Dubloon
 					Currency(515)	-- Darkmoon Prize Ticket
@@ -755,6 +775,185 @@ if gold.enabled then
 			print("/junk clear - "..L_STATS_JUNK_CLEAR_ADDITIONS)
 		end
 	end
+end
+
+----------------------------------------------------------------------------------------
+--	Gold2
+----------------------------------------------------------------------------------------
+if gold.enabled then
+	local function Currency(id, weekly, capped)
+		local name, amount, tex, week, weekmax, maxed, discovered = GetCurrencyInfo(id)
+		if amount == 0 then return end
+		if weekly then
+			if discovered then GameTooltip:AddDoubleLine(name, format("%s |T%s:"..t_icon..":"..t_icon..":0:0:64:64:5:59:5:59:%d|t", REFORGE_CURRENT..": ".. amount.." - "..WEEKLY..": "..week.." / "..weekmax, tex, t_icon), 1, 1, 1, 1, 1, 1) end
+		elseif capped then
+			if id == 392 then maxed = 4000 end
+			if discovered then GameTooltip:AddDoubleLine(name, format("%s |T%s:"..t_icon..":"..t_icon..":0:0:64:64:5:59:5:59:%d|t", amount.." / "..maxed, tex, t_icon), 1, 1, 1, 1, 1, 1) end
+		else
+			if discovered then GameTooltip:AddDoubleLine(name, format("%s |T%s:"..t_icon..":"..t_icon..":0:0:64:64:5:59:5:59:%d|t", amount, tex, t_icon), 1, 1, 1, 1, 1, 1) end
+		end
+	end
+
+	Inject("Gold2", {
+		OnLoad = function(self)
+			self.started = GetMoney()
+			RegEvents(self, "PLAYER_LOGIN PLAYER_MONEY MERCHANT_SHOW")
+			if not SavedStats.JunkIgnore then SavedStats.JunkIgnore = {} end
+		end,
+		OnEvent = function(self, event)
+
+			conf.Gold2 = GetMoney()
+			if event == "MERCHANT_SHOW" then
+				if conf.AutoSell and not (IsAltKeyDown() or IsShiftKeyDown()) then
+					local profit = 0
+					for bag = 0, NUM_BAG_SLOTS do for slot = 0, GetContainerNumSlots(bag) do
+						local link = GetContainerItemLink(bag, slot)
+						if link then
+							local itemstring, ignore = strmatch(link, "|Hitem:(%d-):"), false
+							for _, exception in pairs(SavedStats.JunkIgnore) do
+								if exception == itemstring then ignore = true break end
+							end
+							if (select(3, GetItemInfo(link)) == 0 and not ignore) or (ignore and select(3, GetItemInfo(link)) ~= 0) then
+								profit = profit + select(11, GetItemInfo(link)) * select(2, GetContainerItemInfo(bag, slot))
+								UseContainerItem(bag, slot)
+							end
+						end
+					end end
+					if profit > 0 then print(format("|cff66C6FF%s: |cffFFFFFF%s", L_STATS_JUNK_PROFIT, formatgold(1, profit))) end
+				end
+				return
+			end
+
+			self.text:SetText(formatgold(2, conf.Gold2))
+		end,
+		OnEnter = function(self)
+			local curgold = GetMoney()
+			local _, _, archaeology, _, cooking = GetProfessions()
+
+			conf.Gold2 = curgold
+			GameTooltip:SetOwner(self, "ANCHOR_NONE")
+			GameTooltip:ClearAllPoints()
+
+			GameTooltip:SetPoint(gold2.tip_anchor, gold2.tip_frame, gold2.tip_x, gold2.tip_y)
+			GameTooltip:ClearLines()
+			GameTooltip:AddLine(CURRENCY, tthead.r, tthead.g, tthead.b)
+			GameTooltip:AddLine(" ")
+			if self.started ~= curgold then
+				local gained = curgold > self.started
+				local color = gained and "|cff55ff55" or "|cffff5555"
+				GameTooltip:AddDoubleLine(L_STATS_SESSION_GAIN, format("%s$|r %s %s$|r", color, formatgold(1, abs(self.started - curgold)), color), 1, 1, 1, 1, 1, 1)
+				GameTooltip:AddLine(" ")
+			end
+			GameTooltip:AddLine(L_STATS_SERVER_GOLD, ttsubh.r, ttsubh.g, ttsubh.b)
+			local total = 0
+			for char, conf in pairs(SavedStats[realm]) do
+
+
+
+				if conf.Gold2 and conf.Gold2 > 99 then
+					GameTooltip:AddDoubleLine(char, formatgold(1, conf.Gold2), 1, 1, 1, 1, 1, 1)
+					total = total + conf.Gold2
+				end
+			end
+			GameTooltip:AddDoubleLine(" ", "-----------------", 1, 1, 1, 0.5, 0.5, 0.5)
+			GameTooltip:AddDoubleLine(TOTAL, formatgold(1, total), ttsubh.r, ttsubh.g, ttsubh.b, 1, 1, 1)
+			GameTooltip:AddLine(" ")
+
+			local currencies = 0
+			for i = 1, GetCurrencyListSize() do
+				local name, _, _, _, watched, count, icon = GetCurrencyListInfo(i)
+				if watched then
+					if currencies == 0 then GameTooltip:AddLine(TRACKING, ttsubh.r, ttsubh.g, ttsubh.b) end
+					local r, g, b
+					if count > 0 then r, g, b = 1, 1, 1 else r, g, b = 0.5, 0.5, 0.5 end
+					GameTooltip:AddDoubleLine(name, format("%d |T%s:"..t_icon..":"..t_icon..":0:0:64:64:5:59:5:59:%d|t", count, icon, t_icon), r, g, b, r, g, b)
+					currencies = currencies + 1
+				end
+			end
+			if archaeology and C.stats.CurrArchaeology then
+
+				GameTooltip:AddLine(" ")
+				GameTooltip:AddLine(PROFESSIONS_ARCHAEOLOGY, ttsubh.r, ttsubh.g, ttsubh.b)
+				Currency(384)	-- Dwarf Archaeology Fragment
+				Currency(385)	-- Troll Archaeology Fragment
+				Currency(393)	-- Fossil Archaeology Fragment
+				Currency(394)	-- Night Elf Archaeology Fragment
+				Currency(397)	-- Orc Archaeology Fragment
+				Currency(398)	-- Draenei Archaeology Fragment
+				Currency(399)	-- Vrykul Archaeology Fragment
+				Currency(400)	-- Nerubian Archaeology Fragment
+				Currency(401)	-- Tol'vir Archaeology Fragment
+				Currency(676)	-- Pandaren Archaeology Fragment
+				Currency(677)	-- Mogu Archaeology Fragment
+				Currency(754)	-- Mantid Archaeology Fragment
+				Currency(821)	-- Draenor Clans Archaeology Fragment
+				Currency(828)	-- Ogre Archaeology Fragment
+				Currency(829)	-- Arakkoa Archaeology Fragment
+				Currency(1172)	-- Highborne Archaeology Fragment
+				Currency(1173)	-- Highmountain Tauren Archaeology Fragment
+				Currency(1174)	-- Demonic Archaeology Fragment
+			end
+
+			if cooking and C.stats.CurrCooking then
+
+
+				GameTooltip:AddLine(" ")
+				GameTooltip:AddLine(PROFESSIONS_COOKING, ttsubh.r, ttsubh.g, ttsubh.b)	
+				Currency(81)
+				Currency(402)
+			end
+
+			if C.stats.CurrProfessions then
+
+				GameTooltip:AddLine(" ")
+				GameTooltip:AddLine(TRADE_SKILLS, ttsubh.r, ttsubh.g, ttsubh.b)
+				Currency(910)	-- Secret of Draenor Alchemy
+				Currency(1020)	-- Secret of Draenor Blacksmithing
+				Currency(1008)	-- Secret of Draenor Jewelcrafting
+				Currency(1017)	-- Secret of Draenor Leatherworking
+				Currency(999)	-- Secret of Draenor Tailoring
+			end
+
+			if C.stats.CurrRaid and T.level == MAX_PLAYER_LEVEL then
+
+				GameTooltip:AddLine(" ")
+				GameTooltip:AddLine(L_STATS_CURRENCY_RAID, ttsubh.r, ttsubh.g, ttsubh.b)
+				Currency(1273, false, true)	-- Seal of Broken Fate
+				Currency(1580, false, true)	-- Seal of Wartorn Fate
+			end
+
+			if C.stats.CurrPvP then
+
+				GameTooltip:AddLine(" ")
+				GameTooltip:AddLine(PVP_FLAG, ttsubh.r, ttsubh.g, ttsubh.b)
+				Currency(1587)				-- War Supplies
+			end
+
+			if C.stats.CurrMiscellaneous then
+
+				GameTooltip:AddLine(" ")
+				GameTooltip:AddLine(MISCELLANEOUS, ttsubh.r, ttsubh.g, ttsubh.b)
+				Currency(515)					-- Darkmoon Prize Ticket
+				Currency(1710)					-- Seafarer's Dubloon
+				Currency(1565)					-- Rich Azerite Fragment
+				GameTooltip:AddLine(" ")
+				Currency(1220)					-- Order Resources
+				Currency(1560)					-- War Resources
+			end
+
+			GameTooltip:AddLine(" ")
+			GameTooltip:AddDoubleLine(" ", L_STATS_AUTO_SELL..": "..(conf.AutoSell and "|cff55ff55"..L_STATS_ON or "|cffff5555"..strupper(OFF)), 1, 1, 1, ttsubh.r, ttsubh.g, ttsubh.b)
+			GameTooltip:Show()
+		end,
+		OnClick = function(self, button)
+			if button == "LeftButton" then
+				ToggleCharacter("TokenFrame")
+			elseif button == "RightButton" then
+				conf.AutoSell = not conf.AutoSell
+				self:GetScript("OnEnter")(self)
+			end
+		end
+	})
 end
 
 ----------------------------------------------------------------------------------------
@@ -986,7 +1185,7 @@ if guild.enabled then
 	local function BuildGuildTable()
 		wipe(guildTable)
 		for i = 1, GetNumGuildMembers() do
-			local name, rank, _, level, _, zone, note, officernote, connected, status, class, _, _, mobile = GetGuildRosterInfo(i)
+			local name, rank, _, level, _, zone, note, officernote, connected, status, class, _, _, mobile = C_GuildInfo.C_GuildInfo.GetGuildRosterInfo(i)
 			name = Ambiguate(name, "none")
 			guildTable[i] = {name, rank, level, zone, note, officernote, connected, status, class, mobile}
 		end
@@ -1105,7 +1304,7 @@ if guild.enabled then
 							if online > 2 then GameTooltip:AddLine(format("%d %s (%s)", online - guild.maxguild, L_STATS_HIDDEN, ALT_KEY), ttsubh.r, ttsubh.g, ttsubh.b) end
 							break
 						end
-						name, rank, _, level, _, zone, note, officernote, connected, status, class, _, _, isMobile = GetGuildRosterInfo(i)
+						name, rank, _, level, _, zone, note, officernote, connected, status, class, _, _, isMobile = C_GuildInfo.GetGuildRosterInfo(i)
 						if (connected or isMobile) and level >= guild.threshold then
 							name = Ambiguate(name, "all")
 							if GetRealZoneText() == zone then zone_r, zone_g, zone_b = 0.3, 1, 0.3 else zone_r, zone_g, zone_b = 1, 1, 1 end
