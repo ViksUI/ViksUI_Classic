@@ -434,7 +434,6 @@ C["nameplate"] = {
 }
 
 if T.classic then
-	C["nameplate"]["distance"] = 60
 	C["nameplate"]["health_value"] = true
 	C["nameplate"]["show_castbar_name"] = true
 	C["nameplate"]["track_debuffs"] = true
@@ -484,6 +483,7 @@ C["unitframe"] = {
 	["symbolsize"] = 11,																-- Ø Size on Symbols on Indicator type 2
 	["fontsizeEdge"] = 12,																-- Ø
 	["Findoutline"] = "OUTLINE",														-- Ø
+	["bar_color_happiness"] = true,														-- Pet health bar color by happiness	
 	-- Cast bars
 	["Castbars"] = true, 																-- Show castbars
 	["castbar_ticks"] = true,															-- Castbar ticks

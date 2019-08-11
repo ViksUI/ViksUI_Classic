@@ -1,5 +1,4 @@
 local T, C, L, _ = unpack(select(2, ...))
-if T.classic then return end
 
 --------------------------------------------------------------------
  -- QUEST DATATEXT
@@ -42,14 +41,15 @@ if C.datatext.Quests and C.datatext.Quests > 0 then
 	self:SetScript("OnLeave", function() GameTooltip:Hide() end)
 
 	end
-	
-    local OnMouseDown = function()
-		if ( ObjectiveTrackerFrame.collapsed ) then
-		ObjectiveTracker_Expand();
-		else
-		ObjectiveTracker_Collapse();
+	if not T.classic then
+		local OnMouseDown = function()
+			if ( ObjectiveTrackerFrame.collapsed ) then
+			ObjectiveTracker_Expand();
+			else
+			ObjectiveTracker_Collapse();
+			end
 		end
-	end 
+	end
 	
 	Stat:RegisterEvent("PLAYER_ENTERING_WORLD")
 	Stat:RegisterEvent("UNIT_QUEST_LOG_CHANGED")
@@ -57,11 +57,13 @@ if C.datatext.Quests and C.datatext.Quests > 0 then
 	Stat:SetScript("OnEvent", OnEvent)
 	Stat:SetScript("OnMouseDown", OnMouseDown)
 	
-	local collapse = CreateFrame("Frame")
-	collapse:RegisterEvent("PLAYER_ENTERING_WORLD")
-	collapse:SetScript("OnEvent", function(self, event)
-		if C.automation.auto_collapse_login == true then
-			ObjectiveTracker_Collapse()
-		end
-	end)
+	if not T.classic then	
+		local collapse = CreateFrame("Frame")
+		collapse:RegisterEvent("PLAYER_ENTERING_WORLD")
+		collapse:SetScript("OnEvent", function(self, event)
+			if C.automation.auto_collapse_login == true then
+				ObjectiveTracker_Collapse()
+			end
+		end)
+	end
 end

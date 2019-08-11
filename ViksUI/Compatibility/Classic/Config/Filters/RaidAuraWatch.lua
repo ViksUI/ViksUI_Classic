@@ -63,7 +63,7 @@ local function SpellName(id)
 	if name then
 		return name
 	else
-		print("|cffff0000WARNING: spell ID ["..tostring(id).."] no longer exists! Report this to EsreverWoW.|r")
+		print("|cffff0000WARNING: spell ID ["..tostring(id).."] no longer exists! Report this to Vik.|r")
 		return "Empty"
 	end
 end

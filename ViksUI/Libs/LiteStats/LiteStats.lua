@@ -102,7 +102,7 @@ if modules and ((coords and coords.enabled) or (location and location.enabled)) 
 		if self.elapsed >= 0.2 then
 			local unitMap = C_Map.GetBestMapForUnit("player")
 
-			if unitMap then						
+			if unitMap then
 				coordX, coordY = GetPlayerMapPos(unitMap)
 			end
 
@@ -1185,7 +1185,7 @@ if guild.enabled then
 	local function BuildGuildTable()
 		wipe(guildTable)
 		for i = 1, GetNumGuildMembers() do
-			local name, rank, _, level, _, zone, note, officernote, connected, status, class, _, _, mobile = C_GuildInfo.C_GuildInfo.GetGuildRosterInfo(i)
+			local name, rank, _, level, _, zone, note, officernote, connected, status, class, _, _, mobile = not T.classic and C_GuildInfo.GetGuildRosterInfo(i) or GetGuildRosterInfo(i)
 			name = Ambiguate(name, "none")
 			guildTable[i] = {name, rank, level, zone, note, officernote, connected, status, class, mobile}
 		end
@@ -1304,7 +1304,7 @@ if guild.enabled then
 							if online > 2 then GameTooltip:AddLine(format("%d %s (%s)", online - guild.maxguild, L_STATS_HIDDEN, ALT_KEY), ttsubh.r, ttsubh.g, ttsubh.b) end
 							break
 						end
-						name, rank, _, level, _, zone, note, officernote, connected, status, class, _, _, isMobile = C_GuildInfo.GetGuildRosterInfo(i)
+						name, rank, _, level, _, zone, note, officernote, connected, status, class, _, _, isMobile = not T.classic and C_GuildInfo.GetGuildRosterInfo(i) or GetGuildRosterInfo(i)
 						if (connected or isMobile) and level >= guild.threshold then
 							name = Ambiguate(name, "all")
 							if GetRealZoneText() == zone then zone_r, zone_g, zone_b = 0.3, 1, 0.3 else zone_r, zone_g, zone_b = 1, 1, 1 end
@@ -1561,6 +1561,7 @@ if friends.enabled then
 							for k, v in pairs(LOCALIZED_CLASS_NAMES_FEMALE) do if class == v then class = k end end
 						end
 						classc, levelc = (CUSTOM_CLASS_COLORS or RAID_CLASS_COLORS)[class], GetQuestDifficultyColor(level)
+						classc = classc or {["r"] = 1, ["g"] = 1, ["b"] = 1}
 						grouped = (UnitInParty(name) or UnitInRaid(name)) and (GetRealZoneText() == zone and " |cff7fff00*|r" or " |cffff7f00*|r") or ""
 						GameTooltip:AddDoubleLine(format("|cff%02x%02x%02x%d|r %s%s%s", levelc.r * 255, levelc.g * 255, levelc.b * 255, level, name, grouped, " "..status), zone, classc.r, classc.g, classc.b, zone_r, zone_g, zone_b)
 						if self.altdown and note then GameTooltip:AddLine("  "..note, ttsubh.r, ttsubh.g, ttsubh.b, 1) end
@@ -1589,6 +1590,7 @@ if friends.enabled then
 								for k, v in pairs(LOCALIZED_CLASS_NAMES_FEMALE) do if class == v then class = k end end
 							end
 							classc, levelc = (CUSTOM_CLASS_COLORS or RAID_CLASS_COLORS)[class], GetQuestDifficultyColor(level)
+							classc = classc or {["r"] = 1, ["g"] = 1, ["b"] = 1}
 							if UnitInParty(toonName) or UnitInRaid(toonName) then grouped = " |cffaaaaaa*|r" else grouped = "" end
 							GameTooltip:AddDoubleLine(format("%s (|cff%02x%02x%02x%d|r |cff%02x%02x%02x%s|r%s) |cff%02x%02x%02x%s|r", client, levelc.r * 255, levelc.g * 255, levelc.b * 255, level, classc.r * 255, classc.g * 255, classc.b * 255, toonName, grouped, 255, 0, 0, status), presenceName, 238, 238, 238, 238, 238, 238)
 							if self.altdown then

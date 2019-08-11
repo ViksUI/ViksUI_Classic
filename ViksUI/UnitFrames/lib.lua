@@ -1493,7 +1493,7 @@ end
 
 --WARLOCK
 lib.genShards = function(self)
-    if playerClass ~= "WARLOCK" then return end
+    if T.classic or playerClass ~= "WARLOCK" then return end
     local ShardsFrame = CreateFrame("Frame", self:GetName().."SoulShards", self)
 	ShardsFrame:CreateBackdrop("Default")
     ShardsFrame:SetPoint("BOTTOMLEFT", self, "TOPLEFT", 1,7)
@@ -1526,7 +1526,7 @@ end
 
 -- Arcane Charges (Arcane Mage)
 lib.addArcaneCharges = function(self)
-	if T.class == "MAGE" then
+	if T.classic or playerClass ~= "MAGE" then return end
 		-- Arcane Charge bar
 		if C.unitframe_class_bar.arcane == true then
 			self.ArcaneCharge = CreateFrame("Frame", self:GetName().."ArcaneCharge", self)
@@ -1553,11 +1553,10 @@ lib.addArcaneCharges = function(self)
 			end
 		end
 	end
-end
 
 -- Paladins, HolyPowerbar
 lib.genHolyPower = function(self)
-	if playerClass ~= "PALADIN" then return end
+	if T.classic or playerClass ~= "PALADIN" then return end
 			self.HolyPower = CreateFrame("Frame", self:GetName().."_HolyPowerBar", self)
 			self.HolyPower:CreateBackdrop("Default")
 			self.HolyPower:SetPoint("BOTTOMLEFT", self, "TOPLEFT", 1, 7)
@@ -1586,7 +1585,7 @@ end
 
 -- Deathknight, runebar
 lib.genRunes = function(self)
-	if playerClass ~= "DEATHKNIGHT" then return end
+	if T.classic or playerClass ~= "DEATHKNIGHT" then return end
 	local runes = CreateFrame("Frame", nil, self)
 	runes:SetPoint("BOTTOMLEFT", self, "TOPLEFT",1,7)
 	runes:SetWidth(cfg.unit_size.Player.w - 2)
@@ -1624,14 +1623,15 @@ lib.genCPoints = function(self)
 		self.CPoints:SetBackdropBorderColor(unpack(cfg.bordercolor))
 		self.CPoints:SetHeight(7)
 		self.CPoints:SetWidth(self:GetWidth()-2)
-
+		
+		local maxComboPoints = MAX_COMBO_POINTS
 		if not T.classic then
 			maxComboPoints = 6
 		else
 			maxComboPoints = 5
 		end
 			
-		for i = 1, maxComboPoints or 6 do
+		for i = 1, maxComboPoints do
 			self.CPoints[i] = CreateFrame("StatusBar", self:GetName().."_ComboBar", self.CPoints)
 			self.CPoints[i]:SetSize(213 / 10, 7)
 			if i == 1 then
@@ -1647,12 +1647,14 @@ lib.genCPoints = function(self)
 		self.CPoints[3]:SetStatusBarColor(0.9, 0.9, 0.1)
 		self.CPoints[4]:SetStatusBarColor(0.9, 0.9, 0.1)
 		self.CPoints[5]:SetStatusBarColor(0.1, 0.9, 0.1)
+		if not T.classic then
 		self.CPoints[6]:SetStatusBarColor(0.1, 0.9, 0.1)
+		end
 	end
 end
 
 lib.genHarmony = function(self)
-	if playerClass ~= "MONK" then return end
+	if T.classic or playerClass ~= "MONK" then return end
 	-- Chi bar
 	self.HarmonyBar = CreateFrame("Frame", self:GetName().."_HarmonyBar", self)
 	self.HarmonyBar:CreateBackdrop("Default")

@@ -20,6 +20,8 @@ T.MoverFrames = {
 	RaidCDAnchor,
 	EnemyCDAnchor,
 	ObjectiveTrackerAnchor,
+	ObjectiveTimerAnchor,
+	RaidUtilityPanelAnchor,
 	ThreatMeterAnchor,
 	LootRollAnchor,
 	RaidBuffsAnchor,

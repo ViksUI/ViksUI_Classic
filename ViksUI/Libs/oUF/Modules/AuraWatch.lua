@@ -105,7 +105,7 @@ local function Update(frame, event, unit)
 			icon = icons[key]
 			if icon and not T.RaidBuffsIgnore[spellID] and (icon.anyUnit or (caster and icon.fromUnits and icon.fromUnits[caster])) then
 				if IsClassicBuild() and LibClassicDurations then
-					local durationNew, expirationTimeNew = LibClassicDurations:GetAuraDurationByUnit(unit, spellID, caster)
+					local durationNew, expirationTimeNew = LibClassicDurations:GetAuraDurationByUnit(unit, spellID, caster, name)
 
 					if duration == 0 and durationNew then
 						duration = durationNew
@@ -189,7 +189,7 @@ local function setupIcons(self)
 			if not T.classic then
 				print("|cffff0000WARNING: spell ID ["..tostring(icon.spellID).."] no longer exists! Report this to Shestak.|r")
 			else
-				print("|cffff0000WARNING: spell ID ["..tostring(icon.spellID).."] no longer exists! Report this to EsreverWoW.|r")
+				print("|cffff0000WARNING: spell ID ["..tostring(icon.spellID).."] no longer exists! Report this to Vik.|r")
 			end
 		end
 	end
