@@ -3,13 +3,32 @@ local L = ns
 ----------------------------------------------------------------------------------------
 --	GUI for ViksUI(by Haleth, Solor)
 ----------------------------------------------------------------------------------------
+-- Temporary Function
+local function IsClassicBuild()
+	local major, minor, fix = strsplit(".", tostring(GetBuildInfo()))
+	major, minor, fix = tonumber(major) or 0, tonumber(minor) or 0, tonumber(fix) or 0
+
+	local patch = major + (minor / 100)
+	if patch < 2 then
+		return true
+	end
+end
+
+local function HideOptions(list)
+	for i = 1, #list do
+		local frame = list[i]
+		if frame then
+			frame:Hide()
+		end
+	end
+end
 local realm = GetRealmName()
 local name = UnitName("player")
 
-local pysWidth, pysHeight = _G.GetPhysicalScreenSize()
+local _, pysHeight = _G.GetPhysicalScreenSize()
 local fixedHeight = 768 / pysHeight
 local scale = tonumber(floor(fixedHeight*100 + .5)/100)
-mult = fixedHeight / scale
+local mult = fixedHeight / scale
 
 -- Main window
 local options = CreateFrame("Frame", "ViksUIOptionsPanel", UIParent)
@@ -120,11 +139,11 @@ ns.addCategory("font", L.font, L.font_subtext, true, true)
 ns.addCategory("skins", L_GUI_SKINS, L_GUI_SKINS_SUBTEXT)
 ns.addCategory("unitframe", UNITFRAME_LABEL, L_GUI_UF_SUBTEXT, true)
 ns.addCategory("unitframe_class_bar", L_GUI_UF_PLUGINS_CLASS_BAR, L_GUI_UF_PLUGINS_CLASS_BAR_SUBTEXT)
---ns.addCategory("raidframe", RAID_FRAMES_LABEL, L_GUI_UF_RAIDFRAMES_SUBTEXT, true)
+ns.addCategory("raidframe", RAID_FRAMES_LABEL, L_GUI_UF_RAIDFRAMES_SUBTEXT, true)
 ns.addCategory("actionbar", L_GUI_ACTIONBAR, ACTIONBARS_SUBTEXT)
 ns.addCategory("tooltip", L_GUI_TOOLTIP, L_GUI_TOOLTIP_SUBTEXT)
 ns.addCategory("chat", SOCIALS, L_GUI_CHAT_SUBTEXT)
-ns.addCategory("nameplate", UNIT_NAMEPLATES, L_GUI_NAMEPLATE_SUBTEXT, true)
+ns.addCategory("nameplate", UNIT_NAMEPLATES, L_GUI_NAMEPLATE_SUBTEXT, not IsClassicBuild() and true)
 ns.addCategory("combattext", L_GUI_COMBATTEXT, COMBATTEXT_SUBTEXT.." "..L_GUI_COMBATTEXT_SUBTEXT, true)
 ns.addCategory("aura", BUFFOPTIONS_LABEL, BUFFOPTIONS_SUBTEXT)
 ns.addCategory("bag", L_GUI_BAGS, L_GUI_BAGS_SUBTEXT)
@@ -152,8 +171,11 @@ do
 	local welcome_message = ns.CreateCheckBox(parent, "welcome_message", L_GUI_GENERAL_WELCOME_MESSAGE)
 	welcome_message:SetPoint("TOPLEFT", parent.subText, "BOTTOMLEFT", 0, 0)
 
+	local bottom_lines = ns.CreateCheckBox(parent, "bottom_lines", L_GUI_GENERAL_BOTTOMLINES)
+	bottom_lines:SetPoint("TOPLEFT", welcome_message, "BOTTOMLEFT", 0, 0)
+
 	local auto_scale = ns.CreateCheckBox(parent, "auto_scale", L_GUI_GENERAL_AUTOSCALE)
-	auto_scale:SetPoint("TOPLEFT", welcome_message, "BOTTOMLEFT", 0, 0)
+	auto_scale:SetPoint("TOPLEFT", bottom_lines, "BOTTOMLEFT", 0, 0)
 
 	local uiscale = ns.CreateNumberSlider(parent, "uiscale", nil, nil, 0.4, 1.1, 0.01, true, L_GUI_GENERAL_UISCALE)
 	uiscale:SetPoint("TOPLEFT", auto_scale, "BOTTOMLEFT", 0, -20)
@@ -174,12 +196,9 @@ do
 
 	local backdrop_color = ns.CreateColourPicker(parent, "backdrop_color", true)
 	backdrop_color:SetPoint("TOPLEFT", border_color, "BOTTOMLEFT", 0, -10)
-	
-	local overlay_color = ns.CreateColourPicker(parent, "overlay_color", true)
-	overlay_color:SetPoint("TOPLEFT", backdrop_color, "BOTTOMLEFT", 0, -10)
 
 	local backdrop_alpha = ns.CreateNumberSlider(parent, "backdrop_alpha", nil, nil, 0, 1, 0.05, true)
-	backdrop_alpha:SetPoint("TOPLEFT", overlay_color, "BOTTOMLEFT", 0, -28)
+	backdrop_alpha:SetPoint("TOPLEFT", backdrop_color, "BOTTOMLEFT", 0, -28)
 
 	local subheader = ns.addSubCategory(parent, L.media_subheader_pixel)
 	subheader:SetPoint("TOPLEFT", backdrop_alpha, "BOTTOMLEFT", 0, -10)
@@ -541,6 +560,38 @@ do
 
 	local weak_auras = ns.CreateCheckBox(parent, "weak_auras", L_GUI_SKINS_WEAK_AURAS)
 	weak_auras:SetPoint("LEFT", vanaskos, "RIGHT", 320, 0)
+
+	local classic = {
+		atlasloot,
+		bigwigs,
+		blood_shield_tracker,
+		capping,
+		clique,
+		cool_line,
+		dbm,
+		dbm_movable,
+		dominos,
+		flyout_button,
+		ls_toasts,
+		mage_nuggets,
+		my_role_play,
+		npcscan,
+		nug_running,
+		omen,
+		opie,
+		ovale,
+		postal,
+		recount,
+		rematch,
+		skada,
+		tiny_dps,
+		vanaskos,
+		weak_auras
+	}
+
+	if IsClassicBuild() then
+		HideOptions(classic)
+	end
 end
 
 -- Unit Frames
@@ -687,6 +738,25 @@ do
 
 	local plugins_auto_resurrection = ns.CreateCheckBox(parent, "plugins_auto_resurrection")
 	plugins_auto_resurrection:SetPoint("TOPLEFT", plugins_healcomm, "BOTTOMLEFT", 0, 0)
+
+	local classic = {
+		show_focus,
+		show_arena,
+		arena_on_right,
+		plugins_artifact_bar,
+		plugins_enemy_spec,
+		plugins_diminishing
+	}
+
+	local retail = {
+		bar_color_happiness,
+	}
+
+	if IsClassicBuild() then
+		HideOptions(classic)
+	else
+		HideOptions(retail)
+	end
 end
 
 -- Unit Frames Class bar
@@ -727,6 +797,20 @@ do
 
 	local range = ns.CreateCheckBox(parent, "range", L_GUI_UF_PLUGINS_RANGE_BAR)
 	range:SetPoint("TOPLEFT", totem, "BOTTOMLEFT", 0, 0)
+
+	local classic = {
+		arcane,
+		chi,
+		stagger,
+		holy,
+		shard,
+		rune,
+		range,
+	}
+
+	if IsClassicBuild() then
+		HideOptions(classic)
+	end
 end
 
 -- Raid Frames
@@ -1221,6 +1305,16 @@ do
 
 	local instance_lock = ns.CreateCheckBox(parent, "instance_lock", L_GUI_TOOLTIP_INSTANCE_LOCK)
 	instance_lock:SetPoint("TOPLEFT", unit_role, "BOTTOMLEFT", 0, 0)
+
+	local classic = {
+		achievements,
+		arena_experience,
+		unit_role
+	}
+
+	if IsClassicBuild() then
+		HideOptions(classic)
+	end
 end
 
 -- Chat
@@ -1417,6 +1511,15 @@ do
 
 	local totem_icons = ns.CreateCheckBox(parent, "totem_icons", L_GUI_NAMEPLATE_TOTEM_ICONS)
 	totem_icons:SetPoint("TOPLEFT", healer_icon, "BOTTOMLEFT", 0, 0)
+
+	local classic = {
+		distance, -- broken in Classic
+		healer_icon -- needs fixing since build 30786
+	}
+
+	if IsClassicBuild() then
+		HideOptions(classic)
+	end
 
 	-- Panel 2
 	local parent = ViksUIOptionsPanel.nameplate2
@@ -1657,8 +1760,14 @@ do
 	battleground:SetPoint("TOPLEFT", location, "BOTTOMLEFT", 0, 0)
 
 	-- Currency
-	local currency = ns.addSubCategory(parent, L_GUI_STATS_SUBHEADER_CURRENCY)
-	currency:SetPoint("TOPLEFT", battleground, "BOTTOMLEFT", 0, -16)
+	local currency
+	if not IsClassicBuild() then
+		currency = ns.addSubCategory(parent, L_GUI_STATS_SUBHEADER_CURRENCY)
+		currency:SetPoint("TOPLEFT", battleground, "BOTTOMLEFT", 0, -16)
+	else
+		currency = CreateFrame("Frame", nil, ShestakUIOptionsPanel)
+		EXPANSION_NAME7 = EXPANSION_NAME7 or "Battle for Azeroth"
+	end
 
 	local currency_archaeology = ns.CreateCheckBox(parent, "currency_archaeology", L_GUI_STATS_CURRENCY_ARCHAEOLOGY)
 	currency_archaeology:SetPoint("TOPLEFT", currency, "BOTTOMLEFT", 0, -8)
@@ -1672,8 +1781,21 @@ do
 	local currency_raid = ns.CreateCheckBox(parent, "currency_raid", L_GUI_STATS_CURRENCY_RAID)
 	currency_raid:SetPoint("TOPLEFT", currency_professions, "BOTTOMLEFT", 0, 0)
 
-	local currency_misc = ns.CreateCheckBox(parent, "currency_misc", L_GUI_STATS_CURRENCY_MISCELLANEOUS)
+	local currency_misc = ns.CreateCheckBox(parent, "currency_misc", CURRENCY.. " "..EXPANSION_NAME7)
 	currency_misc:SetPoint("TOPLEFT", currency_raid, "BOTTOMLEFT", 0, 0)
+
+	local classic = {
+		currency,
+		currency_archaeology,
+		currency_cooking,
+		currency_professions,
+		currency_raid,
+		currency_misc
+	}
+
+	if IsClassicBuild() then
+		HideOptions(classic)
+	end
 end
 ]]--
 -- Error
@@ -1828,6 +1950,19 @@ do
 	local hide_raid_button = ns.CreateCheckBox(parent, "hide_raid_button", L_GUI_MISC_HIDE_RAID_BUTTON)
 	hide_raid_button:SetPoint("TOPLEFT", hide_talking_head, "BOTTOMLEFT", 0, 0)
 
+	local classic = {
+		vehicle_mouseover,
+		enchantment_scroll,
+		archaeology,
+		chars_currency,
+		hide_banner,
+		hide_talking_head
+	}
+
+	if IsClassicBuild() then
+		HideOptions(classic)
+	end
+
 	local custom_lagtolerance = ns.CreateCheckBox(parent, "custom_lagtolerance", L_GUI_MISC_LAG_TOLERANCE)
 	custom_lagtolerance:SetPoint("TOPLEFT", hide_raid_button, "BOTTOMLEFT", 0, 0)
 	
@@ -1964,7 +2099,11 @@ do
 	local frame = CreateFrame("Frame", nil, InterfaceOptionsFramePanelContainer)
 	frame:Hide()
 
-	frame.name = "ViksUI"
+	if not IsClassicBuild() then
+		frame.name = "ViksUI"
+	else
+		frame.name = "ViksUI (Classic)"
+	end
 	frame:SetScript("OnShow", function(self)
 		if self.show then return end
 		local T, C, L = unpack(ViksUI)

@@ -96,6 +96,7 @@ L_GUI_UF_ENEMY_HEALTH_COLOR = "Enemy target healthbar is red"
 L_GUI_UF_TOTAL_VALUE = "Display of info text on player and target with XXXX/Total"
 L_GUI_UF_COLOR_VALUE = "Health/mana value is colored"
 L_GUI_UF_BAR_COLOR_VALUE = "Health bar color by current health remaining"
+L_GUI_UF_BAR_COLOR_HAPPINESS = "Color pet health bar by happiness" -- Needs review
 L_GUI_UF_LINES = "Show Player and Target lines"
 L_GUI_UF_SUBHEADER_CAST = "Castbars"
 L_GUI_UF_UNIT_CASTBAR = "Show castbars"

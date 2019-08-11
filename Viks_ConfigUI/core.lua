@@ -7,10 +7,10 @@ local _, ns = ...
 local realm = GetRealmName()
 local name = UnitName("player")
 
-local pysWidth, pysHeight = _G.GetPhysicalScreenSize()
+local _, pysHeight = _G.GetPhysicalScreenSize()
 local fixedHeight = 768 / pysHeight
 local scale = tonumber(floor(fixedHeight*100 + .5)/100)
-mult = fixedHeight / scale
+local mult = fixedHeight / scale
 
 -- [[ Variables ]]
 
@@ -18,7 +18,6 @@ ns.localization = {}
 ns.buttons = {}
 
 local checkboxes = {}
-local radiobuttons = {}
 local sliders = {}
 local editboxes = {}
 local dropdowns = {}
@@ -27,10 +26,8 @@ local panels = {}
 
 -- cache old values to check whether UI needs to be reloaded
 local old = {}
-local oldRadioValues = {}
 local oldColours = {}
 
--- local overrideReload = false
 local userChangedSlider = true -- to use SetValue without triggering OnValueChanged
 local baseName = "ViksUIOptionsPanel"
 
@@ -51,34 +48,23 @@ end
 
 -- check if a reload is needed
 local function checkIsReloadNeeded()
-	-- if not overrideReload then -- can't check sliders for old value, always flag for reload when they change
-		for frame, value in pairs(old) do
-			if C[frame.group][frame.option] ~= value then
-				setReloadNeeded(true)
-				return
-			end
+	for frame, value in pairs(old) do
+		if C[frame.group][frame.option] ~= value then
+			setReloadNeeded(true)
+			return
 		end
+	end
 
-		for radioOptionGroup, radioOptionValues in pairs(oldRadioValues) do
-			for option, value in pairs(radioOptionValues) do
-				if C[radioOptionGroup][option] ~= value then
-					setReloadNeeded(true)
-					return
-				end
-			end
+	for colourOption, oldTable in pairs(oldColours) do
+		local savedTable = C[colourOption.group][colourOption.option]
+		if savedTable[1] ~= oldTable[1] or savedTable[2] ~= oldTable[2] or savedTable[3] ~= oldTable[3] then
+			setReloadNeeded(true)
+			return
 		end
+	end
 
-		for colourOption, oldTable in pairs(oldColours) do
-			local savedTable = C[colourOption.group][colourOption.option]
-			if savedTable[1] ~= oldTable[1] or savedTable[2] ~= oldTable[2] or savedTable[3] ~= oldTable[3] then
-				setReloadNeeded(true)
-				return
-			end
-		end
-
-		-- if the tables were empty, or all of the old values match their current ones
-		setReloadNeeded(false)
-	-- end
+	-- if the tables were empty, or all of the old values match their current ones
+	setReloadNeeded(false)
 end
 
 -- Called by every widget to save a value
@@ -103,17 +89,8 @@ local function toggleChildren(self, checked)
 	end
 
 	for _, child in next, self.children do
-		if child.radioHeader then -- radio button group
-			child.radioHeader:SetTextColor(tR, tG, tB)
-
-			for _, radioButton in pairs(child.buttons) do
-				radioButton:SetEnabled(checked)
-				radioButton.text:SetTextColor(tR, tG, tB)
-			end
-		else
-			child:SetEnabled(checked)
-			child.Text:SetTextColor(tR, tG, tB)
-		end
+		child:SetEnabled(checked)
+		child.Text:SetTextColor(tR, tG, tB)
 	end
 end
 
@@ -162,7 +139,7 @@ local function toggle(self)
 	end
 end
 
-ns.CreateCheckBox = function(parent, option, text, tooltipText)
+ns.CreateCheckBox = function(parent, option, text, textDesc)
 	local f = CreateFrame("CheckButton", nil, parent, "InterfaceOptionsCheckButtonTemplate")
 
 	f.group = parent.tag
@@ -175,13 +152,7 @@ ns.CreateCheckBox = function(parent, option, text, tooltipText)
 		f.Text:SetText(ns[parent.tag.."_"..option])
 	end
 
-	if tooltipText then
-		f.tooltipText = tooltipText
-	elseif ns[parent.tag.."_"..option.."_desc"] then
-		f.tooltipText = ns[parent.tag.."_"..option.."_desc"]
-	else
-		f.tooltipText = text
-	end
+	f.tooltipText = ns[parent.tag.."_"..option.."_desc"] or textDesc or ns[parent.tag.."_"..option] or text
 
 	f.needsReload = true
 
@@ -193,113 +164,11 @@ ns.CreateCheckBox = function(parent, option, text, tooltipText)
 	return f
 end
 
-local function toggleRadio(self)
-	local previousValue
-
-	local index = 1
-	local radioButton = self.parent[self.option..index]
-	while radioButton do
-		if radioButton.isChecked then
-			previousValue = index
-
-			if radioButton ~= self then
-				radioButton.isChecked = false
-				radioButton:SetChecked(false)
-			end
-		end
-
-		index = index + 1
-		radioButton = self.parent[self.option..index]
-	end
-
-	self:SetChecked(true) -- don't allow deselecting
-	self.isChecked = true
-
-	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-
-	SaveValue(self, self.index)
-
-	if self.needsReload then
-		if oldRadioValues[self.group] == nil then
-			oldRadioValues[self.group] = {}
-
-			if oldRadioValues[self.group][self.option] == nil then
-				oldRadioValues[self.group][self.option] = previousValue
-			end
-		end
-
-		checkIsReloadNeeded()
-	end
-end
-
-local function radioOnEnter(self)
-	GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-	GameTooltip:SetText(self.tooltipText, nil, nil, nil, nil, true)
-end
-
-local function radioOnLeave(self)
-	GameTooltip:Hide()
-end
-
-ns.CreateRadioButtonGroup = function(parent, option, numValues, tooltipText, needsReload)
-	local group = {}
-	group.buttons = {}
-
-	for i = 1, numValues do
-		local f = CreateFrame("CheckButton", nil, parent, "UIRadioButtonTemplate")
-
-		f.parent = parent
-		f.group = parent.tag
-		f.option = option
-		f.index = i
-
-		f.text:SetFontObject(GameFontHighlight)
-		f.text:SetText(ns.localization[parent.tag..option..i])
-		if tooltipText then
-			f.tooltipText = ns.localization[parent.tag..option..i.."Tooltip"]
-		end
-
-		if needsReload then
-			f.tooltipText = f.tooltipText and format("%s\n\n%s", f.tooltipText, ns.localization.requiresReload) or ns.localization.requiresReload
-		end
-
-		if f.tooltipText then
-			f:HookScript("OnEnter", radioOnEnter)
-			f:HookScript("OnLeave", radioOnLeave)
-		end
-
-		f.needsReload = needsReload
-
-		f:SetScript("OnClick", toggleRadio)
-		parent[option..i] = f
-
-		-- return value
-		tinsert(group.buttons, f)
-
-		-- handling input, style, ...
-		tinsert(radiobuttons, f)
-
-		if i > 1 then
-			f:SetPoint("TOP", parent[option..i-1], "BOTTOM", 0, -8)
-		end
-	end
-
-	local firstOption = parent[option..1]
-
-	-- add header
-	local header = firstOption:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
-	header:SetPoint("BOTTOMLEFT", firstOption, "TOPLEFT", 2, 5)
-	header:SetText(ns.localization[parent.tag..option])
-	group.radioHeader = header
-
-	return group
-end
-
 -- Sliders
 
 local function onValueChanged(self, value)
 	if self.step < 1 then
-		value = string.format("%.2f", value)
+		value = tonumber(string.format("%.2f", value))
 	else
 		value = floor(value + 0.5)
 	end
@@ -312,16 +181,12 @@ local function onValueChanged(self, value)
 		SaveValue(self, value)
 
 		if self.needsReload then
-			-- if not true, don't set to false - something else might have changed it
 			if self.step < 1 then
-				self.oldValue = string.format("%.2f", self.oldValue)
+				self.oldValue = tonumber(string.format("%.2f", self.oldValue))
 			end
 			old[self] = self.oldValue
 			checkIsReloadNeeded()
-			-- setReloadNeeded(true)
 		end
-
-		-- overrideReload = true
 	end
 end
 
@@ -350,13 +215,7 @@ local function createSlider(parent, option, lowText, highText, low, high, step, 
 	f:SetObeyStepOnDrag(true)
 	f:SetValueStep(step)
 
-	if textDesc then
-		f.tooltipText = textDesc
-	elseif ns[parent.tag.."_"..option.."_desc"] then
-		f.tooltipText = ns[parent.tag.."_"..option.."_desc"]
-	else
-		f.tooltipText = text
-	end
+	f.tooltipText = ns[parent.tag.."_"..option.."_desc"] or textDesc or ns[parent.tag.."_"..option] or text
 
 	f.needsReload = needsReload
 	f.step = step
@@ -422,7 +281,7 @@ end
 ns.CreateEditBox = function(parent, option, needsReload, text, number)
 	local f = CreateFrame("EditBox", parent:GetName()..option.."TextInput", parent, "InputBoxTemplate")
 	f:SetAutoFocus(false)
-	f:SetWidth(60)
+	f:SetWidth(55)
 	f:SetHeight(20)
 	f:SetMaxLetters(8)
 	f:SetFontObject(GameFontHighlight)
@@ -435,15 +294,31 @@ ns.CreateEditBox = function(parent, option, needsReload, text, number)
 	f:SetScript("OnEscapePressed", onSliderEscapePressed)
 	f:SetScript("OnEscapePressed", function(self) self:ClearFocus() self:SetText(f.value) end)
 	f:SetScript("OnEnterPressed", onEnterPressed)
-	f:SetScript("OnEditFocusGained", function(self) f.value = f:GetText() end)
+	f:SetScript("OnEditFocusGained", function() f.value = f:GetText() end)
 	f:SetScript("OnEditFocusLost", onEnterPressed)
 
 	local label = f:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-	label:SetText(text)
 	label:SetWidth(440)
 	label:SetHeight(20)
 	label:SetJustifyH("LEFT")
-	label:SetPoint("LEFT", 70, 0)
+	label:SetPoint("LEFT", f, "RIGHT", 10, 0)
+
+	if text then
+		label:SetText(text)
+	else
+		label:SetText(ns[parent.tag.."_"..option])
+	end
+
+	f.tooltipText = ns[parent.tag.."_"..option.."_desc"] or text
+
+	f:SetScript("OnEnter", function()
+		GameTooltip:SetOwner(f, "ANCHOR_RIGHT", 5, 5)
+		GameTooltip:SetText(f.tooltipText, nil, nil, nil, nil, true)
+	end)
+
+	f:SetScript("OnLeave", function()
+		GameTooltip:Hide()
+	end)
 
 	f.group = parent.tag
 	f.option = option
@@ -511,10 +386,6 @@ end
 ns.CreateColourPicker = function(parent, option, needsReload, text)
 	local f = CreateFrame("Button", nil, parent)
 	f:SetSize(40, 20)
-
-	-- local tex = f:CreateTexture(nil, "OVERLAY")
-	-- tex:SetAllPoints()
-	-- f.tex = tex
 
 	local colortext = f:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
 	colortext:SetText(COLOR)
@@ -603,13 +474,11 @@ local activeTab = nil
 local function setActiveTab(tab)
 	activeTab = tab
 
-	-- activeTab:SetBackdropColor(r, g, b, .6)
 	activeTab.panel.tab.Text:SetTextColor(1, 1, 1)
 
 	activeTab.panel:Show()
 	if activeTab.panel.second then
 		activeTab.panel.general:Show()
-		-- activeTab.panel.optional:Show()
 	end
 
 	if activeTab.panel_2 then
@@ -620,7 +489,6 @@ end
 local onTabClick = function(tab)
 	activeTab.panel:Hide()
 
-	-- activeTab:SetBackdropColor(0, 0, 0, 0)
 	activeTab.panel.tab.Text:SetTextColor(1, 0.82, 0)
 
 	if activeTab.panel.second then
@@ -715,13 +583,13 @@ ns.addCategory = function(name, text, subText, second, third)
 		panel_2.subText:SetSize(570 * mult, 30 * mult)
 		panel_2.subText:SetText(subText)
 
-		panel:SetScript("OnMouseWheel", function(self, delta)
+		panel:SetScript("OnMouseWheel", function(_, delta)
 			if delta < 0 then
 				optional:Click()
 			end
 		end)
 
-		panel_2:SetScript("OnMouseWheel", function(self, delta)
+		panel_2:SetScript("OnMouseWheel", function(_, delta)
 			if delta > 0 then
 				general:Click()
 			end
@@ -807,13 +675,13 @@ ns.addCategory = function(name, text, subText, second, third)
 			panel_3.subText:SetSize(570 * mult, 30 * mult)
 			panel_3.subText:SetText(subText)
 
-			panel:SetScript("OnMouseWheel", function(self, delta)
+			panel:SetScript("OnMouseWheel", function(_, delta)
 				if delta < 0 then
 					optional:Click()
 				end
 			end)
 
-			panel_2:SetScript("OnMouseWheel", function(self, delta)
+			panel_2:SetScript("OnMouseWheel", function(_, delta)
 				if delta > 0 then
 					general:Click()
 				elseif delta < 0 then
@@ -821,7 +689,7 @@ ns.addCategory = function(name, text, subText, second, third)
 				end
 			end)
 
-			panel_3:SetScript("OnMouseWheel", function(self, delta)
+			panel_3:SetScript("OnMouseWheel", function(_, delta)
 				if delta > 0 then
 					optional:Click()
 				end
@@ -914,13 +782,6 @@ local function displaySettings()
 		if box.children then toggleChildren(box, box:GetChecked()) end
 	end
 
-	for _, radio in pairs(radiobuttons) do
-		local isChecked = C[radio.group][radio.option] == radio.index
-
-		radio:SetChecked(isChecked)
-		radio.isChecked = isChecked -- need this for storing the previous value when user changes setting
-	end
-
 	userChangedSlider = false
 
 	for _, slider in pairs(sliders) do
@@ -931,11 +792,6 @@ local function displaySettings()
 	end
 
 	userChangedSlider = true
-
-	for _, picker in pairs(colourpickers) do
-		-- local colourTable = C[picker.group][picker.option]
-		-- picker.tex:SetVertexColor(unpack(colourTable))
-	end
 
 	for _, editbox in pairs(editboxes) do
 		editbox:SetText(C[editbox.group][editbox.option])
@@ -1022,13 +878,8 @@ init:SetScript("OnEvent", function()
 		T.SkinCheckBox(box)
 	end
 
-	-- for _, radio in pairs(radiobuttons) do
-		-- F.ReskinRadio(radio)
-	-- end
-
 	for _, slider in pairs(sliders) do
 		T.SkinSlider(slider)
-		-- slider.textInput:SetTemplate("Overlay")
 		T.SkinEditBox(slider.textInput, nil, 18)
 		-- F.ReskinSlider(slider)
 		-- F.ReskinInput(slider.textInput)
@@ -1037,7 +888,6 @@ init:SetScript("OnEvent", function()
 	end
 
 	for _, picker in pairs(colourpickers) do
-		-- picker.tex:SetTexture(C.media.backdrop)
 		-- F.CreateBG(picker)
 		local value = C[picker.group][picker.option]
 		picker:SetTemplate("Transparent")
