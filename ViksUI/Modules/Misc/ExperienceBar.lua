@@ -191,7 +191,7 @@ function Experience:Create()
 	self:RegisterEvent("PLAYER_ENTERING_WORLD")
 	self:RegisterEvent("PLAYER_UPDATE_RESTING")
 	self:RegisterEvent("UNIT_INVENTORY_CHANGED")
-	if not IsClassicBuild() then
+	if not T.classic then
 	self:RegisterEvent("HONOR_XP_UPDATE")
 	self:RegisterEvent("HONOR_LEVEL_UPDATE")
 	--self:RegisterEvent("AZERITE_EMPOWERED_ITEM_SELECTION_UPDATED")

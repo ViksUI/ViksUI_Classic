@@ -57,7 +57,7 @@ end
 -- Extra tooltip's skin
 local frame = CreateFrame("Frame")
 frame:RegisterEvent("PLAYER_LOGIN")
-frame:SetScript("OnEvent", function(self)
+frame:SetScript("OnEvent", function()
 	if not IsAddOnLoaded("Auc-Advanced") then return end
 
 	local LT = LibStub("LibExtraTip-1")
@@ -272,13 +272,7 @@ if C.tooltip.health_value == true then
 			min, max = UnitHealth(unit), UnitHealthMax(unit)
 			local hpRMH, maxhpRMH
 			if T.classic and IsAddOnLoaded("RealMobHealth") and UnitExists(unit) then
-				if GetAddOnMetadata("RealMobHealth", "Version") == "1.0" then
-					if RealMobHealth.GetHealth then
-						hpRMH, maxhpRMH = RealMobHealth.GetHealth(unit, true)
-					end
-				else
-					hpRMH, maxhpRMH = RealMobHealth.GetUnitHealth(unit, true)
-				end
+				local hpRMH, maxhpRMH = RealMobHealth.GetUnitHealth(unit, true)
 
 				if hpRMH and maxhpRMH then
 					min, max = hpRMH, maxhpRMH
@@ -431,7 +425,7 @@ GameTooltip:HookScript("OnTooltipSetUnit", OnTooltipSetUnit)
 --	Adds guild rank to tooltips(GuildRank by Meurtcriss)
 ----------------------------------------------------------------------------------------
 if C.tooltip.rank == true then
-	GameTooltip:HookScript("OnTooltipSetUnit", function(self, ...)
+	GameTooltip:HookScript("OnTooltipSetUnit", function(self)
 		-- Get the unit
 		local _, unit = self:GetUnit()
 		if not unit then
@@ -569,7 +563,7 @@ end)
 ----------------------------------------------------------------------------------------
 --	Fix GameTooltipMoneyFrame font size
 ----------------------------------------------------------------------------------------
-local function FixFont(self)
+local function FixFont()
 	for i = 1, 2 do
 		if _G["GameTooltipMoneyFrame"..i] then
 			_G["GameTooltipMoneyFrame"..i.."PrefixText"]:SetFontObject("GameTooltipText")
@@ -599,7 +593,9 @@ ItemRefTooltip:HookScript("OnTooltipSetItem", FixFont)
 if not T.classic then
 	GameTooltip.ItemTooltip.Icon:SetTexCoord(0.1, 0.9, 0.1, 0.9)
 	hooksecurefunc(GameTooltip.ItemTooltip.IconBorder, "SetVertexColor", function(self, r, g, b)
-		self:GetParent().backdrop:SetBackdropBorderColor(r, g, b)
+		if r ~= 0.65882 and g ~= 0.65882 and b ~= 0.65882 then
+			self:GetParent().backdrop:SetBackdropBorderColor(r, g, b)
+		end
 		self:SetTexture("")
 	end)
 
@@ -623,7 +619,9 @@ if icon then
 	reward.backdrop:SetPoint("BOTTOMRIGHT", icon, "BOTTOMRIGHT", 2, -2)
 
 	hooksecurefunc(reward.IconBorder, "SetVertexColor", function(self, r, g, b)
-		self:GetParent().backdrop:SetBackdropBorderColor(r, g, b)
+		if r ~= 0.65882 and g ~= 0.65882 and b ~= 0.65882 then
+			self:GetParent().backdrop:SetBackdropBorderColor(r, g, b)
+		end
 		self:SetTexture("")
 	end)
 

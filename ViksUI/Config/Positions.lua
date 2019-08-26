@@ -49,3 +49,7 @@ C["filger_position"] = {
 	cooldown = {"RIGHT", Anchor_CD},		-- "COOLDOWN"
 	target_bar = {"LEFT", AnchorT_BAR},	-- "T_DE/BUFF_BAR"
 }
+
+if T.classic then
+	C.position.quest = {"TOPLEFT", UIParent, "TOPLEFT", 21, -36}
+end

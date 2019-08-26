@@ -99,7 +99,7 @@ function Reputation:Enable()
 
 		self.IsCreated = true
 	end
-	if not IsClassicBuild() then
+	if not T.classic then
 		local ShowArtifact = HasArtifactEquipped()
 		local PlayerLevel = UnitLevel("player")
 

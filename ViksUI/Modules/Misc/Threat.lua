@@ -1,5 +1,5 @@
 ﻿local T, C, L, _ = unpack(select(2, ...))
-if C.threat.enable ~= true then return end
+if T.classic or C.threat.enable ~= true then return end
 
 ----------------------------------------------------------------------------------------
 --	Based on alThreatMeter(by Allez)
@@ -133,7 +133,7 @@ end
 
 local lastCombatLogUpdate = 0
 
-local OnEvent = function(self, event, ...)
+local OnEvent = function(_, event)
 	if event == "PLAYER_TARGET_CHANGED" or event == "UNIT_THREAT_LIST_UPDATE" or event == "PLAYER_REGEN_DISABLED" then
 		if C.threat.hide_solo == true and GetNumGroupMembers() == 0 then
 			targeted = false

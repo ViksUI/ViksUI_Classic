@@ -5,7 +5,7 @@ local T, C, L, _ = unpack(select(2, ...))
 ----------------------------------------------------------------------------------------
 local frame = CreateFrame("Frame")
 frame:RegisterEvent("ADDON_LOADED")
-frame:SetScript("OnEvent", function(self, event, addon)
+frame:SetScript("OnEvent", function(_, _, addon)
 	if addon == "Blizzard_AchievementUI" then
 		if C.tooltip.enable then
 			hooksecurefunc("AchievementFrameCategories_DisplayButton", function(button) button.showTooltipFunc = nil end)
@@ -28,17 +28,13 @@ frame:SetScript("OnEvent", function(self, event, addon)
 
 	Advanced_UseUIScale:Kill()
 	Advanced_UIScaleSlider:Kill()
+	HelpOpenTicketButtonTutorial:Kill()
+	BagHelpBox:Kill()
 	if not T.classic then
 		TutorialFrameAlertButton:Kill()
-	end
-	HelpOpenTicketButtonTutorial:Kill()
-	if not T.classic then
 		TalentMicroButtonAlert:Kill()
 		CollectionsMicroButtonAlert:Kill()
 		ReagentBankHelpBox:Kill()
-	end
-	BagHelpBox:Kill()
-	if not T.classic then
 		EJMicroButtonAlert:Kill()
 		PremadeGroupsPvETutorialAlert:Kill()
 	end
@@ -50,7 +46,7 @@ frame:SetScript("OnEvent", function(self, event, addon)
 	InterfaceOptionsActionBarsPanelCountdownCooldowns:Kill()
 
 	if not T.classic then
-	SetCVar("fstack_preferParentKeys", 0)
+		SetCVar("fstack_preferParentKeys", 0)
 	end
 
 	if C.chat.enable then

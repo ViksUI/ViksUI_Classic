@@ -7,6 +7,8 @@ if C.unitframe.enable ~= true or C.unitframe.plugins_aura_watch ~= true then ret
 local _, ns = ...
 local oUF = ns.oUF
 
+local LibClassicDurations = oUF:IsClassic() and LibStub("LibClassicDurations")
+
 local bossDebuffPrio = 9999999
 local invalidPrio = -1
 local auraFilters = {
@@ -68,7 +70,7 @@ do
 end
 
 local function CheckSpec()
-	if not IsClassicBuild() then
+	if not oUF:IsClassic() then
 		local spec = GetSpecialization()
 		if T.class == "DRUID" then
 			if spec == 4 then
@@ -209,7 +211,7 @@ local Update = function(self, event, unit)
 			local name, icon, count, debuffType, duration, expirationTime, unitCaster, _, _, spellId, _, isBossDebuff = UnitAura(unit, i, filter)
 			if not name then break end
 
-			if IsClassicBuild() and LibClassicDurations then
+			if LibClassicDurations then
 				local durationNew, expirationTimeNew = LibClassicDurations:GetAuraDurationByUnit(unit, spellId, unitCaster, name)
 
 				if duration == 0 and durationNew then
@@ -293,7 +295,7 @@ local Enable = function(self)
 		rd.__owner = self
 		return true
 	end
-	if not IsClassicBuild() then
+	if not oUF:IsClassic() then
 		self:RegisterEvent("PLAYER_TALENT_UPDATE", CheckSpec, true)
 	else
 		self:RegisterEvent("CHARACTER_POINTS_CHANGED", CheckSpec, true)
@@ -307,7 +309,7 @@ local Disable = function(self)
 		self.RaidDebuffs:Hide()
 		self.RaidDebuffs.__owner = nil
 	end
-	if not IsClassicBuild() then
+	if not oUF:IsClassic() then
 		self:UnregisterEvent("PLAYER_TALENT_UPDATE", CheckSpec)
 	else
 		self:UnregisterEvent("CHARACTER_POINTS_CHANGED", CheckSpec)

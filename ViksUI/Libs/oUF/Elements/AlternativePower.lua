@@ -1,4 +1,3 @@
-if IsClassicBuild() then return end
 local _, ns = ...
 local oUF = ns.oUF
 
@@ -147,8 +146,6 @@ local function Enable(self, unit)
 			PlayerPowerBarAlt:UnregisterEvent('UNIT_POWER_BAR_HIDE')
 			PlayerPowerBarAlt:UnregisterEvent('PLAYER_ENTERING_WORLD')
 		end
-
-		element:Hide()
 
 		return true
 	end

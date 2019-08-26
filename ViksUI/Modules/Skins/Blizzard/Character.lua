@@ -27,7 +27,7 @@ local function LoadSkin()
 		self.AzeriteTexture:SetPoint("BOTTOMRIGHT", -2, 2)
 		self.AzeriteTexture:SetDrawLayer("BORDER", 1)
 	end
-	
+
 	local slots = {
 		"HeadSlot",
 		"NeckSlot",
@@ -59,7 +59,6 @@ local function LoadSkin()
 		local border = _G["Character"..i].IconBorder
 
 		border:Kill()
-		slot:StripTextures()
 		slot:StyleButton()
 		slot:SetNormalTexture("")
 		slot.SetHighlightTexture = T.dummy
@@ -71,13 +70,7 @@ local function LoadSkin()
 		icon:ClearAllPoints()
 		icon:SetPoint("TOPLEFT", 2, -2)
 		icon:SetPoint("BOTTOMRIGHT", -2, 2)
-		hooksecurefunc(slot.IconBorder, 'SetVertexColor', function(self, r, g, b)
-			self:GetParent():SetBackdropBorderColor(r, g, b)
-			self:SetTexture("")
-		end)
-		hooksecurefunc(slot.IconBorder, 'Hide', function(self)
-			self:GetParent():SetBackdropBorderColor(unpack(C["media"].border_color))
-		end)
+
 		hooksecurefunc(slot, "DisplayAsAzeriteItem", UpdateAzeriteItem)
 		hooksecurefunc(slot, "DisplayAsAzeriteEmpoweredItem", UpdateAzeriteEmpoweredItem)
 	end
@@ -129,6 +122,7 @@ local function LoadSkin()
 
 	-- Icon in upper right corner of character frame
 	CharacterFramePortrait:Kill()
+	CharacterModelFrameBackgroundOverlay:SetColorTexture(0, 0, 0)
 	CharacterModelFrame:CreateBackdrop("Default")
 	CharacterModelFrame.backdrop:SetPoint("TOPLEFT", -3, 4)
 	CharacterModelFrame.backdrop:SetPoint("BOTTOMRIGHT", 4, 0)
@@ -144,29 +138,38 @@ local function LoadSkin()
 		T.SkinScrollBar(_G[scrollbar])
 	end
 
-	
-	CharacterStatsPane.ItemLevelCategory:StripTextures()
-	CharacterStatsPane.ItemLevelCategory:SetTemplate("Overlay")
-	CharacterStatsPane.ItemLevelCategory:SetHeight(CharacterStatsPane.ItemLevelCategory:GetHeight() - 20)
-	CharacterStatsPane.ItemLevelCategory:SetWidth(CharacterStatsPane.ItemLevelCategory:GetWidth() - 20)
-	CharacterStatsPane.AttributesCategory:StripTextures()
-	CharacterStatsPane.AttributesCategory:SetTemplate("Overlay")
-	CharacterStatsPane.AttributesCategory:SetHeight(CharacterStatsPane.AttributesCategory:GetHeight() - 20)
-	CharacterStatsPane.AttributesCategory:SetWidth(CharacterStatsPane.AttributesCategory:GetWidth() - 20)
-	CharacterStatsPane.AttributesCategory.Title:ClearAllPoints()
-	CharacterStatsPane.AttributesCategory.Title:SetPoint("CENTER", 0, -1)
-	CharacterStatsPane.EnhancementsCategory:StripTextures()
-	CharacterStatsPane.EnhancementsCategory:SetTemplate("Overlay")
-	CharacterStatsPane.EnhancementsCategory:SetHeight(CharacterStatsPane.EnhancementsCategory:GetHeight() - 20)
-	CharacterStatsPane.EnhancementsCategory:SetWidth(CharacterStatsPane.EnhancementsCategory:GetWidth() - 20)
-	CharacterStatsPane.EnhancementsCategory.Title:ClearAllPoints()
-	CharacterStatsPane.EnhancementsCategory.Title:SetPoint("CENTER", 0, -1)
+	local function SkinStatsPane(frame)
+		frame:StripTextures()
 
-	CharacterFrame:SetTemplate("Overlay")
-	
+		local bg = frame.Background
+		bg:SetTexture(C.media.blank)
+		bg:ClearAllPoints()
+		bg:SetPoint("CENTER", 0, -15)
+		bg:SetSize(165, 1)
+		bg:SetVertexColor(unpack(C.media.border_color))
+
+		local border = CreateFrame("Frame", "$parentOuterBorder", frame)
+		border:SetPoint("TOPLEFT", bg, "TOPLEFT", -T.mult, T.mult)
+		border:SetPoint("BOTTOMRIGHT", bg, "BOTTOMRIGHT", T.mult, -T.mult)
+		border:SetFrameLevel(frame:GetFrameLevel() + 1)
+		border:SetBackdrop({
+			edgeFile = C.media.blank, edgeSize = T.mult,
+			insets = {left = T.mult, right = T.mult, top = T.mult, bottom = T.mult}
+		})
+		border:SetBackdropBorderColor(unpack(C.media.backdrop_color))
+	end
+
+	CharacterStatsPane.ItemLevelFrame.Value:SetFont(C.media.normal_font, 18)
+	CharacterStatsPane.ItemLevelFrame.Value:SetShadowOffset(1, -1)
+	CharacterStatsPane.ItemLevelFrame.Background:Hide()
+
+	SkinStatsPane(CharacterStatsPane.ItemLevelCategory)
+	SkinStatsPane(CharacterStatsPane.AttributesCategory)
+	SkinStatsPane(CharacterStatsPane.EnhancementsCategory)
+
 	-- Titles
 	PaperDollTitlesPane:HookScript("OnShow", function(self)
-		for x, object in pairs(PaperDollTitlesPane.buttons) do
+		for _, object in pairs(PaperDollTitlesPane.buttons) do
 			object.BgTop:SetTexture(nil)
 			object.BgBottom:SetTexture(nil)
 			object.BgMiddle:SetTexture(nil)
@@ -182,7 +185,7 @@ local function LoadSkin()
 	PaperDollEquipmentManagerPaneEquipSet:SetPoint("TOPLEFT", PaperDollEquipmentManagerPane, "TOPLEFT", 8, 0)
 	PaperDollEquipmentManagerPaneSaveSet:SetPoint("LEFT", PaperDollEquipmentManagerPaneEquipSet, "RIGHT", 4, 0)
 	PaperDollEquipmentManagerPane:HookScript("OnShow", function(self)
-		for x, object in pairs(PaperDollEquipmentManagerPane.buttons) do
+		for _, object in pairs(PaperDollEquipmentManagerPane.buttons) do
 			object.BgTop:SetTexture(nil)
 			object.BgBottom:SetTexture(nil)
 			object.BgMiddle:SetTexture(nil)
@@ -205,17 +208,13 @@ local function LoadSkin()
 			object.icon.SetSize = T.dummy
 		end
 	end)
-	
+
 	T.SkinIconSelectionFrame(GearManagerDialogPopup, NUM_GEARSET_ICONS_SHOWN, "GearManagerDialogPopupButton", frameNameOverride)
-	
+
 	-- Handle Tabs at bottom of character frame
 	for i = 1, 4 do
 		T.SkinTab(_G["CharacterFrameTab"..i])
 	end
-
-	CharacterFrame.ReputationTabHelpBox:StripTextures()
-	CharacterFrame.ReputationTabHelpBox:SetTemplate("Transparent")
-	T.SkinCloseButton(CharacterFrame.ReputationTabHelpBox.CloseButton)
 
 	-- Buttons used to toggle between equipment manager, titles, and character stats
 	local function FixSidebarTabCoords()
@@ -327,6 +326,8 @@ local function LoadSkin()
 
 	-- Help box
 	T.SkinHelpBox(CharacterFrame.ReputationTabHelpBox)
+	T.SkinHelpBox(PaperDollItemsFrame.HelpTipBox)
+	PaperDollItemsFrame.HelpTipBox.CloseButton.SetPoint = T.dummy
 
 	-- Unit Background Texture
 	CharacterModelFrameBackgroundTopLeft:SetPoint("TOPLEFT", CharacterModelFrame.backdrop, "TOPLEFT", 2, -2)

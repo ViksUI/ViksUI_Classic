@@ -85,6 +85,18 @@ local placed = {
 	"alDamageMeterFrame"
 }
 
+local function UpdateCoords(self)
+	local mover = self.child
+	local ap, _, rp, x, y = mover:GetPoint()
+
+	mover.frame:ClearAllPoints()
+	mover.frame:SetPoint(ap, "UIParent", rp, x, y)
+end
+
+local coordFrame = CreateFrame("Frame")
+coordFrame:SetScript("OnUpdate", UpdateCoords)
+coordFrame:Hide()
+
 local SetPosition = function(mover)
 	local ap, _, rp, x, y = mover:GetPoint()
 	SavedPositions[mover.frame:GetName()] = {ap, "UIParent", rp, x, y}
@@ -92,17 +104,22 @@ end
 
 local OnDragStart = function(self)
 	self:StartMoving()
-	self.frame:ClearAllPoints()
-	self.frame:SetAllPoints(self)
+
+	coordFrame.child = self
+	coordFrame:Show()
 end
 
 local OnDragStop = function(self)
 	self:StopMovingOrSizing()
 	SetPosition(self)
+
+	coordFrame.child = nil
+	coordFrame:Hide()
 end
 
 local RestoreDefaults = function(self, button)
 	if button == "RightButton" then
+		self:SetBackdropColor(0.2, 0.6, 0.2, 0.7)
 		SavedPositions[self.frame:GetName()] = nil
 	end
 end
@@ -142,11 +159,11 @@ local GetMover = function(frame)
 end
 
 local InitMove = function(msg)
-	if InCombatLockdown() then print("|cffffff00"..ERR_NOT_IN_COMBAT..".|r") return end
+	if InCombatLockdown() then print("|cffffff00"..ERR_NOT_IN_COMBAT.."|r") return end
 	if msg and (msg == "reset" or msg == "куыуе") then
 		SavedPositions = {}
 		SavedOptionsPerChar.UFPos = {}
-		for i, v in pairs(placed) do
+		for _, v in pairs(placed) do
 			if _G[v] then
 				_G[v]:SetUserPlaced(false)
 			end
@@ -155,14 +172,14 @@ local InitMove = function(msg)
 		return
 	end
 	if not moving then
-		for i, v in pairs(T.MoverFrames) do
+		for _, v in pairs(T.MoverFrames) do
 			local mover = GetMover(v)
 			if mover then mover:Show() end
 		end
 		moving = true
 		Grid_Show()
 	else
-		for i, v in pairs(movers) do
+		for _, v in pairs(movers) do
 			v:Hide()
 		end
 		moving = false
@@ -182,10 +199,12 @@ local RestoreUI = function(self)
 		end)
 		return
 	end
-	for frame_name, point in pairs(SavedPositions) do
-		if _G[frame_name] then
-			_G[frame_name]:ClearAllPoints()
-			_G[frame_name]:SetPoint(unpack(point))
+	if SavedPositions then
+		for frame_name, point in pairs(SavedPositions) do
+			if _G[frame_name] then
+				_G[frame_name]:ClearAllPoints()
+				_G[frame_name]:SetPoint(unpack(point))
+			end
 		end
 	end
 end

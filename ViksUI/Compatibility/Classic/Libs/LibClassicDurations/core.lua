@@ -1,4 +1,4 @@
-if not IsClassicBuild() then return end
+if _G.WOW_PROJECT_ID ~= _G.WOW_PROJECT_CLASSIC then return end
 
 --[================[
 LibClassicDurations
@@ -63,7 +63,7 @@ Usage example 2:
 --]================]
 
 
-local MAJOR, MINOR = "LibClassicDurations", 8
+local MAJOR, MINOR = "LibClassicDurations", 11
 local lib = LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then return end
 
@@ -73,7 +73,14 @@ lib.frame = lib.frame or CreateFrame("Frame")
 lib.guids = lib.guids or {}
 lib.spells = lib.spells or {}
 lib.npc_spells = lib.npc_spells or {}
-lib.spellNameToID = lib.npc_spells or {}
+
+lib.spellNameToID = lib.spellNameToID or {}
+local spellNameToID = lib.spellNameToID
+
+local NPCspellNameToID = {}
+if lib.NPCSpellTableTimer then
+    lib.NPCSpellTableTimer:Cancel()
+end
 
 lib.DRInfo = lib.DRInfo or {}
 local DRInfo = lib.DRInfo
@@ -95,7 +102,7 @@ local callbacks = lib.callbacks
 local guids = lib.guids
 local spells = lib.spells
 local npc_spells = lib.npc_spells
-local spellNameToID = lib.spellNameToID
+
 
 local PURGE_INTERVAL = 900
 local PURGE_THRESHOLD = 1800
@@ -115,18 +122,17 @@ f:SetScript("OnEvent", function(self, event, ...)
     return self[event](self, event, ...)
 end)
 
-local SpellDataVersions = {}
+lib.dataVersions = lib.dataVersions or {}
+local SpellDataVersions = lib.dataVersions
 
 function lib:SetDataVersion(dataType, version)
     SpellDataVersions[dataType] = version
     npc_spells = lib.npc_spells
-    spellNameToID = lib.spellNameToID
 end
 
 function lib:GetDataVersion(dataType)
     return SpellDataVersions[dataType] or 0
 end
-
 
 lib.AddAura = function(id, opts)
     if not opts then return end
@@ -138,12 +144,9 @@ lib.AddAura = function(id, opts)
     else
         lastRankID = id
     end
-    local mixin = Spell:CreateFromSpellID(lastRankID)
-    mixin:ContinueOnSpellLoad(function()
-        local spellName = mixin:GetSpellName()
 
-        spellNameToID[spellName] = lastRankID
-    end)
+    local spellName = GetSpellInfo(lastRankID)
+    spellNameToID[spellName] = lastRankID
 
     if type(id) == "table" then
         for _, spellID in ipairs(id) do
@@ -164,6 +167,24 @@ lib.Talent = function (...)
     return 0
 end
 
+local prevID
+local counter = 0
+local function processNPCSpellTable()
+    local dataTable = lib.npc_spells
+    counter = 0
+    local id = next(dataTable, prevID)
+    while (id and counter < 300) do
+        NPCspellNameToID[GetSpellInfo(id)] = id
+
+        counter = counter + 1
+        prevID = id
+        id = next(dataTable, prevID)
+    end
+    if (id) then
+        C_Timer.After(1, processNPCSpellTable)
+    end
+end
+lib.NPCSpellTableTimer = C_Timer.NewTimer(10, processNPCSpellTable)
 --------------------------
 -- OLD GUIDs PURGE
 --------------------------
@@ -302,7 +323,6 @@ local function cleanDuration(duration, spellID, srcGUID)
     return duration
 end
 
-
 local function SetTimer(srcGUID, dstGUID, dstName, dstFlags, spellID, spellName, opts, auraType, doRemove)
     if not opts then return end
 
@@ -394,12 +414,13 @@ function f:COMBAT_LOG_EVENT_UNFILTERED(event)
     if auraType == "BUFF" or auraType == "DEBUFF" then
         if spellID == 0 then
             -- so not to rewrite the whole thing to spellnames after the combat log change
-            -- just treat everything as max/first rank id of that spell name
-            local sid = spellNameToID[spellName]
-            if sid then
-                spellID = sid
-            else
-                return
+            -- just treat everything as max rank id of that spell name
+            spellID = spellNameToID[spellName]
+            if not spellID then
+                spellID = NPCspellNameToID[spellName]
+                if not spellID then
+                    return
+                end
             end
         end
 
@@ -408,16 +429,16 @@ function f:COMBAT_LOG_EVENT_UNFILTERED(event)
         local isDstFriendly = bit_band(dstFlags, COMBATLOG_OBJECT_REACTION_FRIENDLY) > 0
 
         local opts = spells[spellID]
-        --[[
+
         if not opts then
             local npc_aura_duration = npc_spells[spellID]
             if npc_aura_duration then
                 opts = { duration = npc_aura_duration }
-            elseif enableEnemyBuffTracking and not isDstFriendly and auraType == "BUFF" then
-                opts = { duration = 0 } -- it'll be accepted but as an indefinite aura
+            -- elseif enableEnemyBuffTracking and not isDstFriendly and auraType == "BUFF" then
+                -- opts = { duration = 0 } -- it'll be accepted but as an indefinite aura
             end
         end
-        ]]
+
         if opts then
             -- print(eventType, srcGUID, "=>", dstName, spellID, spellName, auraType )
             if  eventType == "SPELL_AURA_REFRESH" or
@@ -464,7 +485,6 @@ end
 local shouldDisplayAura = function(auraTable)
     if auraTable[3] == "BUFF" then
         local now = GetTime()
-        -- local duration = auraTable[1]
         local expirationTime = auraTable[2]
         return expirationTime > now
     end
@@ -567,7 +587,7 @@ local function GetGUIDAuraTime(dstGUID, spellName, spellID, srcGUID, isStacking)
             if isStacking then
                 if srcGUID then
                     applicationTable = spellTable.applications[srcGUID]
-                else -- return some duration
+                elseif spellTable.applications then -- return some duration
                     applicationTable = select(2,next(spellTable.applications))
                 end
             else
@@ -602,10 +622,11 @@ function lib:GetAuraDurationByUnit(...)
     return self.GetAuraDurationByUnitDirect(...)
 
 end
-function lib:GetAuraDurationByGUID(dstGUID, spellID, srcGUID)
+function lib:GetAuraDurationByGUID(dstGUID, spellID, srcGUID, spellName)
     local opts = spells[spellID]
     if not opts then return end
-    return GetGUIDAuraTime(dstGUID, spellID, srcGUID, opts.stacking)
+    if not spellName then spellName = GetSpellInfo(spellID) end
+    return GetGUIDAuraTime(dstGUID, spellName, spellID, srcGUID, opts.stacking)
 end
 
 function lib:GetLastRankSpellIDByName(spellName)

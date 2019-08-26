@@ -32,14 +32,18 @@ local function LoadSkin()
 	ClassTrainerDetailScrollFrame:StripTextures()
 	T.SkinScrollBar(ClassTrainerDetailScrollFrameScrollBar)
 
-	ClassTrainerSkillIcon:StripTextures()
-	ClassTrainerSkillIcon:SkinButton()
+	if ClassTrainerSkillIcon then
+		ClassTrainerSkillIcon:StripTextures()
+		ClassTrainerSkillIcon:SkinButton()
+	end
 
 	hooksecurefunc("ClassTrainer_SetSelection", function()
-		ClassTrainerSkillIcon:GetNormalTexture():ClearAllPoints()
-		ClassTrainerSkillIcon:GetNormalTexture():SetPoint("TOPLEFT", 2, -2)
-		ClassTrainerSkillIcon:GetNormalTexture():SetPoint("BOTTOMRIGHT", -2, 2)
-		ClassTrainerSkillIcon:GetNormalTexture():SetTexCoord(0.1, 0.9, 0.1, 0.9)
+		if ClassTrainerSkillIcon then
+			ClassTrainerSkillIcon:GetNormalTexture():ClearAllPoints()
+			ClassTrainerSkillIcon:GetNormalTexture():SetPoint("TOPLEFT", 2, -2)
+			ClassTrainerSkillIcon:GetNormalTexture():SetPoint("BOTTOMRIGHT", -2, 2)
+			ClassTrainerSkillIcon:GetNormalTexture():SetTexCoord(0.1, 0.9, 0.1, 0.9)
+		end
 	end)
 
 	ClassTrainerExpandButtonFrame:StripTextures()

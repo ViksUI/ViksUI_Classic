@@ -12,7 +12,7 @@ local function UpdateColor(element, unit, cur, max)
 		t = parent.colors.tapped
 	elseif(element.colorDisconnected and element.disconnected) then
 		t = parent.colors.disconnected
-	elseif(element.colorHappiness and UnitIsUnit(unit, "pet") and GetPetHappiness()) then
+	elseif(element.colorHappiness and UnitIsUnit(unit, 'pet') and GetPetHappiness()) then
 		t = parent.colors.happiness[GetPetHappiness()]
 	elseif(element.colorClass and UnitIsPlayer(unit)) or
 		(element.colorClassNPC and not UnitIsPlayer(unit)) or
@@ -61,15 +61,8 @@ local function Update(self, event, unit)
 	local cur, max = UnitHealth(unit), UnitHealthMax(unit)
 	local disconnected = not UnitIsConnected(unit)
 
-	local hpRMH, maxhpRMH
-	if IsClassicBuild() and IsAddOnLoaded("RealMobHealth") then
-		if GetAddOnMetadata("RealMobHealth", "Version") == "1.0" then
-			if RealMobHealth.GetHealth then
-				hpRMH, maxhpRMH = RealMobHealth.GetHealth(unit, true)
-			end
-		else
-			hpRMH, maxhpRMH = RealMobHealth.GetUnitHealth(unit, true)
-		end
+	if(oUF:IsClassic() and IsAddOnLoaded('RealMobHealth')) then
+		local hpRMH, maxhpRMH = RealMobHealth.GetUnitHealth(unit, true)
 
 		if hpRMH and maxhpRMH then
 			cur, max = hpRMH, maxhpRMH
@@ -160,7 +153,7 @@ local function Enable(self, unit)
 		self:RegisterEvent('UNIT_CONNECTION', Path)
 		self:RegisterEvent('UNIT_FACTION', Path) -- For tapping
 		self:RegisterEvent('UNIT_FLAGS', Path) -- For selection
-		if IsClassicBuild() then
+		if(oUF:IsClassic()) then
 			self:RegisterEvent('UNIT_HAPPINESS', Path)
 		end
 
@@ -189,7 +182,7 @@ local function Disable(self)
 		self:UnregisterEvent('UNIT_CONNECTION', Path)
 		self:UnregisterEvent('UNIT_FACTION', Path)
 		self:UnregisterEvent('UNIT_FLAGS', Path)
-		if IsClassicBuild() then
+		if(oUF:IsClassic()) then
 			self:UnregisterEvent('UNIT_HAPPINESS', Path)
 		end
 	end

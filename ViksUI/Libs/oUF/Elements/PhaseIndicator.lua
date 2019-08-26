@@ -1,4 +1,5 @@
-if IsClassicBuild() then return end
+local T, C, L, _ = unpack(select(2, ...))
+if T.classic then return end
 --[[
 # Element: Phasing Indicator
 

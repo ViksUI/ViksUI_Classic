@@ -265,6 +265,7 @@
 	<Script file="Modules\Maps\MiniMap.lua"/>
 	<Script file="Modules\Maps\MiniMapButtons.lua"/>
 	<Script file="Modules\Maps\ToggleMenu.lua"/>
+	<!--Script file="Modules\Maps\WorldMap.lua"/-->
 	<Script file="Compatibility\Classic\Modules\Quests\ObjectiveTracker.lua"/>
 	<Script file="Compatibility\Classic\Modules\Quests\AutoAccept.lua"/>
 	

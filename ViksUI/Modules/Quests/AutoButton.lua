@@ -87,7 +87,7 @@ Scanner:SetScript("OnEvent", function()
 		for s = 1, GetContainerNumSlots(b) do
 			local itemID = GetContainerItemID(b, s)
 			itemID = tonumber(itemID)
-			for i, Items in pairs(Items) do
+			for _, Items in pairs(Items) do
 				if itemID == Items then
 					local itemName = GetItemInfo(itemID)
 					local count = GetItemCount(itemID)
@@ -109,7 +109,7 @@ Scanner:SetScript("OnEvent", function()
 					end)
 
 					AutoButton:SetScript("OnEnter", function(self)
-						GameTooltip:SetOwner(self, "ANCHOR_CURSOR")
+						GameTooltip:SetOwner(self, "ANCHOR_LEFT")
 						GameTooltip:SetHyperlink(format("item:%s", itemID))
 						GameTooltip:Show()
 					end)

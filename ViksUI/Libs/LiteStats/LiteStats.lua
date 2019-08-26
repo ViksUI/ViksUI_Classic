@@ -223,46 +223,31 @@ function SlashCmdList.LSTATS()
 	if clock.enabled then
 		slprint(TIMEMANAGER_TITLE, L_STATS_OPEN_CALENDAR, L_STATS_RC_TIME_MANAGER, L_STATS_TOGGLE_TIME)
 	end
-	if memory.enabled then
+	if fps.enabled then
 		slprint(L_STATS_MEMORY, L_STATS_RC_COLLECTS_GARBAGE)
 	end
 	if friends.enabled or guild.enabled then
-		slprint(format("%s/%s", FRIENDS,GUILD), L_STATS_VIEW_NOTES, L_STATS_CHANGE_SORTING)
+		slprint(format("%s/%s", FRIENDS, GUILD), L_STATS_VIEW_NOTES, L_STATS_CHANGE_SORTING)
 	end
 	if durability.enabled then
-		slprint(DURABILITY, L_STATS_OPEN_CHARACTER, L_STATS_RC_AUTO_REPAIRING, L_STATS_EQUIPMENT_CHANGER)
+		slprint(DURABILITY, L_STATS_OPEN_CHARACTER, L_STATS_RC_AUTO_REPAIRING1, L_STATS_RC_AUTO_REPAIRING2, L_STATS_EQUIPMENT_CHANGER)
 	end
 	if experience.enabled then
 		slprint(format("%s/%s/%s", COMBAT_XP_GAIN, TIME_PLAYED_MSG, FACTION), L_STATS_RC_EXPERIENCE, L_STATS_WATCH_FACTIONS, L_STATS_TOOLTIP_EXPERIENCE, L_STATS_TOOLTIP_TIME_PLAYED)
 	end
-
-	if location.enabled or coords.enabled then
-		slprint(L_STATS_LOCATION, L_STATS_WORLD_MAP, L_STATS_INSERTS_COORDS)
-	end
-
 	if talents.enabled then
 		slprint(TALENTS, L_STATS_OPEN_TALENT, L_STATS_RC_TALENT)
 	end
+	if location.enabled or coords.enabled then
+		slprint(L_STATS_LOCATION, L_STATS_WORLD_MAP, L_STATS_INSERTS_COORDS)
+	end
 	if gold.enabled then
-		slprint(strtrim(gsub(MONEY, "%%d", "")), L_STATS_OPEN_CURRENCY, L_STATS_RC_AUTO_SELLING, L_STATS_NOT_TO_SELL, L_STATS_WATCH_CURRENCY)
+		slprint(strtrim(gsub(MONEY, "%%d", "")), L_STATS_OPEN_CURRENCY, L_STATS_RC_AUTO_SELLING, L_STATS_NEED_TO_SELL, L_STATS_WATCH_CURRENCY)
 	end
 	print("|cffBCEE68", format(L_STATS_OTHER_OPTIONS, "|cff66C6FFViksUI\\Config\\DataText.lua").."|r")
 end
 
 CreateFrame("Frame", "LSMenus", UIParent, "UIDropDownMenuTemplate")
-
-----------------------------------------------------------------------------------------
---	FPS
-----------------------------------------------------------------------------------------
-if fps.enabled then
-	Inject("FPS", {
-		text = {
-			string = function()
-				return format(fps.fmt, floor(GetFramerate()))
-			end
-		},
-	})
-end
 
 ----------------------------------------------------------------------------------------
 --	Latency
@@ -279,7 +264,8 @@ if latency.enabled then
 		OnEnter = function(self)
 			local _, _, latencyHome, latencyWorld = GetNetStats()
 			local latency
-			if not T.classic then -- For some reason formatting the localized string directly isn't working in Classic
+			-- For some reason formatting the localized string directly isn't working in Classic
+			if not T.classic then
 				latency = format(MAINMENUBAR_LATENCY_LABEL, latencyHome, latencyWorld)
 			else
 				latency = format("Latency:\n%.0f ms (home)\n%.0f ms (world)", latencyHome, latencyWorld)
@@ -295,64 +281,78 @@ if latency.enabled then
 end
 
 ----------------------------------------------------------------------------------------
---	Memory
+--	FPS
 ----------------------------------------------------------------------------------------
-if memory.enabled then
+if fps.enabled then
 	local function sortdesc(a, b) return a[2] > b[2] end
 	local function formatmem(val, dec)
 		return format(format("%%.%df %s", dec or 1, val > 1024 and "MB" or "KB"), val / (val > 1024 and 1024 or 1))
 	end
 	local memoryt = {}
+	local cput = {}
+	local function UpdateMemory()
+		local totalMemory = 0
+		UpdateMemUse()
+		for i = 1, #memoryt do memoryt[i] = nil end
+		for i = 1, GetNumAddOns() do
+			local memory = GetAddOnMemoryUsage(i)
+			local addon, name = GetAddOnInfo(i)
+			if IsAddOnLoaded(i) then tinsert(memoryt, {name or addon, memory}) end
+			totalMemory = totalMemory + memory
+		end
+		table.sort(memoryt, sortdesc)
+		return totalMemory
+	end
+
+	local function UpdateCPU()
+		local totalCPU = 0
+		UpdateAddOnCPUUsage()
+		for i = 1, #cput do cput[i] = nil end
+		for i = 1, GetNumAddOns() do
+			local cpu = GetAddOnCPUUsage(i)
+			local addon, name = GetAddOnInfo(i)
+			if IsAddOnLoaded(i) then tinsert(cput, {name or addon, cpu}) end
+			totalCPU = totalCPU + cpu
+		end
+		table.sort(cput, sortdesc)
+		return totalCPU
+	end
+
 	local isCPU = GetCVar("scriptProfile") == "1"
-	Inject("Memory", {
+	Inject("FPS", {
 		text = {
 			string = function(self)
-				self.total = 0
-				UpdateMemUse()
 				local parent = self:GetParent()
-				for i = 1, GetNumAddOns() do self.total = self.total + GetAddOnMemoryUsage(i) end
 				if parent.hovered then self:GetParent():GetScript("OnEnter")(parent) end
-				return self.total >= 1024 and format(memory.fmt_mb, self.total / 1024) or format(memory.fmt_kb, self.total)
-			end, update = 5,
+				return format(fps.fmt, floor(GetFramerate()))
+			end
 		},
 		OnEnter = function(self)
+			if T.classic and not InCombatLockdown() then
+				collectgarbage()
+			end
 			self.hovered = true
 			GameTooltip:SetOwner(self, "ANCHOR_NONE")
 			GameTooltip:ClearAllPoints()
-			GameTooltip:SetPoint(modules.Memory.tip_anchor, modules.Memory.tip_frame, modules.Memory.tip_x, modules.Memory.tip_y)
+			GameTooltip:SetPoint(modules.FPS.tip_anchor, modules.FPS.tip_frame, modules.FPS.tip_x, modules.FPS.tip_y)
 			GameTooltip:ClearLines()
 			local lat, r = select(4, GetNetStats()), 750
+			local totalMemory = UpdateMemory()
+			local totalCPU = isCPU and UpdateCPU()
 			GameTooltip:AddDoubleLine(
 				format("|cffffffff%s|r %s, %s%s|r %s", floor(GetFramerate()), FPS_ABBR, gradient(1 - lat / r), lat, MILLISECONDS_ABBR),
-				format("%s: |cffffffff%s", ADDONS, formatmem(self.text.total)), tthead.r, tthead.g, tthead.b, tthead.r, tthead.g, tthead.b)
+				format("%s: |cffffffff%s", ADDONS, formatmem(totalMemory)), tthead.r, tthead.g, tthead.b, tthead.r, tthead.g, tthead.b)
 			GameTooltip:AddLine(" ")
-			if memory.max_addons ~= 0 or IsAltKeyDown() then
+			if fps.max_addons ~= 0 or IsAltKeyDown() then
+				local ctable
 				if isCPU and IsControlKeyDown() then
-					self.timer = 5
-				end
-				if not self.timer or self.timer + 5 < time() then
-					if isCPU and IsControlKeyDown() then
-						UpdateAddOnCPUUsage()
-						for i = 1, #memoryt do memoryt[i] = nil end
-						for i = 1, GetNumAddOns() do
-							local addon, name = GetAddOnInfo(i)
-							if IsAddOnLoaded(i) then tinsert(memoryt, {name or addon, GetAddOnCPUUsage(i)}) end
-						end
-						table.sort(memoryt, sortdesc)
-					else
-						self.timer = time()
-						UpdateMemUse()
-						for i = 1, #memoryt do memoryt[i] = nil end
-						for i = 1, GetNumAddOns() do
-							local addon, name = GetAddOnInfo(i)
-							if IsAddOnLoaded(i) then tinsert(memoryt, {name or addon, GetAddOnMemoryUsage(i)}) end
-						end
-						table.sort(memoryt, sortdesc)
-					end
+					ctable = cput
+				else
+					ctable = memoryt
 				end
 				local exmem = 0
-				for i,t in ipairs(memoryt) do
-					if memory.max_addons and i > memory.max_addons and not IsAltKeyDown() then
+				for i, t in ipairs(ctable) do
+					if fps.max_addons and i > fps.max_addons and not IsAltKeyDown() then
 						exmem = exmem + t[2]
 					else
 						local color = t[2] <= 102.4 and {0,1} -- 0 - 100
@@ -370,7 +370,7 @@ if memory.enabled then
 					end
 				end
 				if exmem > 0 and not IsAltKeyDown() then
-					local more = #memoryt - memory.max_addons
+					local more = #memoryt - fps.max_addons
 					GameTooltip:AddDoubleLine(format("%d %s (%s)", more, L_STATS_HIDDEN, ALT_KEY), formatmem(exmem), ttsubh.r, ttsubh.g, ttsubh.b, ttsubh.r, ttsubh.g, ttsubh.b)
 				end
 				GameTooltip:AddDoubleLine(" ", "--------------", 1, 1, 1, 0.5, 0.5, 0.5)
@@ -381,17 +381,13 @@ if memory.enabled then
 				GameTooltip:AddDoubleLine(L_STATS_DOWNLOAD, format("%s%%", floor(GetDownloadedPercentage() * 100 + 0.5)), ttsubh.r, ttsubh.g, ttsubh.b, 1, 1, 1)
 				GameTooltip:AddLine(" ")
 			end
-			GameTooltip:AddDoubleLine(L_STATS_MEMORY_USAGE, formatmem(gcinfo() - self.text.total), ttsubh.r, ttsubh.g, ttsubh.b, 1, 1, 1)
+			GameTooltip:AddDoubleLine(L_STATS_MEMORY_USAGE, formatmem(gcinfo() - totalMemory), ttsubh.r, ttsubh.g, ttsubh.b, 1, 1, 1)
 			GameTooltip:AddDoubleLine(L_STATS_TOTAL_MEMORY_USAGE, formatmem(collectgarbage"count"), ttsubh.r, ttsubh.g, ttsubh.b, 1, 1, 1)
 			if isCPU then
-				self.totalCPU = 0
-				UpdateAddOnCPUUsage()
-				for i = 1, GetNumAddOns() do self.totalCPU = self.totalCPU + GetAddOnCPUUsage(i) end
-				GameTooltip:AddDoubleLine(L_STATS_TOTAL_CPU_USAGE, format("%d ms", self.totalCPU), ttsubh.r, ttsubh.g, ttsubh.b, 1, 1, 1)
+				GameTooltip:AddDoubleLine(L_STATS_TOTAL_CPU_USAGE, format("%d ms", totalCPU), ttsubh.r, ttsubh.g, ttsubh.b, 1, 1, 1)
 			end
 			GameTooltip:Show()
 		end,
-		--OnUpdate = AltUpdate,
 		OnLeave = function(self) self.hovered = false end,
 		OnClick = function(self, button)
 			if button == "RightButton" then
@@ -1068,6 +1064,8 @@ if clock.enabled then
 		OnClick = function(_, b)
 			if not T.classic then
 				(b == "RightButton" and ToggleTimeManager or ToggleCalendar)()
+			else
+				TimeManager_Toggle()
 			end
 		end
 	})
@@ -1160,20 +1158,20 @@ if ping.enabled then
 			self.anim:SetToAlpha(0)
 			self.anim:SetDuration(2.8)
 			self.anim:SetStartDelay(5)
-			end,
+		end,
 		OnEvent = function(self, _, unit)
 			if unit == P and ping.hide_self then return end
-				local class = (CUSTOM_CLASS_COLORS or RAID_CLASS_COLORS)[select(2, UnitClass(unit))]
-				self.text:SetText(format(ping.fmt, UnitName(unit)))
-				if class then
-					self.text:SetTextColor(class.r, class.g, class.b, 1)
-				else
-					self.text:SetTextColor(1, 1, 1, 1)
-				end
-				self.animGroup:Stop()
-				self.text:Show()
-				self.animGroup:Play()
+			local class = (CUSTOM_CLASS_COLORS or RAID_CLASS_COLORS)[select(2, UnitClass(unit))]
+			self.text:SetText(format(ping.fmt, UnitName(unit)))
+			if class then
+				self.text:SetTextColor(class.r, class.g, class.b, 1)
+			else
+				self.text:SetTextColor(1, 1, 1, 1)
 			end
+			self.animGroup:Stop()
+			self.text:Show()
+			self.animGroup:Play()
+		end
 	})
 end
 
@@ -1185,7 +1183,7 @@ if guild.enabled then
 	local function BuildGuildTable()
 		wipe(guildTable)
 		for i = 1, GetNumGuildMembers() do
-			local name, rank, _, level, _, zone, note, officernote, connected, status, class, _, _, mobile = not T.classic and C_GuildInfo.GetGuildRosterInfo(i) or GetGuildRosterInfo(i)
+			local name, rank, _, level, _, zone, note, officernote, connected, status, class, _, _, mobile = GetGuildRosterInfo(i)
 			name = Ambiguate(name, "none")
 			guildTable[i] = {name, rank, level, zone, note, officernote, connected, status, class, mobile}
 		end
@@ -1202,11 +1200,15 @@ if guild.enabled then
 				if IsInGuild() then
 					local total, _, online = GetNumGuildMembers()
 					return format(guild.fmt, online, total)
-				else return not T.classic and LOOKINGFORGUILD or format("%s %s", NO, GUILD) end
+				else return T.classic and L_STATS_NO_GUILD or LOOKINGFORGUILD end
 			end, update = 5
 		},
 		OnLoad = function(self)
-			GuildRoster()
+			if not T.classic then
+				C_GuildInfo.GuildRoster()
+			else
+				GuildRoster()
+			end
 			SortGuildRoster(guild.sorting == "note" and "rank" or "note")
 			SortGuildRoster(guild.sorting)
 			self:RegisterEvent("GROUP_ROSTER_UPDATE")
@@ -1224,7 +1226,7 @@ if guild.enabled then
 			if IsInGuild() then
 				AltUpdate(self)
 				if not self.gmotd then
-					if self.elapsed > 1 then GuildRoster(); self.elapsed = 0 end
+					if self.elapsed > 1 then if not T.classic then C_GuildInfo.GuildRoster() else GuildRoster() end; self.elapsed = 0 end
 					if GetGuildRosterMOTD() ~= "" then self.gmotd = true; if self.hovered then self:GetScript("OnEnter")(self) end end
 					self.elapsed = self.elapsed + u
 				end
@@ -1286,7 +1288,11 @@ if guild.enabled then
 		OnEnter = function(self)
 			if IsInGuild() then
 				self.hovered = true
-				GuildRoster()
+				if not T.classic then
+					C_GuildInfo.GuildRoster()
+				else
+					GuildRoster()
+				end
 				local name, rank, level, zone, note, officernote, connected, status, class, isMobile, zone_r, zone_g, zone_b, classc, levelc, grouped
 				local total, _, online = GetNumGuildMembers()
 				local gmotd = GetGuildRosterMOTD()
@@ -1304,7 +1310,7 @@ if guild.enabled then
 							if online > 2 then GameTooltip:AddLine(format("%d %s (%s)", online - guild.maxguild, L_STATS_HIDDEN, ALT_KEY), ttsubh.r, ttsubh.g, ttsubh.b) end
 							break
 						end
-						name, rank, _, level, _, zone, note, officernote, connected, status, class, _, _, isMobile = not T.classic and C_GuildInfo.GetGuildRosterInfo(i) or GetGuildRosterInfo(i)
+						name, rank, _, level, _, zone, note, officernote, connected, status, class, _, _, isMobile = GetGuildRosterInfo(i)
 						if (connected or isMobile) and level >= guild.threshold then
 							name = Ambiguate(name, "all")
 							if GetRealZoneText() == zone then zone_r, zone_g, zone_b = 0.3, 1, 0.3 else zone_r, zone_g, zone_b = 1, 1, 1 end
@@ -1573,48 +1579,48 @@ if friends.enabled then
 					for i = 1, BNtotal do
 						_, presenceName, battleTag, _, toonName, toonID, client, isOnline, _, isAFK, isDND = BNGetFriendInfo(i)
 						toonName = BNet_GetValidatedCharacterName(toonName, battleTag, client) or ""
-						if not isOnline then break end
-						if isAFK then
-							status = "|cffE7E716"..L_CHAT_AFK.."|r"
-						else
-							if isDND then
-								status = "|cffff0000"..L_CHAT_DND.."|r"
-							else
-								status = ""
-							end
-						end
-						if client == BNET_CLIENT_WOW then
-							local _, toonName, client, realmName, _, _, _, class, _, zoneName, level = BNGetGameAccountInfo(toonID)
-							for k, v in pairs(LOCALIZED_CLASS_NAMES_MALE) do if class == v then class = k end end
-							if GetLocale() ~= "enUS" then
-								for k, v in pairs(LOCALIZED_CLASS_NAMES_FEMALE) do if class == v then class = k end end
-							end
-							classc, levelc = (CUSTOM_CLASS_COLORS or RAID_CLASS_COLORS)[class], GetQuestDifficultyColor(level)
-							classc = classc or {["r"] = 1, ["g"] = 1, ["b"] = 1}
-							if UnitInParty(toonName) or UnitInRaid(toonName) then grouped = " |cffaaaaaa*|r" else grouped = "" end
-							GameTooltip:AddDoubleLine(format("%s (|cff%02x%02x%02x%d|r |cff%02x%02x%02x%s|r%s) |cff%02x%02x%02x%s|r", client, levelc.r * 255, levelc.g * 255, levelc.b * 255, level, classc.r * 255, classc.g * 255, classc.b * 255, toonName, grouped, 255, 0, 0, status), presenceName, 238, 238, 238, 238, 238, 238)
-							if self.altdown then
-								if GetRealZoneText() == zone then zone_r, zone_g, zone_b = 0.3, 1.0, 0.3 else zone_r, zone_g, zone_b = 0.65, 0.65, 0.65 end
-								if GetRealmName() == realmName then realm_r, realm_g, realm_b = 0.3, 1.0, 0.3 else realm_r, realm_g, realm_b = 0.65, 0.65, 0.65 end
-								GameTooltip:AddDoubleLine("  "..zoneName, realmName, zone_r, zone_g, zone_b, realm_r, realm_g, realm_b)
-							end
-						else
-							local _, _, _, _, _, _, _, _, _, _, _, gameText, _, _, _, _, _, isGameAFK, isGameBusy = BNGetGameAccountInfo(toonID)
-							if client == "BSAp" or client == "App" then
-								client = gameText
-							else
-								client = clientTags[client]
-							end
-							if isGameAFK then
+						if isOnline then
+							if isAFK then
 								status = "|cffE7E716"..L_CHAT_AFK.."|r"
 							else
-								if isGameBusy then
+								if isDND then
 									status = "|cffff0000"..L_CHAT_DND.."|r"
 								else
 									status = ""
 								end
 							end
-							GameTooltip:AddDoubleLine("|cffeeeeee "..presenceName.."|r".." "..status, "|cffeeeeee"..client.."|r")
+							if client == BNET_CLIENT_WOW then
+								local _, toonName, client, realmName, _, _, _, class, _, zoneName, level = BNGetGameAccountInfo(toonID)
+								for k, v in pairs(LOCALIZED_CLASS_NAMES_MALE) do if class == v then class = k end end
+								if GetLocale() ~= "enUS" then
+									for k, v in pairs(LOCALIZED_CLASS_NAMES_FEMALE) do if class == v then class = k end end
+								end
+								classc, levelc = (CUSTOM_CLASS_COLORS or RAID_CLASS_COLORS)[class], GetQuestDifficultyColor(level)
+								if UnitInParty(toonName) or UnitInRaid(toonName) then grouped = " |cffaaaaaa*|r" else grouped = "" end
+								GameTooltip:AddDoubleLine(format("%s (|cff%02x%02x%02x%d|r |cff%02x%02x%02x%s|r%s) |cff%02x%02x%02x%s|r", client, levelc.r * 255, levelc.g * 255, levelc.b * 255, level, classc.r * 255, classc.g * 255, classc.b * 255, toonName, grouped, 255, 0, 0, status), presenceName, 238, 238, 238, 238, 238, 238)
+								if self.altdown then
+									if GetRealZoneText() == zone then zone_r, zone_g, zone_b = 0.3, 1.0, 0.3 else zone_r, zone_g, zone_b = 0.65, 0.65, 0.65 end
+									if GetRealmName() == realmName then realm_r, realm_g, realm_b = 0.3, 1.0, 0.3 else realm_r, realm_g, realm_b = 0.65, 0.65, 0.65 end
+									GameTooltip:AddDoubleLine("  "..zoneName, realmName, zone_r, zone_g, zone_b, realm_r, realm_g, realm_b)
+								end
+							else
+								local _, _, _, _, _, _, _, _, _, _, _, gameText, _, _, _, _, _, isGameAFK, isGameBusy = BNGetGameAccountInfo(toonID)
+								if client == "BSAp" or client == "App" then
+									client = gameText
+								else
+									client = clientTags[client]
+								end
+								if isGameAFK then
+									status = "|cffE7E716"..L_CHAT_AFK.."|r"
+								else
+									if isGameBusy then
+										status = "|cffff0000"..L_CHAT_DND.."|r"
+									else
+										status = ""
+									end
+								end
+								GameTooltip:AddDoubleLine("|cffeeeeee"..presenceName.."|r".." "..status, "|cffeeeeee"..client.."|r")
+							end
 						end
 					end
 				end

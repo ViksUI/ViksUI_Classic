@@ -48,9 +48,26 @@ end
 ----------------------------------------------------------------------------------------
 if not T.classic then
 	local TaintFix = CreateFrame("Frame")
-	TaintFix:SetScript("OnUpdate", function(self, elapsed)
+	TaintFix:SetScript("OnUpdate", function()
 		if LFRBrowseFrame.timeToClear then
 			LFRBrowseFrame.timeToClear = nil
+		end
+	end)
+end
+
+----------------------------------------------------------------------------------------
+--	Collect garbage
+----------------------------------------------------------------------------------------
+if T.classic then
+	local eventcount = 0
+	local Garbage = CreateFrame("Frame")
+	Garbage:RegisterAllEvents()
+	Garbage:SetScript("OnEvent", function(self, event)
+		eventcount = eventcount + 1
+
+		if (not InCombatLockdown() and eventcount > 10000) or event == "PLAYER_ENTERING_WORLD" then
+			collectgarbage("collect")
+			eventcount = 0
 		end
 	end)
 end

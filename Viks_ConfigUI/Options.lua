@@ -139,7 +139,7 @@ ns.addCategory("font", L.font, L.font_subtext, true, true)
 ns.addCategory("skins", L_GUI_SKINS, L_GUI_SKINS_SUBTEXT)
 ns.addCategory("unitframe", UNITFRAME_LABEL, L_GUI_UF_SUBTEXT, true)
 ns.addCategory("unitframe_class_bar", L_GUI_UF_PLUGINS_CLASS_BAR, L_GUI_UF_PLUGINS_CLASS_BAR_SUBTEXT)
-ns.addCategory("raidframe", RAID_FRAMES_LABEL, L_GUI_UF_RAIDFRAMES_SUBTEXT, true)
+--ns.addCategory("raidframe", RAID_FRAMES_LABEL, L_GUI_UF_RAIDFRAMES_SUBTEXT, true)
 ns.addCategory("actionbar", L_GUI_ACTIONBAR, ACTIONBARS_SUBTEXT)
 ns.addCategory("tooltip", L_GUI_TOOLTIP, L_GUI_TOOLTIP_SUBTEXT)
 ns.addCategory("chat", SOCIALS, L_GUI_CHAT_SUBTEXT)
@@ -171,11 +171,8 @@ do
 	local welcome_message = ns.CreateCheckBox(parent, "welcome_message", L_GUI_GENERAL_WELCOME_MESSAGE)
 	welcome_message:SetPoint("TOPLEFT", parent.subText, "BOTTOMLEFT", 0, 0)
 
-	local bottom_lines = ns.CreateCheckBox(parent, "bottom_lines", L_GUI_GENERAL_BOTTOMLINES)
-	bottom_lines:SetPoint("TOPLEFT", welcome_message, "BOTTOMLEFT", 0, 0)
-
 	local auto_scale = ns.CreateCheckBox(parent, "auto_scale", L_GUI_GENERAL_AUTOSCALE)
-	auto_scale:SetPoint("TOPLEFT", bottom_lines, "BOTTOMLEFT", 0, 0)
+	auto_scale:SetPoint("TOPLEFT", welcome_message, "BOTTOMLEFT", 0, 0)
 
 	local uiscale = ns.CreateNumberSlider(parent, "uiscale", nil, nil, 0.4, 1.1, 0.01, true, L_GUI_GENERAL_UISCALE)
 	uiscale:SetPoint("TOPLEFT", auto_scale, "BOTTOMLEFT", 0, -20)
@@ -196,9 +193,12 @@ do
 
 	local backdrop_color = ns.CreateColourPicker(parent, "backdrop_color", true)
 	backdrop_color:SetPoint("TOPLEFT", border_color, "BOTTOMLEFT", 0, -10)
+	
+	local overlay_color = ns.CreateColourPicker(parent, "overlay_color", true)
+	overlay_color:SetPoint("TOPLEFT", backdrop_color, "BOTTOMLEFT", 0, -10)
 
 	local backdrop_alpha = ns.CreateNumberSlider(parent, "backdrop_alpha", nil, nil, 0, 1, 0.05, true)
-	backdrop_alpha:SetPoint("TOPLEFT", backdrop_color, "BOTTOMLEFT", 0, -28)
+	backdrop_alpha:SetPoint("TOPLEFT", overlay_color, "BOTTOMLEFT", 0, -28)
 
 	local subheader = ns.addSubCategory(parent, L.media_subheader_pixel)
 	subheader:SetPoint("TOPLEFT", backdrop_alpha, "BOTTOMLEFT", 0, -10)
@@ -540,8 +540,11 @@ do
 	local ovale = ns.CreateCheckBox(parent, "ovale", L_GUI_SKINS_OVALE)
 	ovale:SetPoint("TOPLEFT", omen, "BOTTOMLEFT", 0, 0)
 
+	local pawn = ns.CreateCheckBox(parent, "pawn", L_GUI_SKINS_PAWN)
+	pawn:SetPoint("LEFT", ovale, "RIGHT", 320, 0)
+	
 	local postal = ns.CreateCheckBox(parent, "postal", L_GUI_SKINS_POSTAL)
-	postal:SetPoint("LEFT", ovale, "RIGHT", 320, 0)
+	postal:SetPoint("LEFT", pawn, "RIGHT", 320, 0)
 
 	local recount = ns.CreateCheckBox(parent, "recount", L_GUI_SKINS_RECOUNT)
 	recount:SetPoint("TOPLEFT", ovale, "BOTTOMLEFT", 0, 0)
@@ -983,8 +986,11 @@ do
 	local accept_quest = ns.CreateCheckBox(parent, "accept_quest", L_GUI_AUTOMATION_ACCEPT_QUEST)
 	accept_quest:SetPoint("TOPLEFT", decline_duel, "BOTTOMLEFT", 0, 0)
 
+	local auto_collapse_login = ns.CreateCheckBox(parent, "auto_collapse_login", L_GUI_AUTOMATION_AUTO_COLLAPSE_LOGIN)
+	auto_collapse_login:SetPoint("TOPLEFT", accept_quest, "BOTTOMLEFT", 0, 0)
+	
 	local auto_collapse = ns.CreateCheckBox(parent, "auto_collapse", L_GUI_AUTOMATION_AUTO_COLLAPSE)
-	auto_collapse:SetPoint("TOPLEFT", accept_quest, "BOTTOMLEFT", 0, 0)
+	auto_collapse:SetPoint("TOPLEFT", auto_collapse_login, "BOTTOMLEFT", 0, 0)
 
 	local auto_collapse_reload = ns.CreateCheckBox(parent, "auto_collapse_reload", L_GUI_AUTOMATION_AUTO_COLLAPSE_RELOAD)
 	auto_collapse_reload:SetPoint("TOPLEFT", auto_collapse, "BOTTOMLEFT", 20, 0)
@@ -1417,7 +1423,7 @@ do
 	local toggle_menu = ns.CreateCheckBox(parent, "toggle_menu", L_GUI_MINIMAP_TOGGLE_MENU)
 	toggle_menu:SetPoint("TOPLEFT", hide_combat, "BOTTOMLEFT", 0, 0)
 	
-	local compass = ns.CreateCheckBox(parent, "compass", L_GUI_MINIMAP_TOGGLE_MENU)
+	local compass = ns.CreateCheckBox(parent, "compass", L_GUI_MINIMAP_COMPASS)
 	compass:SetPoint("TOPLEFT", toggle_menu, "BOTTOMLEFT", 0, 0)
 
 	-- Other
@@ -1432,6 +1438,12 @@ do
 	
 	local minimb2 = ns.CreateCheckBox(parent, "minimb2", L_GUI_MINIMAP_MINIBT_2)
 	minimb2:SetPoint("TOPLEFT", minimb1, "BOTTOMLEFT", 0, -8)
+	
+	local zoneMapMultilplier = ns.CreateNumberSlider(parent, "zoneMapMultilplier", nil, nil, 0, 5, 0.1, true, zoneMapMultilplier)
+	zoneMapMultilplier:SetPoint("TOPLEFT", minimb2, "BOTTOMLEFT", 0, -20)
+	
+	local zoneMapScale = ns.CreateNumberSlider(parent, "zoneMapScale", nil, nil, 0, 2, 0.01, true, zoneMapScale)
+	zoneMapScale:SetPoint("TOPLEFT", zoneMapMultilplier, "BOTTOMLEFT", 0, -20)
 end
 
 -- Loot
@@ -1522,22 +1534,22 @@ do
 	end
 
 	-- Panel 2
-	local parent = ViksUIOptionsPanel.nameplate2
+	--local parent = ViksUIOptionsPanel.nameplate2
 
-	local enhance_threat = ns.CreateCheckBox(parent, "enhance_threat", L_GUI_NAMEPLATE_THREAT)
-	enhance_threat:SetPoint("TOPLEFT", parent.subText, "BOTTOMLEFT", 0, 0)
+	--local enhance_threat = ns.CreateCheckBox(parent, "enhance_threat", L_GUI_NAMEPLATE_THREAT)
+	--enhance_threat:SetPoint("TOPLEFT", parent.subText, "BOTTOMLEFT", 0, 0)
 
-	local good_color = ns.CreateColourPicker(parent, "good_color", true, L_GUI_NAMEPLATE_GOOD_COLOR)
-	good_color:SetPoint("TOPLEFT", enhance_threat, "BOTTOMLEFT", 4, -10)
+	--local good_color = ns.CreateColourPicker(parent, "good_color", true, L_GUI_NAMEPLATE_GOOD_COLOR)
+	--good_color:SetPoint("TOPLEFT", enhance_threat, "BOTTOMLEFT", 4, -10)
 
-	local near_color = ns.CreateColourPicker(parent, "near_color", true, L_GUI_NAMEPLATE_NEAR_COLOR)
-	near_color:SetPoint("TOPLEFT", good_color, "BOTTOMLEFT", 0, -10)
+	--local near_color = ns.CreateColourPicker(parent, "near_color", true, L_GUI_NAMEPLATE_NEAR_COLOR)
+	--near_color:SetPoint("TOPLEFT", good_color, "BOTTOMLEFT", 0, -10)
 
-	local bad_color = ns.CreateColourPicker(parent, "bad_color", true, L_GUI_NAMEPLATE_BAD_COLOR)
-	bad_color:SetPoint("TOPLEFT", near_color, "BOTTOMLEFT", 0, -10)
+	--local bad_color = ns.CreateColourPicker(parent, "bad_color", true, L_GUI_NAMEPLATE_BAD_COLOR)
+	--bad_color:SetPoint("TOPLEFT", near_color, "BOTTOMLEFT", 0, -10)
 
-	local offtank_color = ns.CreateColourPicker(parent, "offtank_color", true, L_GUI_NAMEPLATE_OFFTANK_COLOR)
-	offtank_color:SetPoint("TOPLEFT", bad_color, "BOTTOMLEFT", 0, -10)
+	--local offtank_color = ns.CreateColourPicker(parent, "offtank_color", true, L_GUI_NAMEPLATE_OFFTANK_COLOR)
+	--offtank_color:SetPoint("TOPLEFT", bad_color, "BOTTOMLEFT", 0, -10)
 end
 
 -- ActionBar

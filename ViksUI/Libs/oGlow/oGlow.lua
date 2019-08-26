@@ -19,6 +19,10 @@ local event_metatable = {
 
 local oGlow = CreateFrame("Frame", "oGlow")
 
+function oGlow:IsClassic()
+	return _G.WOW_PROJECT_ID == _G.WOW_PROJECT_CLASSIC
+end
+
 function oGlow:ADDON_LOADED(event, addon)
 	if addon == "ViksUI" then
 		for pipe in next, pipesTable do

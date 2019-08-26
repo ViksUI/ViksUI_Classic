@@ -86,7 +86,7 @@ if IsAddOnLoaded("Gladius") or IsAddOnLoaded("GladiusEx") then
 	C.unitframe.show_arena = false
 end
 
-if IsAddOnLoaded("Omen") or IsAddOnLoaded("rThreat") then
+if IsAddOnLoaded("Omen") or IsAddOnLoaded("rThreat") or IsAddOnLoaded("ClassicThreatMeter") then
 	C.threat.enable = false
 end
 

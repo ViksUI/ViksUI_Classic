@@ -447,7 +447,7 @@ local function Enable(self, unit)
 		element.__owner = self
 		element.ForceUpdate = ForceUpdate
 
-		if(not IsClassicBuild()) then
+		if(not oUF:IsClassic()) then
 			if(not (unit and unit:match'%wtarget$')) then
 				self:RegisterEvent('UNIT_SPELLCAST_START', UNIT_SPELLCAST_START)
 				self:RegisterEvent('UNIT_SPELLCAST_FAILED', UNIT_SPELLCAST_FAILED)
@@ -505,8 +505,6 @@ local function Enable(self, unit)
 		if(safeZone and safeZone:IsObjectType('Texture') and not safeZone:GetTexture()) then
 			safeZone:SetColorTexture(1, 0, 0)
 		end
-
-		element:Hide()
 
 		return true
 	end

@@ -365,7 +365,7 @@ function Filger:OnEvent(event, unit, _, castID)
 			Filger.DisplayActives(self)
 		end
 	elseif event == "PLAYER_ENTERING_WORLD" or event == "SPELL_UPDATE_COOLDOWN"
-	or event == "PLAYER_TARGET_CHANGED" or event == "PLAYER_FOCUS_CHANGED" then
+	or event == "PLAYER_TARGET_CHANGED" then --or event == "PLAYER_FOCUS_CHANGED" then
 		if event ~= "SPELL_UPDATE_COOLDOWN" then
 			for spid in pairs(self.actives) do
 				if self.actives[spid].data.filter ~= "CD" and self.actives[spid].data.filter ~= "ICD" then
