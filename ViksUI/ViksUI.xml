@@ -27,6 +27,7 @@
 	
 	<Script file="Compatibility\Classic\Libs\LibStub\LibStub.lua"/>
 	<Script file="Compatibility\Classic\Libs\CallbackHandler-1.0\CallbackHandler-1.0.lua"/>
+	<Script file="Compatibility\Classic\Libs\LibClassicCasterino\LibClassicCasterino.lua"/>
 	<Include file="Compatibility\Classic\Libs\LibClassicDurations\LibClassicDurations.xml"/>
 	<Script file="Compatibility\Classic.lua"/>
 	<Include file="Libs\load_libs.xml" />
@@ -257,7 +258,7 @@
 	<Script file="Modules\Chat\ChatBind.lua"/>
 		
 	
-	<Script file="Compatibility\Classic\Modules\Maps\FogOfWar.lua"/>																 
+	<!--Script file="Compatibility\Classic\Modules\Maps\FogOfWar.lua"/-->																 
 	<Script file="Modules\Maps\BattlefieldMap.lua"/>
 	<Script file="Modules\Maps\ButtonCollect.lua"/>
 	<Include file="Modules\Maps\MapInfo.xml"/>

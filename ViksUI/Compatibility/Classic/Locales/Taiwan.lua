@@ -6,7 +6,7 @@ if T.client ~= "zhTW" or not T.classic then return end
 --	Translation: Aelb, Ianchan, Leg883, Mania, Nanjiqq, Spacedragon, Tat2dawn, Tibles
 ----------------------------------------------------------------------------------------
 -- Misc
-L_MISC_UI_OUTDATED = "ViksUI 版本已過期，請至 https://github.com/EsreverWoW/ShestakUI_Classic 下載最新版。"
+L_MISC_UI_OUTDATED = "ShestakUI 版本已過期，請至 https://github.com/EsreverWoW/ShestakUI_Classic 下載最新版。"
 
 -- Welcome message
 L_WELCOME_LINE_1 = "歡迎使用ShestakUI (Classic) "

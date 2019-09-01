@@ -1,4 +1,4 @@
-
+local T, C, L, _ = unpack(select(2, ...))
 ----------------------------------------------------------------------
 -- 	This is taken from Leatrix Maps, and recoded for ViksUI
 --  All credit goes to Leatrix
@@ -79,6 +79,176 @@ local dnTex, rdTex = "Dungeon", "Raid"
 local pATex, pHTex, pNTex = "TaxiNode_Continent_Alliance", "TaxiNode_Continent_Horde", "TaxiNode_Continent_Neutral"
 local chTex = "ChallengeMode-icon-chest"
 
+----------------------------------------------------------------------
+-- Show zone levels (must be before show dungeons and raids)
+----------------------------------------------------------------------
+
+do
+
+	-- Create level range table
+	local mapTable = {
+
+		-- Eastern Kingdoms
+		--[[Alterac Mountains]]		[1416] = {minLevel = 27, 	maxLevel = 39},
+		--[[Arathi Highlands]]		[1417] = {minLevel = 30, 	maxLevel = 40},
+		--[[Badlands]]				[1418] = {minLevel = 36, 	maxLevel = 45},
+		--[[Blasted Lands]]			[1419] = {minLevel = 46, 	maxLevel = 63},
+		--[[Burning Steppes]]		[1428] = {minLevel = 50, 	maxLevel = 59},
+		--[[Deadwind Pass]]			[1430] = {minLevel = 50, 	maxLevel = 60},
+		--[[Dun Morogh]]			[1426] = {minLevel = 1, 	maxLevel = 12},
+		--[[Duskwood]]				[1431] = {minLevel = 10, 	maxLevel = 30},
+		--[[Eastern Plaguelands]]	[1423] = {minLevel = 54, 	maxLevel = 59},
+		--[[Elwynn Forest]]			[1429] = {minLevel = 1, 	maxLevel = 10},
+		--[[Felwood]]				[1448] = {minLevel = 47, 	maxLevel = 54},
+		--[[Hillsbrad Foothills]]	[1424] = {minLevel = 20, 	maxLevel = 31},
+		--[[Loch Modan]]			[1432] = {minLevel = 10,	maxLevel = 18},
+		--[[Redridge Mountains]]	[1433] = {minLevel = 15, 	maxLevel = 25},
+		--[[Searing Gorge]]			[1427] = {minLevel = 43, 	maxLevel = 56},
+		--[[Silverpine Forest]]		[1421] = {minLevel = 10, 	maxLevel = 20},
+		--[[Stranglethorn Vale]]	[1434] = {minLevel = 30, 	maxLevel = 50},
+		--[[Swamp of Sorrows]]		[1435] = {minLevel = 36, 	maxLevel = 43},
+		--[[The Hinterlands]]		[1425] = {minLevel = 41, 	maxLevel = 49},
+		--[[Tirisfal Glades]]		[1420] = {minLevel = 1, 	maxLevel = 12},
+		--[[Westfall]]				[1436] = {minLevel = 9, 	maxLevel = 18},
+		--[[Western Plaguelands]]	[1422] = {minLevel = 46, 	maxLevel = 57},
+		--[[Wetlands]]				[1437] = {minLevel = 20, 	maxLevel = 30},
+
+		-- Kalimdor
+		--[[Ashenvale]]				[1440] = {minLevel = 19, 	maxLevel = 30},
+		--[[Azshara]]				[1447] = {minLevel = 42, 	maxLevel = 55},
+		--[[Darkshore]]				[1439] = {minLevel = 11,	maxLevel = 19},
+		--[[Desolace]]				[1443] = {minLevel = 30, 	maxLevel = 39},
+		--[[Durotar]]				[1411] = {minLevel = 1, 	maxLevel = 10},
+		--[[Dustwallow Marsh]]		[1445] = {minLevel = 36, 	maxLevel = 61},
+		--[[Feralas]]				[1444] = {minLevel = 41, 	maxLevel = 60},
+		--[[Moonglade]]				[1450] = {minLevel = 15, 	maxLevel = 15},
+		--[[Mulgore]]				[1412] = {minLevel = 1, 	maxLevel = 10},
+		--[[Silithus]]				[1451] = {minLevel = 55, 	maxLevel = 59},
+		--[[Stonetalon Mountains]]	[1442] = {minLevel = 15, 	maxLevel = 25},
+		--[[Tanaris]]				[1446] = {minLevel = 40, 	maxLevel = 50},
+		--[[Teldrassil]]			[1438] = {minLevel = 1, 	maxLevel = 11},
+		--[[The Barrens]]			[1413] = {minLevel = 10, 	maxLevel = 33},
+		--[[Thousand Needles]]		[1441] = {minLevel = 24, 	maxLevel = 35},
+		--[[Un'Goro Crater]]		[1449] = {minLevel = 48, 	maxLevel = 55},
+		--[[Winterspring]]			[1452] = {minLevel = 55, 	maxLevel = 60},
+
+	}
+
+	-- Replace AreaLabelFrameMixin.OnUpdate
+	local function AreaLabelOnUpdate(self)
+		self:ClearLabel(MAP_AREA_LABEL_TYPE.AREA_NAME)
+		local map = self.dataProvider:GetMap()
+		if map:IsCanvasMouseFocus() then
+			local name
+			local mapID = map:GetMapID()
+			local normalizedCursorX, normalizedCursorY = map:GetNormalizedCursorPosition()
+			local positionMapInfo = C_Map.GetMapInfoAtPosition(mapID, normalizedCursorX, normalizedCursorY)	
+			if positionMapInfo and positionMapInfo.mapID ~= mapID then
+				-- print(positionMapInfo.mapID)
+				name = positionMapInfo.name
+				-- Get level range from table
+				local playerMinLevel, playerMaxLevel
+				if mapTable[positionMapInfo.mapID] then
+					playerMinLevel = mapTable[positionMapInfo.mapID]["minLevel"]
+					playerMaxLevel = mapTable[positionMapInfo.mapID]["maxLevel"]
+				end
+				-- Show level range if map zone exists in table
+				if name and playerMinLevel and playerMaxLevel and playerMinLevel > 0 and playerMaxLevel > 0 then
+					local playerLevel = UnitLevel("player")
+					local color
+					if playerLevel < playerMinLevel then
+						color = GetQuestDifficultyColor(playerMinLevel)
+					elseif playerLevel > playerMaxLevel then
+						-- Subtract 2 from the maxLevel so zones entirely below the player's level won't be yellow
+						color = GetQuestDifficultyColor(playerMaxLevel - 2)
+					else
+						color = QuestDifficultyColors["difficult"]
+					end
+					color = ConvertRGBtoColorString(color)
+					if playerMinLevel ~= playerMaxLevel then
+						name = name..color.." ("..playerMinLevel.."-"..playerMaxLevel..")"..FONT_COLOR_CODE_CLOSE
+					else
+						name = name..color.." ("..playerMaxLevel..")"..FONT_COLOR_CODE_CLOSE
+					end
+				end
+			else
+				name = MapUtil.FindBestAreaNameAtMouse(mapID, normalizedCursorX, normalizedCursorY)
+			end
+			if name then
+				self:SetLabel(MAP_AREA_LABEL_TYPE.AREA_NAME, name, description)
+			end
+		end
+		self:EvaluateLabels()
+	end
+
+	-- Get original script name
+	local origScript
+	for provider in next, WorldMapFrame.dataProviders do
+		if provider.setAreaLabelCallback then
+			origScript = provider.Label:GetScript("OnUpdate")
+		end
+	end
+
+	-- Toggle zone levels
+	local function SetZoneLevelScript()
+		for provider in next, WorldMapFrame.dataProviders do
+			if provider.setAreaLabelCallback then
+				provider.Label:SetScript("OnUpdate", AreaLabelOnUpdate)
+			end
+		end
+	end
+
+	-- Set zone levels when option is clicked and on startup
+	SetZoneLevelScript()
+
+end
+
+----------------------------------------------------------------------
+-- Map zoom
+----------------------------------------------------------------------
+
+WorldMapFrame.ScrollContainer:HookScript("OnMouseWheel", function(self, delta)
+	local x, y = self:GetNormalizedCursorPosition()
+	local nextZoomOutScale, nextZoomInScale = self:GetCurrentZoomRange()
+	if delta == 1 then
+		if nextZoomInScale > self:GetCanvasScale() then
+			self:InstantPanAndZoom(nextZoomInScale, x, y)
+		end
+	else
+		if nextZoomOutScale < self:GetCanvasScale() then
+			self:InstantPanAndZoom(nextZoomOutScale, x, y)
+		end
+	end
+end)
+
+----------------------------------------------------------------------
+-- Remember zoom level
+----------------------------------------------------------------------
+
+do
+
+	local lastZoomLevel = WorldMapFrame.ScrollContainer:GetCanvasScale()
+	local lastHorizontal = WorldMapFrame.ScrollContainer:GetNormalizedHorizontalScroll()
+	local lastVertical = WorldMapFrame.ScrollContainer:GetNormalizedVerticalScroll()
+	local lastMapID = WorldMapFrame.mapID
+
+	hooksecurefunc("ToggleWorldMap", function()
+		if not WorldMapFrame:IsShown() then
+			lastZoomLevel = WorldMapFrame.ScrollContainer:GetCanvasScale()
+			lastHorizontal = WorldMapFrame.ScrollContainer:GetNormalizedHorizontalScroll()
+			lastVertical = WorldMapFrame.ScrollContainer:GetNormalizedVerticalScroll()
+			lastMapID = WorldMapFrame.mapID
+		else
+			if WorldMapFrame.mapID == lastMapID then
+				WorldMapFrame.ScrollContainer:InstantPanAndZoom(lastZoomLevel, lastHorizontal, lastVertical)
+				WorldMapFrame.ScrollContainer:SetPanTarget(lastHorizontal, lastVertical)
+				WorldMapFrame.ScrollContainer:Hide(); WorldMapFrame.ScrollContainer:Show()
+			end
+		end
+	end)
+
+end
+		
 local PinData = {
 
 	-- Eastern Kingdoms
@@ -353,128 +523,127 @@ revBtn:HookScript("OnClick", function()
 	SetRevBtn()
 end)
 
-----------------------------------------------------------------------
--- Character coordinates
-----------------------------------------------------------------------
+	function SetUIPanelAttribute(frame, name, value)
+		local info = UIPanelWindows[frame:GetName()]
+		if not info then return end
 
--- Create character coordinates frame
-local cChar = CreateFrame("Frame", nil, WorldMapFrame.BorderFrame)
-cChar:SetWidth(38); cChar:SetHeight(16)
-cChar:SetPoint("TOPRIGHT", revBtn, "TOPLEFT", -7, -4)
-
-cChar.x = cChar:CreateFontString(nil, "ARTWORK", "GameFontNormal") 
-cChar.x:SetAllPoints(); cChar.x:SetJustifyH"LEFT"
-
-cChar.y = cChar:CreateFontString(nil, "ARTWORK", "GameFontNormal") 
-cChar.y:SetPoint("LEFT", cChar.x, "RIGHT", 0, 0)
-cChar.y:SetJustifyH"LEFT"
-
--- Initialisation
-local mapRects = {}
-local tempVec2D = CreateVector2D(0, 0)
-local cMapID, void
-
--- Function to get player map position
-local function GetPlayerMapPos(cMapID)
-	tempVec2D.x, tempVec2D.y = UnitPosition("player")
-	if not tempVec2D.x then return end
-	local mapRect = mapRects[cMapID]
-	if not mapRect then
-		mapRect = {}
-		void, mapRect[1] = C_Map.GetWorldPosFromMapPos(cMapID, CreateVector2D(0, 0))
-		void, mapRect[2] = C_Map.GetWorldPosFromMapPos(cMapID, CreateVector2D(1, 1))
-		mapRect[2]:Subtract(mapRect[1])
-		mapRects[cMapID] = mapRect
-	end
-	tempVec2D:Subtract(mapRects[cMapID][1])
-	return tempVec2D.y/mapRects[cMapID][2].y, tempVec2D.x/mapRects[cMapID][2].x
-end
-
--- Set MapID on zone changes and hide coordinates frame if player zone is different to map
-hooksecurefunc(WorldMapFrame, "OnMapChanged", function(self)
-	if WorldMapFrame.mapID == C_Map.GetBestMapForUnit("player") then
-		cMapID = self:GetMapID()
-		cChar:Show()
-	else
-		cMapID = nil
-		cChar:Hide()
-	end
-end)
-
--- Function to update coordinates
-local cx, cy
-local stimer = 0
-local function UpdateCoords(self, elapsed)
-	stimer = stimer + elapsed
-	if stimer > 0.2 then
-		if not cMapID then
-			cChar.x:SetText("") 
-			cChar.y:SetText("")
-		else
-			cx, cy = GetPlayerMapPos(cMapID)
-			if not cx or (cx == 0 and cy == 0) then
-				cChar.x:SetText("") 
-				cChar.y:SetText("")
-			else
-				cChar.x:SetFormattedText("%0.1f", 100 * cx) 
-				cChar.y:SetFormattedText("%0.1f", 100 * cy)
+		if not frame:GetAttribute("UIPanelLayout-defined") then
+			frame:SetAttribute("UIPanelLayout-defined", true)
+			for name,value in pairs(info) do
+				frame:SetAttribute("UIPanelLayout-"..name, value)
 			end
 		end
-		stimer = 0
+
+		frame:SetAttribute("UIPanelLayout-"..name, value)
 	end
+
+	WorldMapFrame.BlackoutFrame:StripTextures()
+	WorldMapFrame.BlackoutFrame:EnableMouse(false)
+	WorldMapFrame:SetScale(0.75)
+
+	WorldMapFrame.ScrollContainer.GetCursorPosition = function()
+		local x, y = MapCanvasScrollControllerMixin.GetCursorPosition()
+		local s = WorldMapFrame:GetScale()
+		return x / s, y / s
+	end
+
+	table.insert(UISpecialFrames, WorldMapFrame:GetName())
+
+	if WorldMapFrame:GetAttribute("UIPanelLayout-area") ~= "center" then
+		SetUIPanelAttribute(WorldMapFrame, "area", "center")
+	end
+
+	if WorldMapFrame:GetAttribute("UIPanelLayout-allowOtherPanels") ~= true then
+		SetUIPanelAttribute(WorldMapFrame, "allowOtherPanels", true)
+	end
+	
+----------------------------------------------------------------------------------------
+--	Creating coordinate
+----------------------------------------------------------------------------------------
+local coords = CreateFrame("Frame", "CoordsFrame", WorldMapFrame)
+if not T.classic then
+	coords:SetFrameLevel(WorldMapFrame.BorderFrame:GetFrameLevel() + 2)
+	coords:SetFrameStrata(WorldMapFrame.BorderFrame:GetFrameStrata())
+
+	coords.PlayerText = coords:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+	coords.PlayerText:SetPoint("BOTTOM", WorldMapFrame.ScrollContainer, "BOTTOM", 5, 20)
+	coords.PlayerText:SetJustifyH("LEFT")
+	coords.PlayerText:SetText(UnitName("player")..": 0,0")
+
+	coords.MouseText = coords:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+	coords.MouseText:SetJustifyH("LEFT")
+	coords.MouseText:SetPoint("BOTTOMLEFT", coords.PlayerText, "TOPLEFT", 0, 5)
+	coords.MouseText:SetText(L_MAP_CURSOR..": 0,0")
+else
+	coords:SetFrameLevel(WorldMapFrame.ScrollContainer.Child:GetFrameLevel() + 2)
+	coords:SetFrameStrata(WorldMapFrame.ScrollContainer.Child:GetFrameStrata())
+	coords.PlayerText = coords:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+	coords.PlayerText:SetPoint("BOTTOMLEFT", WorldMapFrame.ScrollContainer, "BOTTOMLEFT", 5, 5)
+	coords.PlayerText:SetJustifyH("LEFT")
+	coords.PlayerText:SetText(UnitName("player")..": 0,0")
+
+	coords.MouseText = coords:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+	coords.MouseText:SetJustifyH("LEFT")
+	coords.MouseText:SetPoint("BOTTOMLEFT", coords.PlayerText, "TOPLEFT", 0, 5)
+	coords.MouseText:SetText(L_MAP_CURSOR..": 0,0")
 end
 
--- Update coordinates when the frame is being shown and on startup
-cChar:SetScript("OnUpdate", UpdateCoords)
-UpdateCoords(self, 1)
+local mapRects, tempVec2D = {}, CreateVector2D(0, 0)
+local function GetPlayerMapPos(mapID)
+	tempVec2D.x, tempVec2D.y = UnitPosition("player")
+	if not tempVec2D.x then return end
 
--- Hide coordinates frame when player zone is different to world map
-cChar:RegisterEvent("ZONE_CHANGED_NEW_AREA")
-cChar:RegisterEvent("ZONE_CHANGED")
-cChar:RegisterEvent("ZONE_CHANGED_INDOORS")
-cChar:RegisterEvent("NEW_WMO_CHUNK")
-cChar:SetScript("OnEvent", function()
-	if WorldMapFrame.mapID == C_Map.GetBestMapForUnit("player") then
-		cMapID = WorldMapFrame.mapID
-		cChar:Show()
-	else
-		cMapID = nil
-		cChar:Hide()
+	local mapRect = mapRects[mapID]
+	if not mapRect then
+		mapRect = {
+			select(2, C_Map.GetWorldPosFromMapPos(mapID, CreateVector2D(0, 0))),
+			select(2, C_Map.GetWorldPosFromMapPos(mapID, CreateVector2D(1, 1)))}
+		mapRect[2]:Subtract(mapRect[1])
+		mapRects[mapID] = mapRect
+	end
+	tempVec2D:Subtract(mapRect[1])
+
+	return (tempVec2D.y/mapRect[2].y), (tempVec2D.x/mapRect[2].x)
+end
+
+local int = 0
+WorldMapFrame:HookScript("OnUpdate", function(self)
+	if not WorldMapFrame:IsShown() then return end
+
+	int = int + 1
+	if int >= 3 then
+		local unitMap = C_Map.GetBestMapForUnit("player")
+		local x, y = 0, 0
+
+		if unitMap then
+			x, y = GetPlayerMapPos(unitMap)
+		end
+
+		if x and y and x >= 0 and y >= 0 then
+			coords.PlayerText:SetFormattedText("%s: %.0f,%.0f", T.name, x * 100, y * 100)
+		else
+			coords.PlayerText:SetText(UnitName("player")..": ".."|cffff0000"..L_MAP_BOUNDS.."|r")
+		end
+
+		if WorldMapFrame.ScrollContainer:IsMouseOver() then
+			local mouseX, mouseY = WorldMapFrame.ScrollContainer:GetNormalizedCursorPosition()
+			if mouseX and mouseY and mouseX >= 0 and mouseY >= 0 then
+				coords.MouseText:SetFormattedText("%s %.0f,%.0f", L_MAP_CURSOR, mouseX * 100, mouseY * 100)
+			else
+				coords.MouseText:SetText(L_MAP_CURSOR.."|cffff0000"..L_MAP_BOUNDS.."|r")
+			end
+		else
+			coords.MouseText:SetText(L_MAP_CURSOR.."|cffff0000"..L_MAP_BOUNDS.."|r")
+		end
+
+		int = 0
 	end
 end)
 
-----------------------------------------------------------------------
--- Cursor coordinates
-----------------------------------------------------------------------
-
--- Create cursor coordinates frame
-local cCursor = CreateFrame("FRAME", nil, WorldMapFrame.BorderFrame)
-cCursor:SetWidth(38); cCursor:SetHeight(16)
-cCursor:SetPoint("TOPRIGHT", cChar, "TOPLEFT", -50, 0)
-
-cCursor.x = cCursor:CreateFontString(nil, "ARTWORK", "GameFontNormal") 
-cCursor.x:SetAllPoints(); cCursor.x:SetJustifyH"LEFT"
-
-cCursor.y = cCursor:CreateFontString(nil, "ARTWORK", "GameFontNormal") 
-cCursor.y:SetPoint("LEFT", cCursor.x, "RIGHT", 0, 0)
-cCursor.y:SetJustifyH"LEFT"
-
--- Initialise timer
-local mTimer = 0
-
--- Cursor coordinates update function
-local function UpdateCursorCoords(self, elapsed)
-	mTimer = mTimer + elapsed
-	if mTimer > 0.1 then
-		local x, y = WorldMapFrame.ScrollContainer:GetNormalizedCursorPosition()
-		if x and y and MouseIsOver(WorldMapFrame.ScrollContainer) then
-			cCursor.x:SetFormattedText("%0.1f", (floor(x * 1000 + 0.5)) / 10)
-			cCursor.y:SetFormattedText("%0.1f", (floor(y * 1000 + 0.5)) / 10)
-		else
-			cCursor.x:SetText("")
-			cCursor.y:SetText("")
-		end
-		mTimer = 0
+coords:RegisterEvent("PLAYER_ENTERING_WORLD")
+coords:SetScript("OnEvent", function(self, event)
+	self:UnregisterEvent(event)
+	if SavedOptionsPerChar and SavedOptionsPerChar.Coords ~= true then
+		coords:SetAlpha(0)
 	end
-end
-cCursor:SetScript("OnUpdate", UpdateCursorCoords)
+end)

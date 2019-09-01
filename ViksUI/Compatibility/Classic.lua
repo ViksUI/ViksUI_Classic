@@ -75,6 +75,7 @@ local ClassicAuraTracker = CreateFrame("Frame")
 
 local LibClassicDurations
 LibClassicDurations = LibStub("LibClassicDurations")
+LibClassicDurations:Register("ViksUI")
 
 if LibClassicDurations then
 	_G.LibClassicDurations = _G.LibClassicDurations or LibClassicDurations

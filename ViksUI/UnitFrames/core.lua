@@ -355,8 +355,10 @@ local UnitSpecific = {
 		self.Health.PostUpdate = lib.PostUpdateRaidFrame
 		self:RegisterEvent('PLAYER_TARGET_CHANGED', lib.ChangedTarget)
 		self:RegisterEvent('RAID_ROSTER_UPDATE', lib.ChangedTarget)
+		if not T.classic then
 		self:RegisterEvent("UNIT_THREAT_LIST_UPDATE", lib.UpdateThreat)
 		self:RegisterEvent("UNIT_THREAT_LIST_UPDATE", lib.UpdateThreat)
+		end
 	end,
 
 	party = function(self, ...)
@@ -396,8 +398,10 @@ local UnitSpecific = {
 		self.Health.PostUpdate = lib.PostUpdateRaidFrame
 		self:RegisterEvent('PLAYER_TARGET_CHANGED', lib.ChangedTarget)
 		self:RegisterEvent('RAID_ROSTER_UPDATE', lib.ChangedTarget)
+		if not T.classic then
 		self:RegisterEvent("UNIT_THREAT_LIST_UPDATE", lib.UpdateThreat)
 		self:RegisterEvent("UNIT_THREAT_LIST_UPDATE", lib.UpdateThreat)
+		end
 		
 	end,
 
@@ -599,8 +603,10 @@ local function CreateRaid25Style(self)
 	self.Health.PostUpdate = lib.PostUpdateRaidFrame
 	self:RegisterEvent('PLAYER_TARGET_CHANGED', lib.ChangedTarget)
 	self:RegisterEvent('RAID_ROSTER_UPDATE', lib.ChangedTarget)
+	if not T.classic then
 	self:RegisterEvent("UNIT_THREAT_LIST_UPDATE", lib.UpdateThreat)
 	self:RegisterEvent("UNIT_THREAT_LIST_UPDATE", lib.UpdateThreat)
+	end
 end
 
 local function CreatePartyPetStyle(self)
@@ -624,8 +630,10 @@ local function CreatePartyPetStyle(self)
 	self.Health.PostUpdate = lib.PostUpdateRaidFrame
 	self:RegisterEvent('PLAYER_TARGET_CHANGED', lib.ChangedTarget)
 	self:RegisterEvent('RAID_ROSTER_UPDATE', lib.ChangedTarget)
+	if not T.classic then
 	self:RegisterEvent("UNIT_THREAT_LIST_UPDATE", lib.UpdateThreat)
 	self:RegisterEvent("UNIT_THREAT_LIST_UPDATE", lib.UpdateThreat)
+	end
 end
   -----------------------------
   -- SPAWN UNITS
@@ -726,9 +734,6 @@ oUF:Factory(function(self)
 			end	
 	end
 
--- Temporary
-local BuggedSecureGroupHeaders = true
-if BuggedSecureGroupHeaders then return end
 
 	local maxGroups = 5
 	if cfg.RaidShowAllGroups then maxGroups = 8 end

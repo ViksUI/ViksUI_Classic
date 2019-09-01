@@ -82,13 +82,13 @@ cast.PostCastStart = function(self, unit, name, rank, text)
 			sf:Show()
 		end
 
-		if self.casting then
-			cast.setBarTicks(self, 0)
-		else
-			local spell = UnitChannelInfo(unit)
-			self.channelingTicks = channelingTicks[spell] or 0
-			cast.setBarTicks(self, self.channelingTicks)
-		end
+		--if self.casting then
+			--cast.setBarTicks(self, 0)
+		--else
+			--local spell = UnitChannelInfo(unit)
+			--self.channelingTicks = channelingTicks[spell] or 0
+			--cast.setBarTicks(self, self.channelingTicks)
+		--end
 	elseif (unit == "target" or unit == "focus" or unit == "party") and not self.interrupt then
 		self:SetStatusBarColor(interruptcb[1],interruptcb[2],interruptcb[3],1)
 	else

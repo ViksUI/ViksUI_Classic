@@ -1,5 +1,5 @@
 local T, C, L, _ = unpack(select(2, ...))
-if T.classic then return end
+
 if C.XPBar.enable ~= true then return end
 
 local ExperienceEnable = true
@@ -9,7 +9,7 @@ local Panels = CreateFrame("Frame")
 local Bars = 20
 local barTex = C.media.texture
 
-Experience.NumBars = 2
+Experience.NumBars = 1
 Experience.RestedColor = {75 / 255, 175 / 255, 76 / 255}
 Experience.XPColor = {0 / 255, 144 / 255, 255 / 255}
 Experience.AZColor = {229 / 255, 204 / 255, 127 / 255}
@@ -110,21 +110,21 @@ function Experience:Update(event, owner)
 
 		Bar.BarType = "XP"
 
-		if (i == 1 and PlayerLevel == MAX_PLAYER_LEVEL) then
-			Current, Max = self:GetHonor()
+		--if (i == 1 and PlayerLevel == MAX_PLAYER_LEVEL) then
+			--Current, Max = self:GetHonor()
 
-			Bar.BarType = "HONOR"
-		elseif (i == 2) then
+			--Bar.BarType = "HONOR"
+		--elseif (i == 2) then
 			--if AzeriteItem and InstanceType ~= "pvp" and InstanceType ~= "arena" then
 				--Current, Max = self:GetAzerite()
 
 				--Bar.BarType = "AZERITE"
 			--else
-				Current, Max = self:GetHonor()
+				--Current, Max = self:GetHonor()
 
-				Bar.BarType = "HONOR"
+				--Bar.BarType = "HONOR"
 			--end
-		end
+		--end
 
 		local BarType = Bar.BarType
 
@@ -143,8 +143,8 @@ function Experience:Update(event, owner)
 			r, g, b = unpack(self.XPColor)
 		--elseif BarType == "AZERITE" then
 			--r, g, b = unpack(self.AZColor)
-		else
-			r, g, b = unpack(self.HNColor)
+		--else
+			--r, g, b = unpack(self.HNColor)
 		end
 
 		Bar:SetStatusBarColor(r, g, b)

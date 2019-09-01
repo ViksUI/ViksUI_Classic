@@ -164,7 +164,7 @@ LPSTAT_CONFIG = {
 		x_off = 3, y_off = 0,
 	},
 	Talents = {
-		enabled = C.toppanel.enable,
+		enabled = false,
 		anchor_frame = "Stats", anchor_to = "left", anchor_from = "right",
 		x_off = 3, y_off = 0, tip_anchor = "ANCHOR_BOTTOMLEFT", tip_x = -3, tip_y = 13
 	},

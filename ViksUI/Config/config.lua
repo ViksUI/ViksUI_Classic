@@ -412,7 +412,7 @@ C["nameplate"] = {
 	["enable"] = true, 							-- Enable nameplate
 	["height"] = 9,								-- Nameplate height
 	["width"] = 120,							-- Nameplate width
-	["distance"] = 40,							-- Show nameplates for units within this range
+	["distance"] = 50,							-- Show nameplates for units within this range
 	["ad_height"] = 0,							-- Additional height for selected nameplate
 	["ad_width"] = 0,							-- Additional width for selected nameplate
 	["combat"] = false,							-- Automatically show nameplate in combat
@@ -556,7 +556,7 @@ end
 --	Raid Frames options
 ----------------------------------------------------------------------------------------
 C["raidframes"] = {
-	["enable"] = false,
+	["enable"] = true,
 	["scale"] = 1.0,
 	["width"] = 101,
     ["height"] = 30,

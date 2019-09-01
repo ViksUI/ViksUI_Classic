@@ -515,6 +515,8 @@ lib.gen_hpstrings = function(f)
 		elseif f.mystyle == "tank" then
 		f:Tag(name, "[drk:color][name][drk:afkdnd]")
 		f:Tag(hpval, "[drk:color][drk:Shp]")
+		elseif f.mystyle == "pet" then
+		f:Tag(name, "[PetNameColor][name]")
 		else
 			f:Tag(name, "[drk:color][name]")
 		end

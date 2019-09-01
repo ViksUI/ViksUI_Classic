@@ -1,5 +1,5 @@
 local T, C, L, _ = unpack(select(2, ...))
-if T.classic then return end
+
 if C.XPBar.enable ~= true then return end
 
 --local Miscellaneous = T["Miscellaneous"]

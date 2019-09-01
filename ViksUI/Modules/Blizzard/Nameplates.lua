@@ -7,8 +7,6 @@ if C.nameplate.enable ~= true or IsAddOnLoaded("Plater") or IsAddOnLoaded("Threa
 local _, ns = ...
 local oUF = ns.oUF
 
-local Castbar = not T.classic and "Castbar" or "CastbarClassic"
-
 local frame = CreateFrame("Frame")
 frame:SetScript("OnEvent", function(self, event, ...) self[event](self, ...) end)
 if C.nameplate.combat == true then
@@ -39,7 +37,7 @@ function frame:PLAYER_ENTERING_WORLD()
 	SetCVar("namePlateMinScale", 1)
 	SetCVar("namePlateMaxScale", 1)
 	SetCVar("nameplateLargerScale", 1)
-	SetCVar("nameplateSelectedScale", 1)
+	SetCVar("nameplateSelectedScale", 1.2)
 	SetCVar("nameplateMinAlpha", 1)
 	SetCVar("nameplateMaxAlpha", 1)
 
@@ -359,16 +357,16 @@ end
 local function UpdateTarget(self)
 	if UnitIsUnit(self.unit, "target") and not UnitIsUnit(self.unit, "player") then
 		self:SetSize((C.nameplate.width + C.nameplate.ad_width) * T.noscalemult, (C.nameplate.height + C.nameplate.ad_height) * T.noscalemult)
-		self[Castbar]:SetPoint("BOTTOMLEFT", self.Health, "BOTTOMLEFT", 0, -8-((C.nameplate.height + C.nameplate.ad_height) * T.noscalemult))
-		self[Castbar].Icon:SetSize(((C.nameplate.height + C.nameplate.ad_height) * 2 * T.noscalemult) + 8, ((C.nameplate.height + C.nameplate.ad_height) * 2 * T.noscalemult) + 8)
+		self.Castbar:SetPoint("BOTTOMLEFT", self.Health, "BOTTOMLEFT", 0, -8-((C.nameplate.height + C.nameplate.ad_height) * T.noscalemult))
+		self.Castbar.Icon:SetSize(((C.nameplate.height + C.nameplate.ad_height) * 2 * T.noscalemult) + 8, ((C.nameplate.height + C.nameplate.ad_height) * 2 * T.noscalemult) + 8)
 		if C.nameplate.class_icons == true then
 			self.Class.Icon:SetSize(((C.nameplate.height + C.nameplate.ad_height) * 2 * T.noscalemult) + 8, ((C.nameplate.height + C.nameplate.ad_height) * 2 * T.noscalemult) + 8)
 		end
 		self:SetAlpha(1)
 	else
 		self:SetSize(C.nameplate.width * T.noscalemult, C.nameplate.height * T.noscalemult)
-		self[Castbar]:SetPoint("BOTTOMLEFT", self.Health, "BOTTOMLEFT", 0, -8-(C.nameplate.height * T.noscalemult))
-		self[Castbar].Icon:SetSize((C.nameplate.height * 2 * T.noscalemult) + 8, (C.nameplate.height * 2 * T.noscalemult) + 8)
+		self.Castbar:SetPoint("BOTTOMLEFT", self.Health, "BOTTOMLEFT", 0, -8-(C.nameplate.height * T.noscalemult))
+		self.Castbar.Icon:SetSize((C.nameplate.height * 2 * T.noscalemult) + 8, (C.nameplate.height * 2 * T.noscalemult) + 8)
 		if C.nameplate.class_icons == true then
 			self.Class.Icon:SetSize((C.nameplate.height * 2 * T.noscalemult) + 8, (C.nameplate.height * 2 * T.noscalemult) + 8)
 		end
@@ -452,12 +450,12 @@ local function callback(self, event, unit)
 		if UnitIsUnit(unit, "player") then
 			self.Power:Show()
 			self.Name:Hide()
-			self[Castbar]:SetAlpha(0)
+			self.Castbar:SetAlpha(0)
 			self.RaidTargetIndicator:SetAlpha(0)
 		else
 			self.Power:Hide()
 			self.Name:Show()
-			self[Castbar]:SetAlpha(1)
+			self.Castbar:SetAlpha(1)
 			self.RaidTargetIndicator:SetAlpha(1)
 		end
 	end
@@ -553,52 +551,52 @@ local function style(self, unit)
 	self:Tag(self.Level, "[DiffColor][NameplateLevel][shortclassification]")
 
 	-- Create Cast Bar
-	self[Castbar] = CreateFrame("StatusBar", nil, self)
-	self[Castbar]:SetFrameLevel(3)
-	self[Castbar]:SetStatusBarTexture(C.media.texture)
-	self[Castbar]:SetStatusBarColor(1, 0.8, 0)
-	self[Castbar]:SetPoint("TOPLEFT", self.Health, "BOTTOMLEFT", 0, -8)
-	self[Castbar]:SetPoint("BOTTOMRIGHT", self.Health, "BOTTOMRIGHT", 0, -8-(C.nameplate.height * T.noscalemult))
-	CreateVirtualFrame(self[Castbar])
+	self.Castbar = CreateFrame("StatusBar", nil, self)
+	self.Castbar:SetFrameLevel(3)
+	self.Castbar:SetStatusBarTexture(C.media.texture)
+	self.Castbar:SetStatusBarColor(1, 0.8, 0)
+	self.Castbar:SetPoint("TOPLEFT", self.Health, "BOTTOMLEFT", 0, -8)
+	self.Castbar:SetPoint("BOTTOMRIGHT", self.Health, "BOTTOMRIGHT", 0, -8-(C.nameplate.height * T.noscalemult))
+	CreateVirtualFrame(self.Castbar)
 
-	self[Castbar].bg = self[Castbar]:CreateTexture(nil, "BORDER")
-	self[Castbar].bg:SetAllPoints()
-	self[Castbar].bg:SetTexture(C.media.texture)
-	self[Castbar].bg:SetColorTexture(1, 0.8, 0, 0.2)
+	self.Castbar.bg = self.Castbar:CreateTexture(nil, "BORDER")
+	self.Castbar.bg:SetAllPoints()
+	self.Castbar.bg:SetTexture(C.media.texture)
+	self.Castbar.bg:SetColorTexture(1, 0.8, 0, 0.2)
 
-	self[Castbar].PostCastStart = castColor
-	self[Castbar].PostChannelStart = castColor
-	self[Castbar].PostCastNotInterruptible = castColor
-	self[Castbar].PostCastInterruptible = castColor
+	self.Castbar.PostCastStart = castColor
+	self.Castbar.PostChannelStart = castColor
+	self.Castbar.PostCastNotInterruptible = castColor
+	self.Castbar.PostCastInterruptible = castColor
 
 	-- Create Cast Time Text
-	self[Castbar].Time = self[Castbar]:CreateFontString(nil, "ARTWORK")
-	self[Castbar].Time:SetPoint("RIGHT", self[Castbar], "RIGHT", 0, 0)
-	self[Castbar].Time:SetFont(C.font.nameplates_font, C.font.nameplates_font_size * T.noscalemult, C.font.nameplates_font_style)
-	self[Castbar].Time:SetShadowOffset(C.font.nameplates_font_shadow and 1 or 0, C.font.nameplates_font_shadow and -1 or 0)
+	self.Castbar.Time = self.Castbar:CreateFontString(nil, "ARTWORK")
+	self.Castbar.Time:SetPoint("RIGHT", self.Castbar, "RIGHT", 0, 0)
+	self.Castbar.Time:SetFont(C.font.nameplates_font, C.font.nameplates_font_size * T.noscalemult, C.font.nameplates_font_style)
+	self.Castbar.Time:SetShadowOffset(C.font.nameplates_font_shadow and 1 or 0, C.font.nameplates_font_shadow and -1 or 0)
 
-	self[Castbar].CustomTimeText = function(self, duration)
+	self.Castbar.CustomTimeText = function(self, duration)
 		self.Time:SetText(("%.1f"):format(self.channeling and duration or self.max - duration))
 	end
 
 	-- Create Cast Name Text
 	if C.nameplate.show_castbar_name == true then
-		self[Castbar].Text = self[Castbar]:CreateFontString(nil, "OVERLAY")
-		self[Castbar].Text:SetPoint("LEFT", self[Castbar], "LEFT", 3, 0)
-		self[Castbar].Text:SetPoint("RIGHT", self[Castbar].Time, "LEFT", -1, 0)
-		self[Castbar].Text:SetFont(C.font.nameplates_font, C.font.nameplates_font_size * T.noscalemult, C.font.nameplates_font_style)
-		self[Castbar].Text:SetShadowOffset(C.font.nameplates_font_shadow and 1 or 0, C.font.nameplates_font_shadow and -1 or 0)
-		self[Castbar].Text:SetHeight(C.font.nameplates_font_size)
-		self[Castbar].Text:SetJustifyH("LEFT")
+		self.Castbar.Text = self.Castbar:CreateFontString(nil, "OVERLAY")
+		self.Castbar.Text:SetPoint("LEFT", self.Castbar, "LEFT", 3, 0)
+		self.Castbar.Text:SetPoint("RIGHT", self.Castbar.Time, "LEFT", -1, 0)
+		self.Castbar.Text:SetFont(C.font.nameplates_font, C.font.nameplates_font_size * T.noscalemult, C.font.nameplates_font_style)
+		self.Castbar.Text:SetShadowOffset(C.font.nameplates_font_shadow and 1 or 0, C.font.nameplates_font_shadow and -1 or 0)
+		self.Castbar.Text:SetHeight(C.font.nameplates_font_size)
+		self.Castbar.Text:SetJustifyH("LEFT")
 	end
 
 	-- Create CastBar Icon
-	self[Castbar].Icon = self[Castbar]:CreateTexture(nil, "OVERLAY")
-	self[Castbar].Icon:SetTexCoord(0.1, 0.9, 0.1, 0.9)
-	self[Castbar].Icon:SetDrawLayer("ARTWORK")
-	self[Castbar].Icon:SetSize((C.nameplate.height * 2 * T.noscalemult) + 8, (C.nameplate.height * 2 * T.noscalemult) + 8)
-	self[Castbar].Icon:SetPoint("TOPLEFT", self.Health, "TOPRIGHT", 8, 0)
-	CreateVirtualFrame(self[Castbar], self[Castbar].Icon)
+	self.Castbar.Icon = self.Castbar:CreateTexture(nil, "OVERLAY")
+	self.Castbar.Icon:SetTexCoord(0.1, 0.9, 0.1, 0.9)
+	self.Castbar.Icon:SetDrawLayer("ARTWORK")
+	self.Castbar.Icon:SetSize((C.nameplate.height * 2 * T.noscalemult) + 8, (C.nameplate.height * 2 * T.noscalemult) + 8)
+	self.Castbar.Icon:SetPoint("TOPLEFT", self.Health, "TOPRIGHT", 8, 0)
+	CreateVirtualFrame(self.Castbar, self.Castbar.Icon)
 
 	-- Raid Icon
 	self.RaidTargetIndicator = self:CreateTexture(nil, "OVERLAY", nil, 7)
@@ -698,18 +696,7 @@ local function style(self, unit)
 			end
 		end
 
-		self.Auras.PostUpdateIcon = function(_, _, icon, _, _, duration, expiration)
-			if duration and duration > 0 and C.aura.show_timer == true then
-				icon.remaining:Show()
-				icon.timeLeft = expiration
-				icon:SetScript("OnUpdate", CreateAuraTimer)
-			else
-				icon.remaining:Hide()
-				icon.timeLeft = math.huge
-				icon:SetScript("OnUpdate", nil)
-			end
-			icon.first = true
-		end
+		self.Auras.PostUpdateIcon = T.PostUpdateIcon
 	end
 
 	self.Health:RegisterEvent("PLAYER_REGEN_DISABLED")

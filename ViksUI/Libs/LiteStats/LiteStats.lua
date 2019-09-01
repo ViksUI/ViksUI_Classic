@@ -475,7 +475,9 @@ if durability.enabled then
 			end
 			GameTooltip:AddLine(" ")
 			local nodur, totalcost = true, 0
-			for slot, string in gmatch("1HEAD3SHOULDER5CHEST6WAIST7LEGS8FEET9WRIST10HANDS16MAINHAND17SECONDARYHAND", "(%d+)([^%d]+)") do
+			local slotString = "1HEAD3SHOULDER5CHEST6WAIST7LEGS8FEET9WRIST10HANDS16MAINHAND17SECONDARYHAND"
+			if T.classic then slotString = slotString .. "18RANGED" end
+			for slot, string in gmatch(slotString, "(%d+)([^%d]+)") do
 				local dur, dmax = GetInventoryItemDurability(slot)
 				local string = _G[string.."SLOT"]
 				if dur ~= dmax then
@@ -1365,7 +1367,7 @@ if friends.enabled then
 		wipe(friendTable)
 
 		for i = 1, total do
-			local name, level, class, area, connected, status, note = GetFriendInfo(i)
+			local name, level, class, area, connected, status, note = C_FriendList.GetFriendInfo(i)
 			for k, v in pairs(LOCALIZED_CLASS_NAMES_MALE) do if class == v then class = k end end
 			if GetLocale() ~= "enUS" then
 				for k, v in pairs(LOCALIZED_CLASS_NAMES_FEMALE) do if class == v then class = k end end
@@ -1421,8 +1423,8 @@ if friends.enabled then
 		OnEvent = function(self, event)
 			if event ~= "GROUP_ROSTER_UPDATE" then
 				local numBNetTotal, numBNetOnline = BNGetNumFriends()
-				local online, total = 0, GetNumFriends()
-				for i = 0, total do if select(5, GetFriendInfo(i)) then online = online + 1 end end
+				local online, total = 0, C_FriendList.GetNumFriends()
+				for i = 0, total do if select(5, C_FriendList.GetFriendInfo(i)) then online = online + 1 end end
 				online = online + numBNetOnline
 				total = total + numBNetTotal
 				self.text:SetText(format(friends.fmt, online, total))
@@ -1439,7 +1441,7 @@ if friends.enabled then
 				HideTT(self)
 
 				local BNTotal = BNGetNumFriends()
-				local total = GetNumFriends()
+				local total = C_FriendList.GetNumFriends()
 				BuildBNTable(BNTotal)
 				BuildFriendTable(total)
 
@@ -1537,11 +1539,11 @@ if friends.enabled then
 			end
 		end,
 		OnEnter = function(self)
-			ShowFriends()
+			C_FriendList.ShowFriends()
 			self.hovered = true
-			local online, total = 0, GetNumFriends()
+			local online, total = 0, C_FriendList.GetNumFriends()
 			local name, level, class, zone, connected, status, note, classc, levelc, zone_r, zone_g, zone_b, grouped
-			for i = 0, total do if select(5, GetFriendInfo(i)) then online = online + 1 end end
+			for i = 0, total do if select(5, C_FriendList.GetFriendInfo(i)) then online = online + 1 end end
 			local BNonline, BNtotal = 0, BNGetNumFriends()
 			local presenceName, toonName, toonID, client, isOnline
 			if BNtotal > 0 then
@@ -1559,7 +1561,7 @@ if friends.enabled then
 					GameTooltip:AddLine(" ")
 					GameTooltip:AddLine(WOW_FRIEND)
 					for i = 1, total do
-						name, level, class, zone, connected, status, note = GetFriendInfo(i)
+						name, level, class, zone, connected, status, note = C_FriendList.GetFriendInfo(i)
 						if not connected then break end
 						if GetRealZoneText() == zone then zone_r, zone_g, zone_b = 0.3, 1.0, 0.3 else zone_r, zone_g, zone_b = 0.65, 0.65, 0.65 end
 						for k, v in pairs(LOCALIZED_CLASS_NAMES_MALE) do if class == v then class = k end end
@@ -1782,7 +1784,7 @@ if talents.enabled then
 						LoadAddOn("Blizzard_TalentUI")
 					end
 					if IsShiftKeyDown() then
-						PlayerTalentFrame_Toggle()
+						ToggleTalentFrame()
 					else
 						for index = 1, 4 do
 							local id, name, _, texture = GetSpecializationInfo(index)
@@ -1929,6 +1931,9 @@ if experience.enabled then
 	local logintime, playedtotal, playedlevel, playedmsg, gained, lastkill, lastquest = GetTime(), 0, 0, 0, 0
 	local repname, repcolor, standingname, currep, minrep, maxrep
 	local mobxp = gsub(COMBATLOG_XPGAIN_FIRSTPERSON, "%%[sd]", "(.*)")
+	if T.classic and T.client == "deDE" then
+		mobxp = gsub(COMBATLOG_XPGAIN_FIRSTPERSON, "%%[0-9]$[sd]", "(.*)")
+	end
 	local questxp = gsub(COMBATLOG_XPGAIN_FIRSTPERSON_UNNAMED, "%%[sd]", "(.*)")
 	local AzeritXP, AzeritTotalLevelXP, AzeritLevel = 0, 0, 0
 	local function short(num, tt)
@@ -2041,7 +2046,7 @@ if experience.enabled then
 				local standing, factionID
 				repname, standing, minrep, maxrep, currep, factionID = GetWatchedFactionInfo()
 				if not T.classic then
-					local friendID, _, _, _, _, _, standingText, _, nextThreshold = GetFriendshipReputation(factionID)
+					local friendID, _, _, _, _, _, standingText, _, nextThreshold = not T.classic and GetFriendshipReputation(factionID)
 					if friendID then
 						if not nextThreshold then
 							minrep, maxrep, currep = 0, 1, 1
@@ -2179,9 +2184,9 @@ if experience.enabled then
 						or (conf.ExpMode == "rep" and UnitLevel(P) ~= MAX_PLAYER_LEVEL) and "xp"
 						or conf.ExpMode == "rep" and "played"
 					if conf.ExpMode == "rep" then
-						self:GetScript("OnEvent")(self,"UPDATE_FACTION")
+						self:GetScript("OnEvent")(self, "UPDATE_FACTION")
 					elseif conf.ExpMode == "art" then
-						self:GetScript("OnEvent")(self,"AZERITE_ITEM_EXPERIENCE_CHANGED")
+						self:GetScript("OnEvent")(self, "AZERITE_ITEM_EXPERIENCE_CHANGED")
 					else
 						self:GetScript("OnUpdate")(self, 5)
 					end
@@ -2191,7 +2196,7 @@ if experience.enabled then
 						or (conf.ExpMode == "rep" and UnitLevel(P) ~= MAX_PLAYER_LEVEL) and "xp"
 						or conf.ExpMode == "rep" and "played"
 					if conf.ExpMode == "rep" then
-						self:GetScript("OnEvent")(self,"UPDATE_FACTION")
+						self:GetScript("OnEvent")(self, "UPDATE_FACTION")
 					else
 						self:GetScript("OnUpdate")(self, 5)
 					end

@@ -38,18 +38,43 @@ if C.datatext.Quests and C.datatext.Quests > 0 then
 				GameTooltip:Show()
 			end
 		end)
-	self:SetScript("OnLeave", function() GameTooltip:Hide() end)
+		self:SetScript("OnLeave", function() GameTooltip:Hide() end)
+	end
+	
+	local expanded = true
 
-	end
-	if not T.classic then
-		local OnMouseDown = function()
-			if ( ObjectiveTrackerFrame.collapsed ) then
-			ObjectiveTracker_Expand();
-			else
-			ObjectiveTracker_Collapse();
-			end
+	local function QuestWatchCollapse()
+		local f = Stat
+		--f.plus:Show()
+		if C.misc.minimize_mouseover then
+			f:SetAlpha(0)
+			f:HookScript("OnEnter", function() f:SetAlpha(1) end)
+			f:HookScript("OnLeave", function() f:SetAlpha(0) end)
 		end
+		QuestWatchFrame:Hide()
+		QuestWatchFrameHeader:Hide()
 	end
+
+	local function QuestWatchExpand()
+		local f = Stat
+		--f.plus:Hide()
+		if C.misc.minimize_mouseover then
+			f:SetAlpha(1)
+			f:HookScript("OnEnter", function() f:SetAlpha(1) end)
+			f:HookScript("OnLeave", function() f:SetAlpha(1) end)
+		end
+		QuestWatchFrame:Show()
+		QuestWatchFrameHeader:Show()
+	end
+
+	Stat:SetScript("OnMouseUp", function(self)
+		expanded = not expanded
+		if expanded then
+			QuestWatchExpand()
+		else
+			QuestWatchCollapse()
+		end
+	end)
 	
 	Stat:RegisterEvent("PLAYER_ENTERING_WORLD")
 	Stat:RegisterEvent("UNIT_QUEST_LOG_CHANGED")

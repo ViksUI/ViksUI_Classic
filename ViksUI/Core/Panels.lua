@@ -120,7 +120,7 @@ R_Omen:SetAlpha(pAlpha)
 end
 
 --Background Panel For Details if used
-if IsAddOnLoaded("Details") then 
+if IsAddOnLoaded("Details") and not T.classic then 
 local L_Details = CreateFrame("Frame", "L_Details", Details_WindowFrame3)
 L_Details:CreatePanel("Transparent", (Pscale*CPSidesWidth)-10, LABar:GetHeight(), "BOTTOMLEFT", LABar, "BOTTOMRIGHT", xoffset, 0)
 L_Details:SetFrameLevel(2)
