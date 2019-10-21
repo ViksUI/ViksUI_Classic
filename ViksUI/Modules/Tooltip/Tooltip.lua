@@ -121,7 +121,7 @@ ricon:SetHeight(18)
 ricon:SetWidth(18)
 ricon:SetPoint("BOTTOM", GameTooltip, "TOP", 0, 5)
 
-GameTooltip:HookScript("OnHide", function(self) ricon:SetTexture(nil) end)
+GameTooltip:HookScript("OnHide", function() ricon:SetTexture(nil) end)
 
 -- Add "Targeted By" line
 local targetedList = {}
@@ -208,26 +208,15 @@ end
 hooksecurefunc("GameTooltip_SetDefaultAnchor", GameTooltipDefault)
 
 if C.tooltip.shift_modifer == true then
-	local ShiftShow = function()
+	GameTooltip:SetScript("OnShow", function(self)
 		if IsShiftKeyDown() then
-			GameTooltip:Show()
+			self:Show()
 		else
 			if not HoverBind.enabled then
-				GameTooltip:Hide()
+				self:Hide()
 			end
 		end
-	end
-	GameTooltip:SetScript("OnShow", ShiftShow)
-	local EventShow = function()
-		if arg1 == "LSHIFT" and arg2 == 1 then
-			GameTooltip:Show()
-		elseif arg1 == "LSHIFT" and arg2 == 0 then
-			GameTooltip:Hide()
-		end
-	end
-	local sh = CreateFrame("Frame")
-	sh:RegisterEvent("MODIFIER_STATE_CHANGED")
-	sh:SetScript("OnEvent", EventShow)
+	end)
 else
 	if C.tooltip.cursor == true then
 		hooksecurefunc("GameTooltip_SetDefaultAnchor", function(self, parent)
@@ -379,9 +368,8 @@ local OnTooltipSetUnit = function(self)
 	else
 		for i = 2, lines do
 			local line = _G["GameTooltipTextLeft"..i]
-			if not line or not line:GetText() or UnitIsBattlePetCompanion(unit) then return end
+			if not line or not line:GetText() or (not T.classic and UnitIsBattlePetCompanion(unit)) then return end
 			if (level and line:GetText():find("^"..LEVEL)) or (creatureType and line:GetText():find("^"..creatureType)) then
-				local r, g, b = GameTooltip_UnitColor(unit)
 				line:SetFormattedText("|cff%02x%02x%02x%s%s|r %s", levelColor.r * 255, levelColor.g * 255, levelColor.b * 255, level, classification, creatureType or "")
 				break
 			end

@@ -399,6 +399,7 @@ C["loot"] = {
 	["width"] = 221,							-- Loot window width
 	["auto_greed"] = true,						-- Push "greed" or "disenchant" button when an item roll
 	["auto_confirm_de"] = true,					-- Auto confirm disenchant
+	["faster_loot"] = true,						-- Faster auto looting
 }
 
 if T.classic then

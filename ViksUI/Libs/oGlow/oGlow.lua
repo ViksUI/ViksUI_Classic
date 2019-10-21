@@ -24,7 +24,7 @@ function oGlow:IsClassic()
 end
 
 function oGlow:ADDON_LOADED(event, addon)
-	if addon == "ViksUI" then
+	if addon == "ShestakUI" then
 		for pipe in next, pipesTable do
 			self:EnablePipe(pipe)
 

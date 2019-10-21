@@ -7,10 +7,10 @@ if C.reminder.solo_buffs_enable ~= true then return end
 local tab = T.ReminderSelfBuffs[T.class]
 if not tab then return end
 
-local function OnEvent(self, event, arg1, arg2)
+local function OnEvent(self, event, arg1)
 	local group = tab[self.id]
 	if not group.spells then return end
-	if not GetSpecialization() then return end
+	if (T.classic and not T.GetSpecialization()) or (not T.classic and not GetSpecialization()) then return end
 	if event == "UNIT_AURA" and arg1 ~= "player" then return end
 	if group.level and T.level < group.level then return end
 
@@ -87,7 +87,7 @@ local function OnEvent(self, event, arg1, arg2)
 	end
 
 	if spec ~= nil then
-		if spec == GetSpecialization() then
+		if spec == T.classic and T.GetSpecialization() or not T.classic and GetSpecialization() then
 			specpass = true
 		else
 			specpass = false
@@ -117,7 +117,7 @@ local function OnEvent(self, event, arg1, arg2)
 		if canplaysound == true then PlaySoundFile(C.media.warning_sound, "Master") end
 	elseif ((combat and UnitAffectingCombat("player")) or (instance and difficultyID ~= 0)) and
 	reversecheck == true and not UnitInVehicle("player") then
-		if negate_reversecheck and negate_reversecheck == GetSpecialization() then self:Hide() return end
+		if negate_reversecheck and (negate_reversecheck == T.classic and T.GetSpecialization() or not T.classic and GetSpecialization()) then self:Hide() return end
 		for _, buff in pairs(group.spells) do
 			local name = GetSpellInfo(buff)
 			local icon, unitCaster = T.CheckPlayerBuff(name)
@@ -156,7 +156,7 @@ for i = 1, #tab do
 		frame:RegisterEvent("UNIT_EXITED_VEHICLE")
 	end
 	frame:SetScript("OnEvent", OnEvent)
-	frame:SetScript("OnUpdate", function(self, elapsed)
+	frame:SetScript("OnUpdate", function(self)
 		if not self.icon:GetTexture() then
 			self:Hide()
 		end

@@ -1,9 +1,7 @@
 local parent, ns = ...
 local oUF = ns.oUF
 local Private = oUF.Private
-
 if(oUF:IsClassic()) then return end
-
 local argcheck = Private.argcheck
 local error = Private.error
 local validateUnit = Private.validateUnit

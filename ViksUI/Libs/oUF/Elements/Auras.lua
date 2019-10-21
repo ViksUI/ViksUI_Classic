@@ -3,7 +3,7 @@
 local _, ns = ...
 local oUF = ns.oUF
 
-local LibClassicDurations = oUF:IsClassic() and LibStub("LibClassicDurations")
+local LibClassicDurations = LibStub('LibClassicDurations')
 
 local VISIBLE = 1
 local HIDDEN = 0
@@ -78,7 +78,17 @@ end
 local function updateIcon(unit, icons, index, offset, filter, isDebuff, visible)
 	local name, texture, count, debuffType, duration, expiration, caster, isStealable,
 		nameplateShowSelf, spellID, canApply, isBossDebuff, casterIsPlayer, nameplateShowAll,
+		timeMod, effect1, effect2, effect3
+
+	if(LibClassicDurations and filter == 'HELPFUL') then
+		name, texture, count, debuffType, duration, expiration, caster, isStealable,
+		nameplateShowSelf, spellID, canApply, isBossDebuff, casterIsPlayer, nameplateShowAll,
+		timeMod, effect1, effect2, effect3 = LibClassicDurations:UnitAura(unit, index, filter)
+	else
+		name, texture, count, debuffType, duration, expiration, caster, isStealable,
+		nameplateShowSelf, spellID, canApply, isBossDebuff, casterIsPlayer, nameplateShowAll,
 		timeMod, effect1, effect2, effect3 = UnitAura(unit, index, filter)
+	end
 
 	if(name) then
 		local n = visible + offset + 1
@@ -88,14 +98,10 @@ local function updateIcon(unit, icons, index, offset, filter, isDebuff, visible)
 			icon = (icons.CreateIcon or createAuraIcon) (icons, n)
 		end
 
-		if(LibClassicDurations) then
-			local durationNew, expirationTimeNew = LibClassicDurations:GetAuraDurationByUnit(unit, spellID, caster, name)
-
-			if(duration == 0 and durationNew) then
-				duration = durationNew
-				expiration = expirationTimeNew
-			end
-		end
+		icon.caster = caster
+		icon.filter = filter
+		icon.isDebuff = isDebuff
+		icon.isPlayer = caster == 'player' or caster == 'vehicle'
 
 		local show = (icons.CustomFilter or customFilter) (icons, unit, icon, name, texture,
 			count, debuffType, duration, expiration, caster, isStealable, nameplateShowSelf, spellID,
@@ -133,11 +139,6 @@ local function updateIcon(unit, icons, index, offset, filter, isDebuff, visible)
 
 			icon.icon:SetTexture(texture)
 			icon.count:SetText((count > 1 and count))
-
-			icon.caster = caster
-			icon.filter = filter
-			icon.isDebuff = isDebuff
-			icon.isPlayer = caster == 'player' or caster == 'vehicle'
 
 			icon:SetID(index)
 			icon:Show()
@@ -305,7 +306,10 @@ end
 
 local function Enable(self)
 	if(self.Buffs or self.Debuffs or self.Auras) then
-		self:RegisterEvent("UNIT_AURA", Update)
+		self:RegisterEvent('UNIT_AURA', Update)
+		if(LibClassicDurations) then
+			LibClassicDurations.RegisterCallback(self, 'UNIT_BUFF', Update)
+		end
 
 		local buffs = self.Buffs
 		if(buffs) then
@@ -340,7 +344,10 @@ end
 
 local function Disable(self)
 	if(self.Buffs or self.Debuffs or self.Auras) then
-		self:UnregisterEvent("UNIT_AURA", Update)
+		self:UnregisterEvent('UNIT_AURA', Update)
+		if(LibClassicDurations) then
+			LibClassicDurations.UnregisterCallback(self, 'UNIT_BUFF')
+		end
 	end
 end
 

@@ -5,6 +5,7 @@ local GetNetStats = GetNetStats
 local GetTime = GetTime
 local UnitCastingInfo = UnitCastingInfo or CastingInfo
 local UnitChannelInfo = UnitChannelInfo or ChannelInfo
+local DEFAULT_ICON = 134400 -- [[Interface\ICONS\INV_Misc_QuestionMark]]
 
 local LibClassicCasterino = oUF:IsClassic() and LibStub('LibClassicCasterino', true)
 if(LibClassicCasterino) then
@@ -57,7 +58,7 @@ local function UNIT_SPELLCAST_START(self, event, unit)
 	element:SetValue(0)
 
 	if(texture == 136235) then
-		texture = 134400
+		texture = DEFAULT_ICON
 	end
 
 	if(element.Text) then element.Text:SetText(LibClassicCasterino and name or text) end
@@ -274,7 +275,7 @@ local function UNIT_SPELLCAST_CHANNEL_START(self, event, unit, _, spellID)
 	element:SetValue(duration)
 
 	if(texture == 136235) then
-		texture = 134400
+		texture = DEFAULT_ICON
 	end
 
 	if(element.Text) then element.Text:SetText(name) end
@@ -481,17 +482,8 @@ local function Enable(self, unit)
 				self:RegisterEvent('UNIT_SPELLCAST_CHANNEL_STOP', UNIT_SPELLCAST_CHANNEL_STOP)
 			end
 		else
-			if(self.unit == 'player') then
-				self:RegisterEvent('UNIT_SPELLCAST_START', UNIT_SPELLCAST_START)
-				self:RegisterEvent('UNIT_SPELLCAST_FAILED', UNIT_SPELLCAST_FAILED)
-				self:RegisterEvent('UNIT_SPELLCAST_STOP', UNIT_SPELLCAST_STOP)
-				self:RegisterEvent('UNIT_SPELLCAST_INTERRUPTED', UNIT_SPELLCAST_INTERRUPTED)
-				self:RegisterEvent('UNIT_SPELLCAST_DELAYED', UNIT_SPELLCAST_DELAYED)
-				self:RegisterEvent('UNIT_SPELLCAST_CHANNEL_START', UNIT_SPELLCAST_CHANNEL_START)
-				self:RegisterEvent('UNIT_SPELLCAST_CHANNEL_UPDATE', UNIT_SPELLCAST_CHANNEL_UPDATE)
-				self:RegisterEvent('UNIT_SPELLCAST_CHANNEL_STOP', UNIT_SPELLCAST_CHANNEL_STOP)
-			elseif(not (unit and unit:match'%wtarget$')) then
-				if(LibClassicCasterino) then
+			if(not (unit and unit:match'%wtarget$')) then
+				if(self.unit ~= 'player' and LibClassicCasterino) then
 					local CastbarEventHandler = function(event, ...)
 						return EventFunctions[event](self, event, ...)
 					end

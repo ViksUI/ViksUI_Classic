@@ -1544,7 +1544,7 @@ if ( LAYOUT == 4 ) then
 	elseif (T.class == "ROGUE" and C.unitframe_class_bar.combo_old ~= true) then
 		playerFrame:SetPoint( "BOTTOMLEFT",  oUF_Player, "TOPLEFT", 1, 20 );
 		playerFrame:SetPoint( "BOTTOMRIGHT",  oUF_Player, "TOPRIGHT", -1, 20 );
-	elseif ( T.class == "PALADIN") and GetSpecialization() == 3 then
+	elseif ( T.class == "PALADIN") and T.GetSpecialization() == 3 then
 			playerFrame:SetPoint( "BOTTOMLEFT",  oUF_Player, "TOPLEFT", 1, 20 );
 			playerFrame:SetPoint( "BOTTOMRIGHT",  oUF_Player, "TOPRIGHT", -1, 20 );
 	elseif ( T.class == "DRUID" and C.unitframe_class_bar.combo_old ~= true) then
@@ -1554,7 +1554,7 @@ if ( LAYOUT == 4 ) then
 			playerFrame:SetPoint( "BOTTOMRIGHT",  oUF_Player, "TOPRIGHT", -1, 20 );
 		end
 	elseif ( T.class == "MAGE") then
-		if GetSpecialization() == 1 and C.unitframe_class_bar.arcane then
+		if T.GetSpecialization() == 1 and C.unitframe_class_bar.arcane then
 			playerFrame:SetPoint( "BOTTOMLEFT",  oUF_Player, "TOPLEFT", 1, 20 );
 			playerFrame:SetPoint( "BOTTOMRIGHT",  oUF_Player, "TOPRIGHT", -1, 20 );
 		end

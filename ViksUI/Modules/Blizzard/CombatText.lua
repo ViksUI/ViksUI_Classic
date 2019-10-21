@@ -20,12 +20,21 @@ else
 	numf = 3
 end
 
+-- WoW Classic requies combat text be enabled to display incoming damage
+if T.classic then
+	SetCVar("enableFloatingCombatText", 1)
+end
+
 -- Detect vehicle
 local function SetUnit()
-	if UnitHasVehicleUI("player") then
-		ct.unit = "vehicle"
-	else
+	if T.classic then
 		ct.unit = "player"
+	else
+		if UnitHasVehicleUI("player") then
+			ct.unit = "vehicle"
+		else
+			ct.unit = "player"
+		end
 	end
 	CombatTextSetActiveUnit(ct.unit)
 end
@@ -33,7 +42,7 @@ end
 -- Limit lines
 local function LimitLines()
 	for i = 1, #ct.frames do
-		f = ct.frames[i]
+		local f = ct.frames[i]
 		if i == 4 and C.combattext.icons then
 			f:SetMaxLines(math.floor(f:GetHeight() / (C.combattext.icon_size * 1.5)))
 		else
@@ -58,7 +67,7 @@ end
 
 -- Partial resists styler
 local part = "-%s [%s %s]"
-local r, g, b
+local r, g, b, lowMana, lowHealth
 
 -- Function, handles everything
 local function OnEvent(self, event, subevent, powerType)
@@ -324,6 +333,7 @@ local function OnEvent(self, event, subevent, powerType)
 		if GetRuneCooldown(arg1) ~= 0 then return end
 		xCT3:AddMessage("+"..COMBAT_TEXT_RUNE_DEATH, 0.75, 0, 0)
 	elseif event == "UNIT_ENTERED_VEHICLE" or event == "UNIT_EXITING_VEHICLE" then
+		local arg1 = subevent
 		if arg1 == "player" then
 			SetUnit()
 		end
@@ -390,6 +400,11 @@ for i = 1, numf do
 	f:SetClampedToScreen(true)
 	f:SetClampRectInsets(0, 0, C.font.combat_text_font_size, 0)
 	f:SetInsertMode(C.combattext.direction and 2 or 1)
+	if not C.unitframe.enable then
+		C.position.xct.frame1 = {"CENTER", -192, -32}
+		C.position.xct.frame2 = {"CENTER", 192, -32}
+		C.position.xct.frame4 = {"CENTER", 330, 205}
+	end
 	if i == 1 then
 		f:SetJustifyH(ct.justify_1)
 		if C.unitframe.enable == true and _G.oUF_Player then
@@ -467,11 +482,20 @@ local pr = function(msg)
 	print(tostring(msg))
 end
 
+local function SetPosition(f)
+	local a1, _, a2, x, y = f:GetPoint()
+	for i = 1, #ct.frames do
+		if f == ct.frames[i] then
+			SavedPositions["xCT"..i] = {a1, "UIParent", a2, x, y}
+		end
+	end
+end
+
 -- Configmode and testmode
 local StartConfigmode = function()
 	if not InCombatLockdown()then
 		for i = 1, #ct.frames do
-			f = ct.frames[i]
+			local f = ct.frames[i]
 			f:SetTemplate("Transparent")
 			f:SetBackdropBorderColor(1, 0, 0, 1)
 
@@ -492,14 +516,14 @@ local StartConfigmode = function()
 				f.fs:SetTextColor(1, 1, 0, 0.9)
 			end
 
-			f.t = f:CreateTexture("ARTWORK")
+			f.t = f:CreateTexture(nil, "ARTWORK")
 			f.t:SetPoint("TOPLEFT", f, "TOPLEFT", 1, -1)
 			f.t:SetPoint("TOPRIGHT", f, "TOPRIGHT", -1, -19)
 			f.t:SetHeight(20)
 			f.t:SetColorTexture(0.5, 0.5, 0.5)
 			f.t:SetAlpha(0.3)
 
-			f.d = f:CreateTexture("ARTWORK")
+			f.d = f:CreateTexture(nil, "ARTWORK")
 			f.d:SetHeight(16)
 			f.d:SetWidth(16)
 			f.d:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -1, 1)
@@ -508,11 +532,12 @@ local StartConfigmode = function()
 
 			if not f.tr then
 				f.tr = CreateFrame("Frame", nil, f)
-				f.tr:SetScript("OnDragStart", function(self, button)
+				f.tr:SetScript("OnDragStart", function(self)
 					self:GetParent():StartMoving()
 				end)
 				f.tr:SetScript("OnDragStop", function(self)
 					self:GetParent():StopMovingOrSizing()
+					SetPosition(self:GetParent())
 				end)
 				f.tr:EnableMouse(true)
 				f.tr:RegisterForDrag("LeftButton")
@@ -549,7 +574,7 @@ end
 
 local function EndConfigmode()
 	for i = 1, #ct.frames do
-		f = ct.frames[i]
+		local f = ct.frames[i]
 		f:SetBackdrop(nil)
 		f.iborder:Hide()
 		f.oborder:Hide()
@@ -748,14 +773,15 @@ if C.combattext.merge_aoe_spam then
 	end
 end
 
+local unpack, select, time = unpack, select, time
+local gflags = bit.bor(COMBATLOG_OBJECT_AFFILIATION_MINE,
+	COMBATLOG_OBJECT_REACTION_FRIENDLY,
+	COMBATLOG_OBJECT_CONTROL_PLAYER,
+	COMBATLOG_OBJECT_TYPE_GUARDIAN
+)
+
 -- Damage
 if C.combattext.damage then
-	local unpack, select, time = unpack, select, time
-	local gflags = bit.bor(COMBATLOG_OBJECT_AFFILIATION_MINE,
-		COMBATLOG_OBJECT_REACTION_FRIENDLY,
-		COMBATLOG_OBJECT_CONTROL_PLAYER,
-		COMBATLOG_OBJECT_TYPE_GUARDIAN
-	)
 	local xCTd = CreateFrame("Frame")
 	if C.combattext.damage_color then
 		ct.dmgcolor = {}
@@ -812,8 +838,8 @@ if C.combattext.damage then
 			elseif eventType == "RANGE_DAMAGE" then
 				local spellId, spellName, _, amount, _, _, _, _, _, critical = select(12, CombatLogGetCurrentEventInfo())
 				if amount >= C.combattext.treshold then
-					if spellId == 0  and spellName then
-						spellId = select(7, GetSpellInfo(spellName))
+					if T.classic then
+						spellId = T.GetSpellID(spellName)
 					end
 					local rawamount = amount
 					if C.combattext.short_numbers == true then
@@ -823,7 +849,11 @@ if C.combattext.damage then
 						amount = "|cffFF0000"..C.combattext.crit_prefix.."|r"..amount.."|cffFF0000"..C.combattext.crit_postfix.."|r"
 					end
 					if C.combattext.icons then
-						icon = GetSpellTexture(spellId) or ""
+						if spellId and spellId ~= 0 then
+							icon = GetSpellTexture(spellId)
+						else
+							icon = ""
+						end
 						msg = " \124T"..icon..":"..C.combattext.icon_size..":"..C.combattext.icon_size..":0:0:64:64:5:59:5:59\124t"
 					end
 					if C.combattext.merge_aoe_spam then
@@ -845,8 +875,8 @@ if C.combattext.damage then
 			elseif eventType == "SPELL_DAMAGE" or (eventType == "SPELL_PERIODIC_DAMAGE" and C.combattext.dot_damage) then
 				local spellId, spellName, spellSchool, amount, _, _, _, _, _, critical = select(12, CombatLogGetCurrentEventInfo())
 				if amount >= C.combattext.treshold then
-					if spellId == 0  and spellName then
-						spellId = select(7, GetSpellInfo(spellName))
+					if T.classic then
+						spellId = T.GetSpellID(spellName)
 					end
 					local color = {}
 					local rawamount = amount
@@ -857,7 +887,11 @@ if C.combattext.damage then
 						amount = "|cffFF0000"..C.combattext.crit_prefix.."|r"..amount.."|cffFF0000"..C.combattext.crit_postfix.."|r"
 					end
 					if C.combattext.icons then
-						icon = GetSpellTexture(spellId) or ""
+						if spellId and spellId ~= 0 then
+							icon = GetSpellTexture(spellId)
+						else
+							icon = ""
+						end
 					end
 					if C.combattext.damage_color then
 						if ct.dmgcolor[spellSchool] then
@@ -910,9 +944,16 @@ if C.combattext.damage then
 				xCT4:AddMessage(missType)
 			elseif eventType == "SPELL_MISSED" or eventType == "RANGE_MISSED" then
 				local spellId, spellName, _, missType = select(12, CombatLogGetCurrentEventInfo())
+				if T.classic then
+					spellId = T.GetSpellID(spellName)
+				end
 				if missType == "IMMUNE" and spellId == 118895 then return end
 				if C.combattext.icons then
-					icon = GetSpellTexture(spellId) or GetSpellTexture(spellName) or ""
+					if spellId and spellId ~= 0 then
+						icon = GetSpellTexture(spellId)
+					else
+						icon = ""
+					end
 					missType = misstypes[missType].." \124T"..icon..":"..C.combattext.icon_size..":"..C.combattext.icon_size..":0:0:64:64:5:59:5:59\124t"
 				else
 					missType = misstypes[missType]
@@ -920,9 +961,16 @@ if C.combattext.damage then
 				xCT4:AddMessage(missType)
 			elseif eventType == "SPELL_DISPEL" and C.combattext.dispel then
 				local id, effect, _, etype = select(15, CombatLogGetCurrentEventInfo())
+				if T.classic then
+					id = T.GetSpellID(effect)
+				end
 				local color
 				if C.combattext.icons then
-					icon = GetSpellTexture(id) or ""
+					if id and id ~= 0 then
+						icon = GetSpellTexture(id)
+					else
+						icon = ""
+					end
 				end
 				if icon then
 					msg = " \124T"..icon..":"..C.combattext.icon_size..":"..C.combattext.icon_size..":0:0:64:64:5:59:5:59\124t"
@@ -939,9 +987,16 @@ if C.combattext.damage then
 				xCT3:AddMessage(ACTION_SPELL_DISPEL..": "..effect..msg, unpack(color))
 			elseif eventType == "SPELL_STOLEN" and C.combattext.dispel then
 				local id, effect = select(15, CombatLogGetCurrentEventInfo())
+				if T.classic then
+					id = T.GetSpellID(effect)
+				end
 				local color = {1, 0.5, 0}
 				if C.combattext.icons then
-					icon = GetSpellTexture(id) or ""
+					if id and id ~= 0 then
+						icon = GetSpellTexture(id)
+					else
+						icon = ""
+					end
 				end
 				if icon then
 					msg = " \124T"..icon..":"..C.combattext.icon_size..":"..C.combattext.icon_size..":0:0:64:64:5:59:5:59\124t"
@@ -953,9 +1008,16 @@ if C.combattext.damage then
 				xCT3:AddMessage(ACTION_SPELL_STOLEN..": "..effect..msg, unpack(color))
 			elseif eventType == "SPELL_INTERRUPT" and C.combattext.interrupt then
 				local id, effect = select(15, CombatLogGetCurrentEventInfo())
+				if T.classic then
+					id = T.GetSpellID(effect)
+				end
 				local color = {1, 0.5, 0}
 				if C.combattext.icons then
-					icon = GetSpellTexture(id) or ""
+					if id and id ~= 0 then
+						icon = GetSpellTexture(id)
+					else
+						icon = ""
+					end
 				end
 				if icon then
 					msg = " \124T"..icon..":"..C.combattext.icon_size..":"..C.combattext.icon_size..":0:0:64:64:5:59:5:59\124t"
@@ -992,8 +1054,8 @@ if C.combattext.healing then
 			if eventType == "SPELL_HEAL" or (eventType == "SPELL_PERIODIC_HEAL" and C.combattext.show_hots) then
 				if C.combattext.healing then
 					local spellId, spellName, _, amount, overhealing, _, critical = select(12, CombatLogGetCurrentEventInfo())
-					if spellId == 0  and spellName then
-						spellId = select(7, GetSpellInfo(spellName))
+					if T.classic then
+						spellId = T.GetSpellID(spellName)
 					end
 					if T.healfilter[spellId] then
 						return
@@ -1020,7 +1082,11 @@ if C.combattext.healing then
 							color = {0.1, 0.65, 0.1}
 						end
 						if C.combattext.icons then
-							icon = GetSpellTexture(spellId) or ""
+							if spellId and spellId ~= 0 then
+								icon = GetSpellTexture(spellId)
+							else
+								icon = ""
+							end
 						else
 							msg = ""
 						end

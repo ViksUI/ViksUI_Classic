@@ -59,7 +59,13 @@ local groupedTable = { "|cffaaaaaa*|r", "" }
 local friendTable, BNTable = {}, {}
 local dataValid = false
 local totalOnline, BNTotalOnline = 0, 0
-
+local WoWTable = {}
+local BNGetGameAccountInfo = BNGetGameAccountInfo
+local GetFriendInfo = GetFriendInfo
+local BNGetFriendInfo = BNGetFriendInfo
+local C_FriendList_GetNumFriends = C_FriendList.GetNumFriends
+local C_FriendList_GetNumOnlineFriends = C_FriendList.GetNumOnlineFriends
+local C_FriendList_GetFriendInfoByIndex = C_FriendList.GetFriendInfoByIndex
 
 local Text  = Stat:CreateFontString(nil, "OVERLAY")
 if C.datatext.Friends >= 9 then
@@ -303,7 +309,7 @@ local function Update(self, event)
 	end
 	
 	if event == "FRIENDLIST_UPDATE" or "PLAYER_ENTERING_WORLD" then
-		local total = GetNumFriends()
+		local total = C_FriendList_GetNumFriends()
 		if total == #friendTable then
 			UpdateFriendTable(total)
 		else

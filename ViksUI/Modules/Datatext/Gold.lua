@@ -99,7 +99,7 @@ Stat:RegisterEvent("PLAYER_ENTERING_WORLD")
 Stat:SetScript("OnEvent", OnEvent)
 Stat:SetScript("OnEnter", function(self)
 	if InCombatLockdown() then return end
-	local prof1, prof2, archaeology, _, cooking = GetProfessions()
+	local prof1, prof2, archaeology, _, cooking = not T.classic and GetProfessions()
 	
 	GameTooltip:SetOwner(self, "ANCHOR_TOP", 0, 6);
 	GameTooltip:ClearAllPoints()

@@ -1103,7 +1103,7 @@ C["filger_spells"] = {
 			-- Sanctity Aura
 			-- {spellID = 20218, unitID = "player", caster = "player", filter = "BUFF"},
 			-- Seal of Command
-			{spellID = 20735, unitID = "player", caster = "player", filter = "BUFF"},
+			{spellID = 20375, unitID = "player", caster = "player", filter = "BUFF"},
 			-- Seal of Justice
 			{spellID = 20164, unitID = "player", caster = "player", filter = "BUFF"},
 			-- Seal of Light
@@ -2963,7 +2963,7 @@ C["filger_spells"] = {
 			{spellID = 23034, unitID = "player", caster = "all", filter = "BUFF", absID = true},
 			-- Horde Battle Standard
 			{spellID = 23035, unitID = "player", caster = "all", filter = "BUFF", absID = true},
-			-- Stormpike Battle Standard 
+			-- Stormpike Battle Standard
 			{spellID = 23539, unitID = "player", caster = "all", filter = "BUFF", absID = true},
 			-- Frostwolf Battle Standard
 			{spellID = 23538, unitID = "player", caster = "all", filter = "BUFF", absID = true},
@@ -2996,7 +2996,7 @@ C["filger_spells"] = {
 			-- Power Infusion
 			{spellID = 10060, unitID = "player", caster = "all", filter = "BUFF"},
 			-- Soulstone Resurrection
-			{spellID = 20707, unitID = "player", caster = "all", filter = "BUFF"},
+			-- {spellID = 20707, unitID = "player", caster = "all", filter = "BUFF"},
 
 			-- Trinket Effects
 			-- Persistent Shield (Absorb, Use) [Scarab Brooch]

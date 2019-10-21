@@ -285,10 +285,10 @@ Stat:RegisterEvent("PLAYER_ENTERING_WORLD")
 Stat:SetScript("OnUpdate", Update)
 Stat:RegisterEvent("UPDATE_INSTANCE_INFO")
 Stat:SetScript("OnMouseDown", function(self, btn)
-	if btn == 'RightButton'  then
-		ToggleTimeManager()
-	else
-		GameTimeFrame:Click()
-	end
+	--if btn == 'RightButton'  then
+		TimeManager_Toggle()
+	--else
+		--GameTimeFrame:Click()
+	--end
 end)
 Update(Stat, 10)

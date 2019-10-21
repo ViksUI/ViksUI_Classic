@@ -93,9 +93,17 @@ local isCaster = {
 }
 
 local function CheckRole()
-	local spec = GetSpecialization()
-	local role = spec and GetSpecializationRole(spec)
+	local spec, role
+	if T.classic then
+		spec = T.GetSpecialization()
+		role = spec and T.GetSpecializationRole(spec)
+		
+	else
+		spec = GetSpecialization()
+		role = spec and GetSpecializationRole(spec)
+	end
 
+	T.Spec = spec
 	if role == "TANK" then
 		T.Role = "Tank"
 	elseif role == "HEALER" then
@@ -138,12 +146,24 @@ T.CheckPlayerBuff = function(spell)
 end
 
 ----------------------------------------------------------------------------------------
+--	Player's level check
+----------------------------------------------------------------------------------------
+local function CheckLevel(_, _, level)
+	T.level = level
+end
+local LevelUpdater = CreateFrame("Frame")
+LevelUpdater:RegisterEvent("PLAYER_LEVEL_UP")
+LevelUpdater:SetScript("OnEvent", CheckLevel)
+
+----------------------------------------------------------------------------------------
 --	Pet Battle Hider
 ----------------------------------------------------------------------------------------
+if not T.classic then
 T_PetBattleFrameHider = CreateFrame("Frame", "ViksUI_PetBattleFrameHider", UIParent, "SecureHandlerStateTemplate")
 T_PetBattleFrameHider:SetAllPoints()
 T_PetBattleFrameHider:SetFrameStrata("LOW")
 RegisterStateDriver(T_PetBattleFrameHider, "visibility", "[petbattle] hide; show")
+end
 
 ----------------------------------------------------------------------------------------
 --	UTF functions
@@ -687,6 +707,25 @@ function T.SkinHelpBox(frame)
 	end
 	if frame.Arrow then
 		frame.Arrow:Hide()
+	end
+end
+
+function T.SkinStatusBarWidget(frame)
+	local bar = frame.Bar
+	local atlas = bar:GetStatusBarAtlas()
+	if not atlas then
+		bar:SetStatusBarTexture(C.media.texture)
+	end
+	if not bar.styled then
+		bar.BGLeft:SetAlpha(0)
+		bar.BGRight:SetAlpha(0)
+		bar.BGCenter:SetAlpha(0)
+		bar.BorderLeft:SetAlpha(0)
+		bar.BorderRight:SetAlpha(0)
+		bar.BorderCenter:SetAlpha(0)
+		bar.Spark:SetAlpha(0)
+		bar:CreateBackdrop("Overlay")
+		bar.styled = true
 	end
 end
 
@@ -1486,7 +1525,22 @@ T.PostCreateIcon = function(element, button)
 	end
 end
 
-T.PostUpdateIcon = function(_, unit, button, _, _, duration, expiration, debuffType, isStealable)
+local LibClassicDurations = T.classic and LibStub("LibClassicDurations")
+
+T.PostUpdateIcon = function(_, unit, button, index, _, duration, expiration, debuffType, isStealable)
+	local name, debuffType, durationTime, expirationTime, caster, isStealable, spellID
+	if LibClassicDurations and button.filter == "HELPFUL" then
+		name, _, _, debuffType, durationTime, expirationTime, caster, isStealable, _, spellID = LibClassicDurations:UnitAura(unit, index, button.filter)
+	else
+		name, _, _, debuffType, durationTime, expirationTime, caster, isStealable, _, spellID = UnitAura(unit, index, button.filter)
+	end
+
+	if LibClassicDurations and durationTime == 0 and expirationTime == 0 then
+		durationTime, expirationTime = LibClassicDurations:GetAuraDurationByUnit(unit, spellID, caster, name)
+
+		button.isLibClassicDuration = true
+	end
+
 	local playerUnits = {
 		player = true,
 		pet = true,
@@ -1495,9 +1549,7 @@ T.PostUpdateIcon = function(_, unit, button, _, _, duration, expiration, debuffT
 
 	if button.isDebuff then
 		if not UnitIsFriend("player", unit) and not playerUnits[button.caster] then
-			if C.aura.player_aura_only then
-				button:Hide()
-			else
+			if not C.aura.player_aura_only then
 				button:SetBackdropBorderColor(unpack(C.media.border_color))
 				button.icon:SetDesaturated(true)
 			end
@@ -1519,27 +1571,68 @@ T.PostUpdateIcon = function(_, unit, button, _, _, duration, expiration, debuffT
 		button.icon:SetDesaturated(false)
 	end
 
-	if duration and duration > 0 and C.aura.show_timer == true then
-		button.remaining:Show()
-		button.timeLeft = expiration
-		button:SetScript("OnUpdate", CreateAuraTimer)
+	if T.classic and button.remaining then
+		if durationTime and durationTime > 0 and C.aura.show_timer == true then
+			button.remaining:Show()
+			button.timeLeft = expirationTime
+			button:SetScript("OnUpdate", CreateAuraTimer)
+		else
+			button.remaining:Hide()
+			button.timeLeft = math.huge
+			button:SetScript("OnUpdate", nil)
+		end
 	else
-		button.remaining:Hide()
-		button.timeLeft = math.huge
-		button:SetScript("OnUpdate", nil)
+		if duration and duration > 0 and C.aura.show_timer == true then
+			button.remaining:Show()
+			button.timeLeft = expiration
+			button:SetScript("OnUpdate", CreateAuraTimer)
+		else
+			button.remaining:Hide()
+			button.timeLeft = math.huge
+			button:SetScript("OnUpdate", nil)
+		end
 	end
 
 	button.first = true
 end
 
+T.CustomFilter = function(_, unit, button, _, _, _, _, _, _, caster)
+	if C.aura.player_aura_only then
+		if button.isDebuff then
+			local playerUnits = {
+				player = true,
+				pet = true,
+				vehicle = true,
+			}
+			if not UnitIsFriend("player", unit) and not playerUnits[caster] then
+				return false
+			end
+		end
+	end
+	return true
+end
+
+local LibBanzai = T.classic and LibStub("LibBanzai-2.0", true)
+
 T.UpdateThreat = function(self, _, unit)
 	if self.unit ~= unit then return end
-	local threat = UnitThreatSituation(self.unit)
-	if threat and threat > 1 then
-		r, g, b = GetThreatStatusColor(threat)
-		self.backdrop:SetBackdropBorderColor(r, g, b)
+	local threat
+	if T.classic then
+		if not LibBanzai then return end
+		threat = LibBanzai:GetUnitAggroByUnitId(self.unit)
+		if threat then
+			self.backdrop:SetBackdropBorderColor(1, 0, 0)
+		else
+			self.backdrop:SetBackdropBorderColor(unpack(C.media.border_color))
+		end
 	else
-		self.backdrop:SetBackdropBorderColor(unpack(C.media.border_color))
+		threat = UnitThreatSituation(self.unit)
+		if threat and threat > 1 then
+			local r, g, b = GetThreatStatusColor(threat)
+			self.backdrop:SetBackdropBorderColor(r, g, b)
+		else
+			self.backdrop:SetBackdropBorderColor(unpack(C.media.border_color))
+		end
 	end
 end
 

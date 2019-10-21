@@ -200,7 +200,7 @@ local function Stuffing_Toggle()
 end
 
 local function Stuffing_ToggleBag(id)
-	if id == -2 then
+	if T.classic and id == -2 then
 		ToggleKeyRing()
 		return
 	end
@@ -276,7 +276,13 @@ end
 function Stuffing:SlotUpdate(b)
 	local texture, count, locked, quality = GetContainerItemInfo(b.bag, b.slot)
 	local clink = GetContainerItemLink(b.bag, b.slot)
-	local isQuestItem, questId, isActiveQuest = GetContainerItemQuestInfo(b.bag, b.slot)
+	local isQuestItem, questId, isActiveQuest
+	if T.classic then
+		-- isQuestItem, questId, isActiveQuest
+		if b.itemClassID == LE_ITEM_CLASS_QUESTITEM then isQuestItem = true end
+	else
+		isQuestItem, questId, isActiveQuest = GetContainerItemQuestInfo(b.bag, b.slot)
+	end
 
 	-- Set all slot color to default ViksUI on update
 	if not b.frame.lock then
@@ -285,7 +291,20 @@ function Stuffing:SlotUpdate(b)
 
 	if b.cooldown and StuffingFrameBags and StuffingFrameBags:IsShown() then
 		local start, duration, enable = GetContainerItemCooldown(b.bag, b.slot)
-		CooldownFrame_Set(b.cooldown, start, duration, enable)
+		if T.classic and HasWandEquipped() then
+			local wandID = GetInventoryItemID("player", 18)
+			local wandSpeed = GetItemCooldown(wandID)
+			if wandSpeed == 0 then
+				CooldownFrame_Set(b.cooldown, start, duration, enable)
+			else
+				if wandSpeed < 1.5 then wandSpeed = 1.5 end
+				if duration and duration > wandSpeed then
+					CooldownFrame_Set(b.cooldown, start, duration, enable)
+				end
+			end
+		else
+			CooldownFrame_Set(b.cooldown, start, duration, enable)
+		end
 	end
 
 	if C.bag.ilvl == true then
@@ -300,7 +319,7 @@ function Stuffing:SlotUpdate(b)
 	if b.frame.UpgradeIcon then
 		b.frame.UpgradeIcon:SetPoint("TOPLEFT", C.bag.button_size/2.7, -C.bag.button_size/2.7)
 		b.frame.UpgradeIcon:SetSize(C.bag.button_size/1.7, C.bag.button_size/1.7)
-		local itemIsUpgrade = IsContainerItemAnUpgrade(b.frame:GetParent():GetID(), b.frame:GetID())
+		local itemIsUpgrade = not T.classic and IsContainerItemAnUpgrade(b.frame:GetParent():GetID(), b.frame:GetID())
 		if itemIsUpgrade and itemIsUpgrade == true then
 			b.frame.UpgradeIcon:SetShown(true)
 		else
@@ -370,7 +389,20 @@ end
 function Stuffing:UpdateCooldowns(b)
 	if b.cooldown and StuffingFrameBags and StuffingFrameBags:IsShown() then
 		local start, duration, enable = GetContainerItemCooldown(b.bag, b.slot)
-		CooldownFrame_Set(b.cooldown, start, duration, enable)
+		if T.classic and HasWandEquipped() then
+			local wandID = GetInventoryItemID("player", 18)
+			local wandSpeed = GetItemCooldown(wandID)
+			if wandSpeed == 0 then
+				return CooldownFrame_Set(b.cooldown, start, duration, enable)
+			else
+				if wandSpeed < 1.5 then wandSpeed = 1.5 end
+				if duration and duration > wandSpeed then
+					return CooldownFrame_Set(b.cooldown, start, duration, enable)
+				end
+			end
+		else
+			return CooldownFrame_Set(b.cooldown, start, duration, enable)
+		end
 	end
 end
 
@@ -527,11 +559,7 @@ function Stuffing:BagFrameSlotNew(p, slot)
 	if slot > 3 then
 		ret.slot = slot
 		slot = slot - 4
-		if not T.classic then
-			ret.frame = CreateFrame("ItemButton", "StuffingBBag"..slot.."Slot", p, "BankItemButtonBagTemplate")
-		else
-			ret.frame = CreateFrame("CheckButton", "StuffingBBag"..slot.."Slot", p, "BankItemButtonBagTemplate")
-		end
+		ret.frame = CreateFrame(T.classic and "CheckButton" or "ItemButton", "StuffingBBag"..slot.."Slot", p, "BankItemButtonBagTemplate")
 		ret.frame:StripTextures()
 		ret.frame:SetID(slot)
 		hooksecurefunc(ret.frame.IconBorder, "SetVertexColor", function(self, r, g, b)
@@ -560,11 +588,7 @@ function Stuffing:BagFrameSlotNew(p, slot)
 			SetItemButtonTextureVertexColor(ret.frame, 1.0, 1.0, 1.0)
 		end
 	else
-		if not T.classic then
-			ret.frame = CreateFrame("ItemButton", "StuffingFBag"..slot.."Slot", p, "BagSlotButtonTemplate")
-		else
-			ret.frame = CreateFrame("CheckButton", "StuffingFBag"..slot.."Slot", p, "BagSlotButtonTemplate")
-		end
+		ret.frame = CreateFrame(T.classic and "CheckButton" or "ItemButton", "StuffingFBag"..slot.."Slot", p, "BagSlotButtonTemplate")
 
 		hooksecurefunc(ret.frame.IconBorder, "SetVertexColor", function(self, r, g, b)
 			if r ~= 0.65882 and g ~= 0.65882 and b ~= 0.65882 then
@@ -636,11 +660,7 @@ function Stuffing:SlotNew(bag, slot)
 	end
 
 	if not ret.frame then
-		if not T.classic then
-			ret.frame = CreateFrame("ItemButton", "StuffingBag"..bag.."_"..slot, self.bags[bag], tpl)
-		else
-			ret.frame = CreateFrame("Button", "StuffingBag"..bag.."_"..slot, self.bags[bag], tpl)
-		end
+		ret.frame = CreateFrame(T.classic and "Button" or "ItemButton", "StuffingBag"..bag.."_"..slot, self.bags[bag], tpl)
 		ret.frame:StyleButton()
 		ret.frame:SetTemplate("Default")
 		ret.frame:SetNormalTexture(nil)
@@ -709,7 +729,7 @@ function Stuffing:BagType(bag)
 end
 
 function Stuffing:BagNew(bag, f)
-	for i, v in pairs(self.bags) do
+	for _, v in pairs(self.bags) do
 		if v:GetID() == bag then
 			v.bagType = self:BagType(bag)
 			return v
@@ -751,7 +771,7 @@ function Stuffing:SearchUpdate(str)
 			b.frame:SetAlpha(0.2)
 		end
 		if b.name then
-			local _, setName = GetContainerItemEquipmentSetInfo(b.bag, b.slot)
+			local _, setName = not T.classic and GetContainerItemEquipmentSetInfo(b.bag, b.slot)
 			setName = setName or ""
 			local ilink = GetContainerItemLink(b.bag, b.slot)
 			local class, subclass, _, equipSlot = select(6, GetItemInfo(ilink))
@@ -1817,6 +1837,14 @@ function Stuffing.Menu(self, level)
 		end
 	end
 	UIDropDownMenu_AddButton(info, level)
+
+	if ToggleKeyRing then -- since KeyRing isn't in phase 1, but it will be in phase 2
+		wipe(info)
+		info.text = "Show Keyring" --TODO: L_BAG_SHOW_KEYRING
+		info.notCheckable = 1
+		info.func = ToggleKeyRing
+		UIDropDownMenu_AddButton(info, level)
+	end
 
 	wipe(info)
 	info.disabled = nil

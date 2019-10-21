@@ -1,5 +1,5 @@
 local T, C, L, _ = unpack(select(2, ...))
-if C.reminder.raid_buffs_enable ~= true then return end
+if T.classic or C.reminder.raid_buffs_enable ~= true then return end
 
 ----------------------------------------------------------------------------------------
 --	Raid buffs on player(by Elv22)
@@ -9,12 +9,14 @@ local flaskbuffs = T.ReminderBuffs["Flask"]
 local battleelixirbuffs = T.ReminderBuffs["BattleElixir"]
 local guardianelixirbuffs = T.ReminderBuffs["GuardianElixir"]
 local foodbuffs = T.ReminderBuffs["Food"]
-local visible, flask, battleelixir, guardianelixir, food
+local staminabuffs = T.ReminderBuffs["Stamina"]
+local custombuffs = T.ReminderBuffs["Custom"]
+local visible, flask, battleelixir, guardianelixir, food, stamina, spell4, custom
 
 -- We need to check if you have two different elixirs if your not flasked, before we say your not flasked
 local function CheckElixir(unit)
 	if battleelixirbuffs and battleelixirbuffs[1] then
-		for i, battleelixirbuffs in pairs(battleelixirbuffs) do
+		for _, battleelixirbuffs in pairs(battleelixirbuffs) do
 			local name, _, icon = GetSpellInfo(battleelixirbuffs)
 			if T.CheckPlayerBuff(name) then
 				FlaskFrame.t:SetTexture(icon)
@@ -27,7 +29,7 @@ local function CheckElixir(unit)
 	end
 
 	if guardianelixirbuffs and guardianelixirbuffs[1] then
-		for i, guardianelixirbuffs in pairs(guardianelixirbuffs) do
+		for _, guardianelixirbuffs in pairs(guardianelixirbuffs) do
 			local name, _, icon = GetSpellInfo(guardianelixirbuffs)
 			if T.CheckPlayerBuff(name) then
 				guardianelixir = true
@@ -54,6 +56,13 @@ end
 -- Main Script
 local function OnAuraChange(self, event, arg1, unit)
 	if event == "UNIT_AURA" and arg1 ~= "player" then return end
+
+	-- If We're a caster we may want to see different buffs
+	if T.Role == "Caster" or T.Role == "Healer" then
+		T.ReminderCasterBuffs()
+	else
+		T.ReminderPhysicalBuffs()
+	end
 
 	-- Start checking buffs to see if we can find a match from the list
 	if flaskbuffs and flaskbuffs[1] then
@@ -89,11 +98,61 @@ local function OnAuraChange(self, event, arg1, unit)
 		end
 	end
 
+	for i, staminabuffs in pairs(staminabuffs) do
+		local name, _, icon = GetSpellInfo(staminabuffs)
+		if i == 1 then
+			StaminaFrame.t:SetTexture(icon)
+		end
+		if T.CheckPlayerBuff(name) then
+			StaminaFrame:SetAlpha(C.reminder.raid_buffs_alpha)
+			stamina = true
+			break
+		else
+			StaminaFrame:SetAlpha(1)
+			stamina = false
+		end
+	end
+
+	for i, Spell4Buff in pairs(Spell4Buff) do
+		local name, _, icon = GetSpellInfo(Spell4Buff)
+		if i == 1 then
+			Spell4Frame.t:SetTexture(icon)
+		end
+		if T.CheckPlayerBuff(name) then
+			Spell4Frame:SetAlpha(C.reminder.raid_buffs_alpha)
+			spell4 = true
+			break
+		else
+			Spell4Frame:SetAlpha(1)
+			spell4 = false
+		end
+	end
+
+	if custombuffs and custombuffs[1] then
+		for i, custombuffs in pairs(custombuffs) do
+			local name, _, icon = GetSpellInfo(custombuffs)
+			if i == 1 then
+				CustomFrame.t:SetTexture(icon)
+			end
+			if T.CheckPlayerBuff(name) then
+				CustomFrame:SetAlpha(C.reminder.raid_buffs_alpha)
+				custom = true
+				break
+			else
+				CustomFrame:SetAlpha(1)
+				custom = false
+			end
+		end
+	else
+		CustomFrame:Hide()
+		custom = true
+	end
+
 	local _, instanceType = IsInInstance()
 	if (not IsInGroup() or instanceType ~= "raid") and C.reminder.raid_buffs_always == false then
 		RaidBuffReminder:SetAlpha(0)
 		visible = false
-	elseif flask == true and food == true then
+	elseif flask == true and food == true and stamina == true and spell4 == true and custom == true then
 		if not visible then
 			RaidBuffReminder:SetAlpha(0)
 			visible = false
@@ -148,4 +207,7 @@ end
 do
 	CreateButton("FlaskFrame", RaidBuffReminder, true)
 	CreateButton("FoodFrame", FlaskFrame, false)
+	CreateButton("StaminaFrame", FoodFrame, false)
+	CreateButton("Spell4Frame", StaminaFrame, false)
+	CreateButton("CustomFrame", Spell4Frame, false)
 end
