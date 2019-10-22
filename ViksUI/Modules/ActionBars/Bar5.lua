@@ -4,7 +4,7 @@ if C.actionbar.enable ~= true then return end
 ----------------------------------------------------------------------------------------
 --	MultiBarBottomRight(by Tukz)
 ----------------------------------------------------------------------------------------
-local bar = CreateFrame("Frame", "Bar5Holder", T_PetBattleFrameHider)
+local bar = CreateFrame("Frame", "Bar5Holder", T_PetBattleFrameHider or UIParent)
 if C.actionbar.rightbars < 3 then
 	if C.actionbar.split_bars == true then
 		bar:SetAllPoints(SplitBarLeft)
@@ -13,6 +13,14 @@ if C.actionbar.rightbars < 3 then
 	end
 else
 	bar:SetAllPoints(RightActionBarAnchor)
+
+	if not C.general.auto_scale then
+		hooksecurefunc(MultiBarLeft, "SetScale", function(_, scale)
+			if not InCombatLockdown() then
+				MultiBarBottomRight:SetScale(scale)
+			end
+		end)
+	end
 end
 MultiBarBottomRight:SetParent(bar)
 bar:SetFrameStrata("LOW")
