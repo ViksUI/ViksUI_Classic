@@ -1,4 +1,4 @@
-﻿local T, C, L, _ = unpack(select(2, ...))
+local T, C, L = unpack(ViksUI)
 ----------------------------------------------------------------------------------------
 -- Default Size Values
 ----------------------------------------------------------------------------------------
@@ -124,7 +124,7 @@ local shadows = {
 }
 function CreateShadow(f)
 	if f.shadow then return end
-	local shadow = CreateFrame("Frame", nil, f)
+	local shadow = CreateFrame("Frame", nil, f, "BackdropTemplate")
 	shadow:SetFrameLevel(1)
 	shadow:SetFrameStrata(f:GetFrameStrata())
 	shadow:SetPoint("TOPLEFT", -4, 4)
@@ -260,7 +260,6 @@ end
 function frame12(f)
     if f.frame==nil then
       local frame = CreateFrame("Frame", nil, f)
-      frame = CreateFrame("Frame", nil, f)
       frame:SetFrameLevel(12)
       frame:SetFrameStrata(f:GetFrameStrata())
       frame:SetPoint("TOPLEFT", 4, -4)
@@ -278,10 +277,9 @@ function frame12(f)
       f.frame = frame
     end
 end 
-function frame(f)
+local function frame(f)
     if f.frame==nil then
       local frame = CreateFrame("Frame", nil, f)
-      frame = CreateFrame("Frame", nil, f)
       frame:SetFrameLevel(12)
       frame:SetFrameStrata(f:GetFrameStrata())
       frame:SetPoint("TOPLEFT", 4, -4)
@@ -302,7 +300,6 @@ end
 function frame123(f)
     if f.frame==nil then
       local frame = CreateFrame("Frame", nil, f)
-      frame = CreateFrame("Frame", nil, f)
       frame:SetFrameLevel(2)
       frame:SetFrameStrata(f:GetFrameStrata())
       frame:SetPoint("TOPLEFT", 9, -9)
@@ -323,7 +320,6 @@ end
 function CreateShadow1(f)
     if f.frameBD==nil then
       local frameBD = CreateFrame("Frame", nil, f)
-      frameBD = CreateFrame("Frame", nil, f)
       frameBD:SetFrameLevel(1)
       frameBD:SetFrameStrata(f:GetFrameStrata())
       frameBD:SetPoint("TOPLEFT", 0, 0)
@@ -331,7 +327,7 @@ function CreateShadow1(f)
       frameBD:SetPoint("TOPRIGHT", 0, 0)
       frameBD:SetPoint("BOTTOMRIGHT", 0, 0)
       frameBD:SetBackdrop( { 
-         edgeFile = "Interface\\AddOns\\ViksUI\\media\\Other\\glowTex", edgeSize = 4,
+         edgeFile = "Interface\\AddOns\\ViksUI\\Media\\Other\\glowTex", edgeSize = 4,
          insets = {left = 3, right = 3, top = 3, bottom = 3},
          tile = false, tileSize = 0,
       })
@@ -343,7 +339,6 @@ end
 function CreateShadow2(f)
     if f.frameBD==nil then
       local frameBD = CreateFrame("Frame", nil, f)
-      frameBD = CreateFrame("Frame", nil, f)
       frameBD:SetFrameLevel(0)
       frameBD:SetFrameStrata(f:GetFrameStrata())
       frameBD:SetPoint("TOPLEFT", 5, -5)
@@ -351,7 +346,7 @@ function CreateShadow2(f)
       frameBD:SetPoint("TOPRIGHT", -5, -5)
       frameBD:SetPoint("BOTTOMRIGHT", -5, 5)
       frameBD:SetBackdrop( { 
-         edgeFile = "Interface\\AddOns\\ViksUI\\media\\Other\\glowTex", edgeSize = 4,
+         edgeFile = "Interface\\AddOns\\ViksUI\\Media\\Other\\glowTex", edgeSize = 4,
          insets = {left = 3, right = 3, top = 3, bottom = 3},
          tile = false, tileSize = 0,
       })

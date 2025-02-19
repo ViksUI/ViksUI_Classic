@@ -1,7 +1,10 @@
-if(select(2, UnitClass("player")) ~= "PALADIN") then return end
+local T, C, L = unpack(ViksUI)
+if C.unitframe.enable ~= true or T.class ~= "PALADIN" then return end
 
 local _, ns = ...
 local oUF = ns.oUF
+
+if(oUF:IsClassic() and not oUF:IsCata()) then return end
 
 local SPELL_POWER_HOLY_POWER = Enum.PowerType.HolyPower or 9
 
@@ -14,8 +17,16 @@ local function Update(self, _, unit, powerType)
 		element:PreUpdate(unit)
 	end
 
+	if UnitHasVehicleUI("player") then
+		element:Hide()
+		--if self.Debuffs then self.Debuffs:SetPoint("BOTTOMRIGHT", self, "TOPRIGHT", 2, 5) end  --Not changing as its on own anchor
+	else
+		element:Show()
+		--if self.Debuffs then self.Debuffs:SetPoint("BOTTOMRIGHT", self, "TOPRIGHT", 2, 19) end  --Not changing as its on own anchor
+	end
+
 	local cur = UnitPower("player", SPELL_POWER_HOLY_POWER)
-	local max = 5 -- Cause we don't use :Factory to spawn frames it return sometimes "3"
+	local max = (oUF:IsClassic() and 3 or 5) -- Cause we don't use :Factory to spawn frames it return sometimes "3"
 
 	for i = 1, max do
 		if(i <= cur) then
@@ -40,15 +51,12 @@ end
 
 local function Visibility(self)
 	local element = self.HolyPower
-	local spec = GetSpecialization()
 
-	if spec == SPEC_PALADIN_RETRIBUTION then
+	if not UnitHasVehicleUI("player") then
 		element:Show()
-		if self.Debuffs then self.Debuffs:SetPoint("BOTTOMRIGHT", self, "TOPRIGHT", 2, 19) end
-	else
-		element:Hide()
-		if self.Debuffs then self.Debuffs:SetPoint("BOTTOMRIGHT", self, "TOPRIGHT", 2, 5) end
+		--if self.Debuffs then self.Debuffs:SetPoint("BOTTOMRIGHT", self, "TOPRIGHT", 2, 19) end  --Not changing as its on own anchor
 	end
+	self:RegisterEvent("UNIT_POWER_UPDATE", Path)
 end
 
 local function Enable(self)
@@ -57,12 +65,10 @@ local function Enable(self)
 		element.__owner = self
 		element.ForceUpdate = ForceUpdate
 
-		self:RegisterEvent('UNIT_POWER_UPDATE', Path)
-
-		element.hadler = CreateFrame("Frame", nil, element)
-		element.hadler:RegisterEvent("PLAYER_TALENT_UPDATE")
-		element.hadler:RegisterEvent("PLAYER_ENTERING_WORLD")
-		element.hadler:SetScript("OnEvent", function() Visibility(self) end)
+		element.handler = CreateFrame("Frame", nil, element)
+		element.handler:RegisterEvent("PLAYER_TALENT_UPDATE")
+		element.handler:RegisterEvent("PLAYER_ENTERING_WORLD")
+		element.handler:SetScript("OnEvent", function() Visibility(self) end)
 
 		return true
 	end
@@ -71,9 +77,8 @@ end
 local function Disable(self)
 	local element = self.HolyPower
 	if(element) then
-		self:UnregisterEvent('UNIT_POWER_UPDATE', Path)
-		element.hadler:UnregisterEvent("PLAYER_TALENT_UPDATE")
-		element.hadler:UnregisterEvent("PLAYER_ENTERING_WORLD")
+		element.handler:UnregisterEvent("PLAYER_TALENT_UPDATE")
+		element.handler:UnregisterEvent("PLAYER_ENTERING_WORLD")
 	end
 end
 

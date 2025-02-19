@@ -1,4 +1,4 @@
-﻿local T, C, L, _ = unpack(select(2, ...))
+local T, C, L = unpack(ViksUI)
 
 ----------------------------------------------------------------------------------------
 --	Check outdated UI version
@@ -7,7 +7,11 @@ local check = function(self, event, prefix, message, _, sender)
 	if event == "CHAT_MSG_ADDON" then
 		if prefix ~= "ViksUIVersion" or sender == T.name then return end
 		if tonumber(message) ~= nil and tonumber(message) > tonumber(T.version) then
-			print("|cffff0000"..L_MISC_UI_OUTDATED.."|r")
+			if T.Classic then
+				print("|cffff0000"..L_MISC_UI_OUTDATED_CLASSIC.."|r")
+			else
+				print("|cffff0000"..L_MISC_UI_OUTDATED.."|r")
+			end
 			self:UnregisterEvent("CHAT_MSG_ADDON")
 		end
 	else
@@ -36,7 +40,7 @@ C_ChatInfo.RegisterAddonMessagePrefix("ViksUIVersion")
 local whisp = CreateFrame("Frame")
 whisp:RegisterEvent("CHAT_MSG_WHISPER")
 whisp:RegisterEvent("CHAT_MSG_BN_WHISPER")
-whisp:SetScript("OnEvent", function(self, event, text, name, ...)
+whisp:SetScript("OnEvent", function(_, event, text, name, ...)
 	if text:lower():match("ui_version") or text:lower():match("уи_версия") then
 		if event == "CHAT_MSG_WHISPER" then
 			SendChatMessage("ViksUI "..T.version, "WHISPER", nil, name)

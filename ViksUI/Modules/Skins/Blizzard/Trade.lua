@@ -1,5 +1,5 @@
-local T, C, L, _ = unpack(select(2, ...))
-if T.classic or C.skins.blizzard_frames ~= true then return end
+local T, C, L = unpack(ViksUI)
+if C.skins.blizzard_frames ~= true then return end
 
 ----------------------------------------------------------------------------------------
 --	Trade skin
@@ -14,9 +14,12 @@ local function LoadSkin()
 	TradePlayerInputMoneyInset:StripTextures()
 	TradeRecipientMoneyInset:StripTextures()
 	TradeRecipientMoneyBg:StripTextures()
+	TradeFramePortrait:SetAlpha(0)
 
-	TradeFrame.RecipientOverlay.portrait:SetAlpha(0)
-	TradeFrame.RecipientOverlay.portraitFrame:SetAlpha(0)
+	if T.Mainline then
+		TradeFrame.RecipientOverlay.portrait:SetAlpha(0)
+		TradeFrame.RecipientOverlay.portraitFrame:SetAlpha(0)
+	end
 
 	TradeFrame:CreateBackdrop("Transparent")
 	TradeFrame.backdrop:SetPoint("TOPLEFT", 0, 0)

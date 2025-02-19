@@ -3,20 +3,22 @@ if(select(2, UnitClass('player')) ~= 'MONK') then return end
 local _, ns = ...
 local oUF = ns.oUF
 
+if(oUF:IsClassic()) then return end
+
 -- sourced from FrameXML/Constants.lua
-local SPEC_MONK_BREWMASTER = SPEC_MONK_BREWMASTER or 1
+local SPEC_MONK_BREWMASTER = _G.SPEC_MONK_BREWMASTER or 1
 
 -- sourced from FrameXML/MonkStaggerBar.lua
-local BREWMASTER_POWER_BAR_NAME = BREWMASTER_POWER_BAR_NAME or 'STAGGER'
+local BREWMASTER_POWER_BAR_NAME = _G.BREWMASTER_POWER_BAR_NAME or 'STAGGER'
 
 -- percentages at which bar should change color
-local STAGGER_YELLOW_TRANSITION =  STAGGER_YELLOW_TRANSITION or 0.3
-local STAGGER_RED_TRANSITION = STAGGER_RED_TRANSITION or 0.6
+local STAGGER_YELLOW_TRANSITION =  _G.STAGGER_YELLOW_TRANSITION or 0.3
+local STAGGER_RED_TRANSITION = _G.STAGGER_RED_TRANSITION or 0.6
 
 -- table indices of bar colors
-local STAGGER_GREEN_INDEX = STAGGER_GREEN_INDEX or 1
-local STAGGER_YELLOW_INDEX = STAGGER_YELLOW_INDEX or 2
-local STAGGER_RED_INDEX = STAGGER_RED_INDEX or 3
+local STAGGER_GREEN_INDEX = _G.STAGGER_GREEN_INDEX or 1
+local STAGGER_YELLOW_INDEX = _G.STAGGER_YELLOW_INDEX or 2
+local STAGGER_RED_INDEX = _G.STAGGER_RED_INDEX or 3
 
 local function UpdateColor(element, cur, max)
 	local colors = element.__owner.colors.power[BREWMASTER_POWER_BAR_NAME]
@@ -104,14 +106,16 @@ local function Visibility(self, event, unit)
 		if(self.Stagger:IsShown()) then
 			self.Stagger:Hide()
 			self:UnregisterEvent('UNIT_AURA', Path)
+		end
+		if SPEC_MONK_WINDWALKER ~= GetSpecialization() then
 			if self.Debuffs then self.Debuffs:SetPoint("BOTTOMRIGHT", self, "TOPRIGHT", 2, 5) end	-- ViksUI
 		end
 	else
 		if(not self.Stagger:IsShown()) then
 			self.Stagger:Show()
 			self:RegisterEvent('UNIT_AURA', Path)
-			if self.Debuffs then self.Debuffs:SetPoint("BOTTOMRIGHT", self, "TOPRIGHT", 2, 19) end	-- ViksUI
 		end
+		if self.Debuffs then self.Debuffs:SetPoint("BOTTOMRIGHT", self, "TOPRIGHT", 2, 19) end	-- ViksUI
 
 		return Path(self, event, unit)
 	end
@@ -141,6 +145,11 @@ local function Enable(self)
 		self:RegisterEvent('UNIT_DISPLAYPOWER', VisibilityPath)
 		self:RegisterEvent('PLAYER_TALENT_UPDATE', VisibilityPath, true)
 
+		element.handler = CreateFrame("Frame", nil, element)	-- ViksUI
+		element.handler:RegisterEvent("PLAYER_TALENT_UPDATE")
+		element.handler:RegisterEvent("PLAYER_ENTERING_WORLD")
+		element.handler:SetScript("OnEvent", function() Visibility(self) end)
+
 		if(element:IsObjectType('StatusBar') and not element:GetStatusBarTexture()) then
 			element:SetStatusBarTexture([[Interface\TargetingFrame\UI-StatusBar]])
 		end
@@ -155,6 +164,7 @@ local function Enable(self)
 		MonkStaggerBar:UnregisterEvent('UNIT_EXITED_VEHICLE')
 		MonkStaggerBar:UnregisterEvent('UPDATE_VEHICLE_ACTIONBAR')
 
+		-- do not change this without taking Visibility into account
 		element:Hide()
 
 		return true

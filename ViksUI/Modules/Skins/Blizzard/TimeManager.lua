@@ -1,5 +1,5 @@
-local T, C, L, _ = unpack(select(2, ...))
-if T.classic or C.skins.blizzard_frames ~= true then return end
+local T, C, L = unpack(ViksUI)
+if C.skins.blizzard_frames ~= true then return end
 
 ----------------------------------------------------------------------------------------
 --	TimeManager skin
@@ -13,9 +13,9 @@ local function LoadSkin()
 
 	T.SkinCloseButton(TimeManagerFrameCloseButton, TimeManagerFrame.backdrop)
 
-	T.SkinDropDownBox(TimeManagerAlarmHourDropDown, 79)
-	T.SkinDropDownBox(TimeManagerAlarmMinuteDropDown, 79)
-	T.SkinDropDownBox(TimeManagerAlarmAMPMDropDown, 70)
+	T.SkinDropDownBox(TimeManagerAlarmTimeFrame.HourDropdown, 79)
+	T.SkinDropDownBox(TimeManagerAlarmTimeFrame.MinuteDropdown, 79)
+	T.SkinDropDownBox(TimeManagerAlarmTimeFrame.AMPMDropdown, 70)
 
 	T.SkinEditBox(TimeManagerAlarmMessageEditBox, nil, TimeManagerAlarmMessageEditBox:GetHeight() - 5)
 

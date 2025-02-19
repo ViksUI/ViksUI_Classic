@@ -1,5 +1,5 @@
-﻿local T, C, L, _ = unpack(select(2, ...))
-if T.classic or C.chat.enable ~= true or C.chat.spam ~= true then return end
+local T, C, L = unpack(ViksUI)
+if C.chat.enable ~= true or C.chat.spam ~= true then return end
 
 T.ChatSpamList = {
 	"золото",
@@ -16,13 +16,12 @@ T.ChatSpamList = {
 	"монетки",
 	"м0нетки",
 	"монеты",
-	"порталы",
-	"портал",
-	"порты",
-	"порт",
+	"visа",
 	"mastercard",
 	"webmoney",
 	"вебмани",
+	"qiwi",
+	"qiwі",
 	"яндекс",
 	"skype",
 	"skуpe",
@@ -30,33 +29,11 @@ T.ChatSpamList = {
 	"скайп",
 	"скаип",
 	"sкайп",
-	"аттестат",
+	"портал",
 	"анус",
-	"анальное",
-	"visа",
-	"qiwi",
-	"qiwі",
-	"к/г",
-	"ісq",
-	"іcq",
-	"аsя",
-	"asя",
-	"овощевик.рф",
-	"nigmаz.сom",
-	"mywowgоld.ru",
-	"rpgbox.ru",
-	"rpgdealer.ru",
-	"gamersgold.ru",
-	"wowelfgold.ru",
-	"arenamasters.ru",
-	"project-razgrom.ru",
-	"[www.project-razgrom.ru]",
-	"dving.ru",
-	"farm4gold.com",
-	"No account",
-	"Hordebank.COM",
-	"RGB boost",
-	"TitaniumBay",
-	"anal",
-	"Anal",
+	"анальное"
 }
+
+for word in gmatch(C.chat.spam_list, "%S+") do
+	tinsert(T.ChatSpamList, word)
+end

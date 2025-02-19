@@ -1,4 +1,5 @@
-if select(2, UnitClass("player")) ~= "MONK" then return end
+local T, C, L = unpack(ViksUI)
+if C.unitframe.enable ~= true or T.class ~= "MONK" then return end
 
 local _, ns = ...
 local oUF = ns.oUF
@@ -66,10 +67,10 @@ local function Visibility(self)
 
 	if spec == SPEC_MONK_WINDWALKER then
 		element:Show()
-		if self.Debuffs then self.Debuffs:SetPoint("BOTTOMRIGHT", self, "TOPRIGHT", 2, 19) end
+		-- if self.Debuffs then self.Debuffs:SetPoint("BOTTOMRIGHT", self, "TOPRIGHT", 2, 19) end  --Not changing as its on own anchor
 	else
 		element:Hide()
-		if self.Debuffs then self.Debuffs:SetPoint("BOTTOMRIGHT", self, "TOPRIGHT", 2, 5) end
+		-- if self.Debuffs then self.Debuffs:SetPoint("BOTTOMRIGHT", self, "TOPRIGHT", 2, 5) end  --Not changing as its on own anchor
 	end
 end
 
@@ -83,10 +84,10 @@ local function Enable(self, unit)
 		self:RegisterEvent("UNIT_DISPLAYPOWER", Path)
 		self:RegisterEvent("UNIT_MAXPOWER", Path)
 
-		element.hadler = CreateFrame("Frame", nil, element)
-		element.hadler:RegisterEvent("PLAYER_TALENT_UPDATE")
-		element.hadler:RegisterEvent("PLAYER_ENTERING_WORLD")
-		element.hadler:SetScript("OnEvent", function() Visibility(self) end)
+		element.handler = CreateFrame("Frame", nil, element)
+		element.handler:RegisterEvent("PLAYER_TALENT_UPDATE")
+		element.handler:RegisterEvent("PLAYER_ENTERING_WORLD")
+		element.handler:SetScript("OnEvent", function() Visibility(self) end)
 
 		element.maxChi = 0
 
@@ -100,8 +101,8 @@ local function Disable(self)
 		self:UnregisterEvent("UNIT_POWER_UPDATE", Path)
 		self:UnregisterEvent("UNIT_DISPLAYPOWER", Path)
 		self:UnregisterEvent("UNIT_MAXPOWER", Path)
-		element.hadler:UnregisterEvent("PLAYER_TALENT_UPDATE")
-		element.hadler:UnregisterEvent("PLAYER_ENTERING_WORLD")
+		element.handler:UnregisterEvent("PLAYER_TALENT_UPDATE")
+		element.handler:UnregisterEvent("PLAYER_ENTERING_WORLD")
 	end
 end
 

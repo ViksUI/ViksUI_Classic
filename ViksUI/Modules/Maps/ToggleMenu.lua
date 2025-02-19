@@ -1,4 +1,4 @@
-﻿local T, C, L, _ = unpack(select(2, ...))
+local T, C, L = unpack(ViksUI)
 if C.minimap.enable ~= true or C.minimap.toggle_menu ~= true then return end
 
 ----------------------------------------------------------------------------------------
@@ -65,20 +65,15 @@ C["togglemainmenu"] = {
 			if C.unitframe.enable == true then
 				SlashCmdList.TEST_UF()
 			end
-			if C.announcements.pull_countdown == true then
-				SlashCmdList.PULLCOUNTDOWN()
-			end
 			if C.loot.rolllootframe == true then
 				SlashCmdList.TESTROLL()
 			end
 			if C.threat.enable == true then
-				if not T.classic then SlashCmdList.alThreat() end
+				SlashCmdList.alThreat()
 			end
 			SlashCmdList.DBMTEST()
-			if not T.classic then
-				SlashCmdList.TEST_EXTRABUTTON()
-				SlashCmdList.TEST_ACHIEVEMENT()
-			end
+			SlashCmdList.TEST_EXTRABUTTON()
+			SlashCmdList.TEST_ACHIEVEMENT()
 			--SlashCmdList.GRIDONSCREEN()
 		end
 	},
@@ -130,7 +125,7 @@ C["toggleaddons"] = {
 		GatherMate2.db.profile["showWorldMap"] = not GatherMate2.db.profile["showWorldMap"]
 		GatherMate2:GetModule("Config"):UpdateConfig()
 	end,
-	["ViksUI_Config"] = function()
+	["Viks_ConfigUI"] = function()
 		SlashCmdList.CONFIG()
 	end,
 	["ACP"] = function()
@@ -167,7 +162,7 @@ local defaultframelevel = 0
 
 local function updateTextures(button, checkable)
 	if checkable then
-		local texture = button:CreateTexture(nil, nil, self)
+		local texture = button:CreateTexture()
 		texture:SetColorTexture(1, 1, 1, 0.3)
 		texture:SetPoint("TOPLEFT", button, 2, -2)
 		texture:SetPoint("BOTTOMRIGHT", button, -2, 2)
@@ -180,14 +175,14 @@ end
 local MenuBG = CreateFrame("Frame", "TTMenuBackground", UIParent)
 MenuBG:CreatePanel("Transparent", borderwidth(1), 1, "BOTTOMRIGHT", RChatTab, "TOPRIGHT", 2, 3)
 MenuBG:SetFrameLevel(defaultframelevel)
-MenuBG:SetFrameStrata("HIGH")
+MenuBG:SetFrameStrata("MEDIUM")
 MenuBG:EnableMouse(true)
 MenuBG:Hide()
 
 local AddonBG = CreateFrame("Frame", "TTMenuAddOnBackground", UIParent)
 AddonBG:CreatePanel("Transparent", borderwidth(1), 1, "BOTTOMRIGHT", MenuBG, "BOTTOMRIGHT", 0, 0)
 AddonBG:SetFrameLevel(defaultframelevel)
-AddonBG:SetFrameStrata("HIGH")
+AddonBG:SetFrameStrata("MEDIUM")
 AddonBG:EnableMouse(true)
 AddonBG:Hide()
 
@@ -230,7 +225,7 @@ local function addMainMenuButtons(menuItems, menuName, menuBackground)
 			menuItems[index] = CreateFrame("Button", menuName..index, menuBackground)
 			menuItems[index]:CreatePanel("Overlay", buttonwidth(1), buttonheight(1), "BOTTOM", menuBackground, "BOTTOM", 0, buttonspacing(1))
 			menuItems[index]:SetFrameLevel(defaultframelevel + 1)
-			menuItems[index]:SetFrameStrata("HIGH")
+			menuItems[index]:SetFrameStrata("MEDIUM")
 			if mainmenusize == 0 then
 				menuItems[index]:SetPoint("BOTTOMRIGHT", menuBackground, "BOTTOMRIGHT", buttonspacing(-1), buttonspacing(-1))
 			else
@@ -244,6 +239,8 @@ local function addMainMenuButtons(menuItems, menuName, menuBackground)
 			Text:SetFont(C.media.pixel_font, C.media.pxfontHsize, C.media.pxfontHFlag)
 			Text:SetPoint("CENTER", menuItems[index], 0, 0)
 			Text:SetText(value.text)
+			Text:SetWidth(buttonwidth(1) - buttonspacing(1))
+			Text:SetHeight(C.media.pxfontHsize)
 
 			local hideItem = (value.text == ADDONS)
 			InsertButton(menuItems, index, hideItem)
@@ -266,15 +263,15 @@ OpenMenuBG:CreatePanel("Overlay", borderwidth(1), buttonheight(1) / 1.3, "BOTTOM
 OpenMenuBG:EnableMouse(true)
 OpenMenuBG:RegisterForClicks("AnyUp")
 OpenMenuBG:SetFrameLevel(defaultframelevel)
-OpenMenuBG:SetFrameStrata("HIGH")
+OpenMenuBG:SetFrameStrata("MEDIUM")
 OpenMenuBG:SetScript("OnMouseUp", function()
 	ToggleMenu_Toggle()
-	if (T.class == "MAGE" and T.level >= 17) and _G["TeleportMenu"]:IsShown() then
+	if (T.class == "MAGE" and T.level >= 11) and _G["TeleportMenu"]:IsShown() then
 		_G["TeleportMenu"]:Hide()
 	end
 end)
 OpenMenuBG:HookScript("OnEnter", function(self)
-	if (T.class == "MAGE" and T.level >= 17) and _G["TeleportMenu"]:IsShown() then
+	if (T.class == "MAGE" and T.level >= 11) and _G["TeleportMenu"]:IsShown() then
 	else
 		self:FadeIn()
 	end
@@ -293,7 +290,7 @@ expandbutton:CreatePanel("Overlay", buttonwidth(1), buttonheight(1) / 2, "TOP", 
 expandbutton:EnableMouse(true)
 expandbutton:RegisterForClicks("AnyUp")
 expandbutton:SetFrameLevel(defaultframelevel + 1)
-expandbutton:SetFrameStrata("HIGH")
+expandbutton:SetFrameStrata("MEDIUM")
 updateTextures(expandbutton)
 
 Text = expandbutton:CreateFontString(nil, "OVERLAY")
@@ -349,7 +346,7 @@ if not addonInfo then
 	end
 end
 
-local function addonEnableToggle(self, i)
+local function addonEnableToggle(_, i)
 	local was_enabled = addonInfo[i].enabled
 	for j = 1, GetNumAddOns() do
 		if (addonInfo[j].parent == i and addonInfo[i].collapsed) or (i == j and not addonInfo[addonInfo[i].parent].collapsed) then
@@ -363,7 +360,7 @@ local function addonEnableToggle(self, i)
 	end
 end
 
-local function addonFrameToggle(self, i)
+local function addonFrameToggle(_, i)
 	local name = GetAddOnInfo(i)
 	if C.toggleaddons[name] then
 		if IsAddOnLoaded(i) then
@@ -384,13 +381,13 @@ local function refreshAddOnMenu()
 			end
 		end
 	end
-	menuwidth = ceil(menusize / 25)
-	menuheight = ceil(menusize / menuwidth)
+	local menuwidth = ceil(menusize / 25)
+	local menuheight = ceil(menusize / menuwidth)
 
 	local lastMenuEntryID = lastMainMenuEntryID
 	menusize = mainmenusize
 	for i = 1, GetNumAddOns() do
-		j = totalmainmenusize + i
+		local j = totalmainmenusize + i
 		local name = GetAddOnInfo(i)
 		addonmenuitems[j]:Hide()
 		if addonInfo[i].is_main or addonInfo[i].parent == i or not addonInfo[addonInfo[i].parent].collapsed then
@@ -432,14 +429,14 @@ expandbutton:SetScript("OnMouseUp", function(self)
 end)
 
 for i = 1, GetNumAddOns() do
-	j = totalmainmenusize + i
+	local j = totalmainmenusize + i
 	local name = GetAddOnInfo(i)
 	addonmenuitems[j] = CreateFrame("CheckButton", "AddonMenu"..j, AddonBG)
 	addonmenuitems[j]:CreatePanel("Overlay", buttonwidth(1), buttonheight(1), "BOTTOM", AddonBG, "BOTTOM", 0, buttonspacing(1))
 	addonmenuitems[j]:EnableMouse(true)
 	addonmenuitems[j]:RegisterForClicks("AnyUp")
 	addonmenuitems[j]:SetFrameLevel(defaultframelevel + 1)
-	addonmenuitems[j]:SetFrameStrata("HIGH")
+	addonmenuitems[j]:SetFrameStrata("MEDIUM")
 	updateTextures(addonmenuitems[j], true)
 
 	addonmenuitems[j]:SetChecked(not addonInfo[i].enabled)
@@ -475,7 +472,7 @@ for i = 1, GetNumAddOns() do
 		local expandAddonButton = CreateFrame("Button", "AddonMenuExpand"..j, addonmenuitems[j])
 		expandAddonButton:CreatePanel("Overlay", buttonheight(1) - 4, buttonheight(1) - 4, "TOPLEFT", addonmenuitems[j], "TOPLEFT", 2, -2)
 		expandAddonButton:SetFrameLevel(defaultframelevel + 2)
-		expandAddonButton:SetFrameStrata("HIGH")
+		expandAddonButton:SetFrameStrata("MEDIUM")
 		expandAddonButton:EnableMouse(true)
 		expandAddonButton:RegisterForClicks("AnyUp")
 		updateTextures(expandAddonButton)
@@ -489,7 +486,7 @@ for i = 1, GetNumAddOns() do
 			end
 			GameTooltip:Show()
 		end)
-		expandAddonButton:HookScript("OnLeave", function(self)
+		expandAddonButton:HookScript("OnLeave", function()
 			GameTooltip:Hide()
 		end)
 

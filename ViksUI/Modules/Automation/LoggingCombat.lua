@@ -1,4 +1,4 @@
-local T, C, L, _ = unpack(select(2, ...))
+local T, C, L = unpack(ViksUI)
 if C.automation.logging_combat ~= true then return end
 
 ----------------------------------------------------------------------------------------
@@ -6,9 +6,11 @@ if C.automation.logging_combat ~= true then return end
 ----------------------------------------------------------------------------------------
 local frame = CreateFrame("Frame")
 frame:RegisterEvent("PLAYER_ENTERING_WORLD")
+frame:RegisterEvent("RAID_INSTANCE_WELCOME")
 frame:SetScript("OnEvent", function()
 	local _, instanceType = IsInInstance()
-	if instanceType == "raid" and IsInRaid(LE_PARTY_CATEGORY_HOME) then
+	local _, _, difficultyID, _, _, _, _, instanceID = GetInstanceInfo()
+	if (instanceType == "raid" or (T.SoD and (difficultyID == 198 or instanceID == 48))) and IsInRaid(LE_PARTY_CATEGORY_HOME) then
 		if not LoggingCombat() then
 			LoggingCombat(1)
 			print("|cffffff00"..COMBATLOGENABLED.."|r")

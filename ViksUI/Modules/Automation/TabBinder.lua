@@ -1,4 +1,4 @@
-local T, C, L, _ = unpack(select(2, ...))
+local T, C, L = unpack(ViksUI)
 if C.automation.tab_binder ~= true then return end
 
 ----------------------------------------------------------------------------------------
@@ -14,7 +14,7 @@ TabBinder:RegisterEvent("CHAT_MSG_SYSTEM")
 
 local RTB_Fail, RTB_DefaultKey, LastTargetKey, TargetKey, CurrentBind, Success = false, true
 
-TabBinder:SetScript("OnEvent", function(self, event, ...)
+TabBinder:SetScript("OnEvent", function(_, event, ...)
 	if event == "CHAT_MSG_SYSTEM" then
 		local RTBChatMessage = ...
 		if RTBChatMessage == ERR_DUEL_REQUESTED then

@@ -1,4 +1,4 @@
-local T, C, L = unpack(select(2, ...))
+local T, C, L = unpack(ViksUI)
 if C.unitframe.enable ~= true or C.unitframe.plugins_smooth_bar ~= true then return end
 
 ----------------------------------------------------------------------------------------
@@ -16,7 +16,7 @@ local function Smooth(self, value)
 	end
 end
 
-local function SmoothBar(self, bar)
+local function SmoothBar(_, bar)
 	bar.SetValue_ = bar.SetValue
 	bar.SetValue = Smooth
 end

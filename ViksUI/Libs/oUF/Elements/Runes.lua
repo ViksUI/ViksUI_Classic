@@ -3,7 +3,9 @@ if(select(2, UnitClass('player')) ~= 'DEATHKNIGHT') then return end
 local _, ns = ...
 local oUF = ns.oUF
 
-local runemap = {1, 2, 3, 4, 5, 6}
+if(oUF:IsVanilla() or oUF:IsTBC()) then return end
+
+local runemap = oUF:IsClassic() and {1, 2, 5, 6, 3, 4} or {1, 2, 3, 4, 5, 6}
 local hasSortOrder = false
 
 local function onUpdate(self, elapsed)
@@ -36,25 +38,68 @@ local function descSort(runeAID, runeBID)
 	end
 end
 
-local function UpdateColor(element, runeID)
-	local spec = GetSpecialization() or 0
+local function UpdateColor(self, event, runeID, alt)
+	local element = self.Runes
+
+	local validRuneType = (runeID and type(runeID) == "number" and runeID >= 0 and runeID <= 6)
 
 	local color
-	if(spec ~= 0 and element.colorSpec) then
-		color = element.__owner.colors.runes[spec]
+	if(oUF:IsClassic()) then
+		local runeType = validRuneType and GetRuneType(runeID) or alt
+		color = runeType and self.colors.runes[runeType] or self.colors.power.RUNES
 	else
-		color = element.__owner.colors.power.RUNES
+		local spec = GetSpecialization() or 0
+		if(spec > 0 and spec < 4 and element.colorSpec) then
+			color = self.colors.runes[spec]
+		else
+			color = self.colors.power.RUNES
+		end
 	end
 
 	local r, g, b = color[1], color[2], color[3]
 
-	element[runeID]:SetStatusBarColor(r, g, b)
+	if(oUF:IsClassic() and validRuneType) then
+		element[runeID]:SetStatusBarColor(r, g, b)
 
-	local bg = element[runeID].bg
-	if(bg) then
-		local mu = bg.multiplier or 1
-		bg:SetVertexColor(r * mu, g * mu, b * mu)
+		local bg = element[runeID].bg
+		if(bg) then
+			local mu = bg.multiplier or 1
+			bg:SetVertexColor(r * mu, g * mu, b * mu)
+		end
+	elseif(not oUF:IsClassic()) then
+		for index = 1, #element do
+			element[index]:SetStatusBarColor(r, g, b)
+
+			local bg = element[index].bg
+			if(bg) then
+				local mu = bg.multiplier or 1
+				bg:SetVertexColor(r * mu, g * mu, b * mu)
+			end
+		end
 	end
+
+	--[[ Callback: Runes:PostUpdateColor(r, g, b)
+	Called after the element color has been updated.
+
+	* self - the Runes element
+	* r    - the red component of the used color (number)[0-1]
+	* g    - the green component of the used color (number)[0-1]
+	* b    - the blue component of the used color (number)[0-1]
+	--]]
+	if(element.PostUpdateColor) then
+		element:PostUpdateColor(r, g, b)
+	end
+end
+
+local function ColorPath(self, ...)
+	--[[ Override: Runes.UpdateColor(self, event, ...)
+	Used to completely override the internal function for updating the widgets' colors.
+
+	* self  - the parent object
+	* event - the event triggering the update (string)
+	* ...   - the arguments accompanying the event
+	--]]
+	(self.Runes.UpdateColor or UpdateColor) (self, ...)
 end
 
 local function Update(self, event)
@@ -91,6 +136,10 @@ local function Update(self, event)
 				rune:SetScript('OnUpdate', onUpdate)
 			end
 
+			if(oUF:IsClassic()) then
+				UpdateColor(self, event, runeID)
+			end
+
 			rune:Show()
 		end
 	end
@@ -106,21 +155,7 @@ local function Update(self, event)
 	end
 end
 
-local function Path(self, event, ...)
-	local element = self.Runes
-	if(event ~= 'RUNE_POWER_UPDATE') then
-		--[[ Override: Runes:UpdateColor(runeID)
-		Used to completely override the internal function for updating the widgets' colors.
-
-		* self   - the Runes element
-		* runeID - the index of the updated rune (number)
-		--]]
-		local UpdateColorMethod = element.UpdateColor or UpdateColor
-		for index = 1, #element do
-			UpdateColorMethod(element, index)
-		end
-	end
-
+local function Path(self, ...)
 	--[[ Override: Runes.Override(self, event, ...)
 	Used to completely override the internal update function.
 
@@ -128,11 +163,17 @@ local function Path(self, event, ...)
 	* event - the event triggering the update (string)
 	* ...   - the arguments accompanying the event
 	--]]
-	return (element.Override or Update) (self, event, ...)
+	(self.Runes.Override or Update) (self, ...)
+end
+
+local function AllPath(...)
+	Path(...)
+	ColorPath(...)
 end
 
 local function ForceUpdate(element)
-	return Path(element.__owner, 'ForceUpdate')
+	Path(element.__owner, 'ForceUpdate')
+	ColorPath(element.__owner, 'ForceUpdate')
 end
 
 local function Enable(self, unit)
@@ -148,8 +189,12 @@ local function Enable(self, unit)
 			end
 		end
 
-		self:RegisterEvent('PLAYER_SPECIALIZATION_CHANGED', Path)
+		if(oUF:IsMainline()) then
+			self:RegisterEvent('PLAYER_SPECIALIZATION_CHANGED', ColorPath)
+		end
 		self:RegisterEvent('RUNE_POWER_UPDATE', Path, true)
+		self:RegisterEvent('RUNE_TYPE_UPDATE', ColorPath, true)
+		self:RegisterEvent('PLAYER_ENTERING_WORLD', Path, true)
 
 		return true
 	end
@@ -162,9 +207,13 @@ local function Disable(self)
 			element[i]:Hide()
 		end
 
-		self:UnregisterEvent('PLAYER_SPECIALIZATION_CHANGED', Path)
+		if(oUF:IsMainline()) then
+			self:UnregisterEvent('PLAYER_SPECIALIZATION_CHANGED', ColorPath)
+		end
 		self:UnregisterEvent('RUNE_POWER_UPDATE', Path)
+		self:UnregisterEvent('RUNE_TYPE_UPDATE', ColorPath)
+		self:UnregisterEvent('PLAYER_ENTERING_WORLD', Path)
 	end
 end
 
-oUF:AddElement('Runes', Path, Enable, Disable)
+oUF:AddElement('Runes', AllPath, Enable, Disable)

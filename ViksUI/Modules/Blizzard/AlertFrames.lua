@@ -1,4 +1,4 @@
-﻿local T, C, L, _ = unpack(select(2, ...))
+local T, C, L = unpack(ViksUI)
 if IsAddOnLoaded("MoveAnything") then return end
 
 ----------------------------------------------------------------------------------------
@@ -14,7 +14,7 @@ local alertBlacklist = {
 	TalkingHeadFrame = true
 }
 
-local POSITION, ANCHOR_POINT, YOFFSET = "BOTTOM", "TOP", -9
+local POSITION, ANCHOR_POINT, YOFFSET, FIRST_YOFFSET = "BOTTOM", "TOP", -9
 
 local function CheckGrow()
 	local point = AchievementAnchor:GetPoint()
@@ -41,14 +41,6 @@ local ReplaceAnchors do
 			alertFrame:SetPoint(POSITION, relativeAlert, ANCHOR_POINT, 0, YOFFSET)
 			relativeAlert = alertFrame
 		end
-
-		-- if C.loot.rolllootframe then
-			-- GroupLootContainer:ClearAllPoints()
-			-- GroupLootContainer:SetPoint(POSITION, relativeAlert, ANCHOR_POINT, 0, YOFFSET)
-		-- else
-			-- GroupLootContainer:ClearAllPoints()
-			-- GroupLootContainer:SetPoint(POSITION, AchievementAnchor, POSITION, 2, FIRST_YOFFSET)
-		-- end
 
 		return relativeAlert
 	end
@@ -97,13 +89,15 @@ local ReplaceAnchors do
 end
 
 local function SetUpAlert()
+	GroupLootContainer:EnableMouse(false)
+
 	hooksecurefunc(AlertFrame, "UpdateAnchors", function(self)
 		CheckGrow()
 		self:ClearAllPoints()
 		self:SetPoint(POSITION, AchievementAnchor, POSITION, 2, FIRST_YOFFSET)
 	end)
 
-	hooksecurefunc(AlertFrame, "AddAlertFrameSubSystem", function(self, alertFrameSubSystem)
+	hooksecurefunc(AlertFrame, "AddAlertFrameSubSystem", function(_, alertFrameSubSystem)
 		local _, isBlacklisted = ReplaceAnchors(alertFrameSubSystem)
 		if isBlacklisted then
 			for i, alertSubSystem in ipairs(AlertFrame.alertFrameSubSystems) do

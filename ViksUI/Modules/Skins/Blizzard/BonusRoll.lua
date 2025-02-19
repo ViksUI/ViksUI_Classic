@@ -1,11 +1,11 @@
-local T, C, L, _ = unpack(select(2, ...))
-if T.classic or C.skins.blizzard_frames ~= true then return end
+local T, C, L = unpack(ViksUI)
+if C.skins.blizzard_frames ~= true then return end
 
 ----------------------------------------------------------------------------------------
 --	BonusRoll skin
 ----------------------------------------------------------------------------------------
 local function LoadSkin()
-	-- /run BonusRollFrame_StartBonusRoll(242969,'test',40,515,79,14)
+	-- /run BonusRollFrame_StartBonusRoll(242969,"test",40,515,79,14)
 	BonusRollFrame:StripTextures()
 	BonusRollFrame:CreateBackdrop("Transparent")
 	BonusRollFrame.backdrop:SetFrameLevel(0)
@@ -24,10 +24,10 @@ local function LoadSkin()
 	BonusRollFrame.PromptFrame.IconBackdrop:SetPoint("BOTTOMRIGHT", BonusRollFrame.PromptFrame.Icon, 2, -2)
 
 	BonusRollFrame.PromptFrame.Timer:CreateBackdrop("Default")
-	BonusRollFrame.PromptFrame.Timer.Bar:SetColorTexture(1, 1, 1)
+	BonusRollFrame.PromptFrame.Timer:SetStatusBarTexture(C.media.texture)
 	BonusRollFrame.PromptFrame.Timer:SetPoint("BOTTOMLEFT", BonusRollFrame.PromptFrame, "BOTTOMLEFT", 0, 1)
 
-	BonusRollFrame.SpecRing:SetTexture("")
+	BonusRollFrame.SpecRing:SetTexture(0)
 	BonusRollFrame.SpecIcon:SetPoint("TOPLEFT", BonusRollFrame, "TOPLEFT", 0, -3)
 	BonusRollFrame.SpecIcon:SetTexCoord(0.1, 0.9, 0.1, 0.9)
 	-- BonusRollFrame.SpecIcon:SetTexture("Interface\\Icons\\spell_nature_brilliance")
@@ -51,15 +51,46 @@ local function LoadSkin()
 		end
 	end)
 
+	-- Skin currency icons
 	hooksecurefunc("BonusRollFrame_StartBonusRoll", function()
-		-- skin currency icons
 		local ccf, pfifc = BonusRollFrame.CurrentCountFrame.Text, BonusRollFrame.PromptFrame.InfoFrame.Cost
 		local text1, text2 = ccf and ccf:GetText(), pfifc and pfifc:GetText()
-		if text1 and text1:find('|t') then ccf:SetText(text1:gsub('|T(.-):.-|t', '|T%1:16:16:0:0:64:64:5:59:5:59|t')) end
-		if text2 and text2:find('|t') then pfifc:SetText(text2:gsub('|T(.-):.-|t', '|T%1:16:16:0:0:64:64:5:59:5:59|t')) end
+		if text1 and text1:find("|t") then ccf:SetText(text1:gsub("|T(.-):.-|t", "|T%1:16:16:0:0:64:64:5:59:5:59|t")) end
+		if text2 and text2:find("|t") then pfifc:SetText(text2:gsub("|T(.-):.-|t", "|T%1:16:16:0:0:64:64:5:59:5:59|t")) end
 	end)
 
-	T.SkinHelpBox(BonusRollFrame.PromptFrame.EncounterJournalLinkButtonHelp)
+	-- Group loot roll
+	hooksecurefunc("GroupLootContainer_OpenNewFrame", function()
+		for i = 1, 4 do
+			local frame = _G["GroupLootFrame"..i]
+			if not frame.styled then
+				frame:StripTextures()
+				frame:CreateBackdrop("Transparent")
+
+				frame.Timer:CreateBackdrop("Default")
+				frame.Timer:SetStatusBarTexture(C.media.texture)
+				frame.Timer:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 6, 4)
+
+				frame.IconFrame.Border:SetAlpha(0)
+				frame.IconFrame.Icon:SkinIcon()
+				frame.IconFrame.Icon:ClearAllPoints()
+				frame.IconFrame.Icon:SetPoint("LEFT", frame, 6, 6)
+
+				frame.styled = true
+			end
+		end
+	end)
+
+	-- Loot after finished dungeon (not tested)
+	-- hooksecurefunc("BossBanner_ConfigureLootFrame", function(frame)
+		-- local button = frame.IconHitBox
+		-- if not button.styled then
+			-- frame.Icon:SkinIcon()
+			-- T.SkinIconBorder(button.IconBorder, frame.Icon:GetParent().backdrop)
+
+			-- button.styled = true
+		-- end
+	-- end
 end
 
 tinsert(T.SkinFuncs["ViksUI"], LoadSkin)

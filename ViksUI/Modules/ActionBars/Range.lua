@@ -1,210 +1,512 @@
-local T, C, L, _ = unpack(select(2, ...))
+local T, C, L = unpack(ViksUI)
 if C.actionbar.enable ~= true then return end
 
 ----------------------------------------------------------------------------------------
 --	Out of range check(tullaRange by Tuller)
 ----------------------------------------------------------------------------------------
--- Locals and speed
-local _G = _G
-local next = next
-local pairs = pairs
+local AddonName = ...
 
-local UPDATE_DELAY = 0.15
-local ATTACK_BUTTON_FLASH_TIME = ATTACK_BUTTON_FLASH_TIME
+local Addon = CreateFrame("Frame", AddonName, SettingsPanel or InterfaceOptionsFrame)
 
+-- the name of the database
+local DB_KEY = "TULLARANGE_COLORS"
+
+-- frequently used globals
+local GetActionInfo = GetActionInfo
+local GetMacroInfo = GetMacroInfo
+local GetMacroSpell = GetMacroSpell
+local GetPetActionInfo = GetPetActionInfo
+local GetPetActionSlotUsable = GetPetActionSlotUsable
+local GetSpellPowerCost = GetSpellPowerCost
 local IsActionInRange = IsActionInRange
 local IsUsableAction = IsUsableAction
-local HasAction = HasAction
+local UnitPower = UnitPower
 
-local function timer_Create(parent, interval)
-	local updater = parent:CreateAnimationGroup()
-	updater:SetLooping("NONE")
-	updater:SetScript("OnFinished", function()
-		if parent:Update() then
-			parent:Start(interval)
+
+local SpecialMacroNames = setmetatable({}, {
+	__index = function(t, k)
+		local result = k:sub(1, 1) == "#"
+
+		t[k] = result
+
+		return result
+	end
+})
+
+local function actionButton_GetState(button)
+	local action = button.action
+	local actionType, actionTypeID = GetActionInfo(action)
+
+	if actionType then
+		if actionType == "macro" then
+			-- for macros with names that start with a #, we prioritize the OOM check
+			-- using a spell cost strategy over other ones to better clarify if the
+			-- macro is actually usable or not
+			local name = GetMacroInfo(actionTypeID)
+
+			if name and SpecialMacroNames[name] then
+				local spellID = GetMacroSpell(actionTypeID)
+
+				-- only run the check for spell macros
+				if spellID then
+					local costs = GetSpellPowerCost(spellID)
+					for i = 1, #costs do
+						local cost = costs[i]
+
+						if UnitPower("player", cost.type) < cost.minCost then
+							return "oom"
+						end
+					end
+				end
+			end
 		end
-	end)
 
-	local a = updater:CreateAnimation("Animation")
-	a:SetOrder(1)
-
-	parent.Start = function(self)
-		self:Stop()
-		a:SetDuration(interval)
-		updater:Play()
-		return self
-	end
-
-	parent.Stop = function(self)
-		if updater:IsPlaying() then
-			updater:Stop()
+		local isUsable, notEnoughMana = IsUsableAction(action)
+		if isUsable then
+			if IsActionInRange(action) == false then
+				return "oor"
+			end
+		elseif notEnoughMana then
+			return "oom"
+		else
+			return "unusable"
 		end
-		return self
 	end
 
-	parent.Active = function()
-		return updater:IsPlaying()
-	end
-
-	return parent
+	return "normal"
 end
 
--- Main thing
-local tullaRange = timer_Create(CreateFrame("Frame", "tullaRange"), UPDATE_DELAY)
+--------------------------------------------------------------------------------
+-- Saved settings setup stuff
+--------------------------------------------------------------------------------
 
-function tullaRange:Load()
+local function removeDefaults(tbl, defaults)
+	for k, v in pairs(defaults) do
+		if type(tbl[k]) == "table" and type(v) == "table" then
+			removeDefaults(tbl[k], v)
+			if next(tbl[k]) == nil then
+				tbl[k] = nil
+			end
+		elseif tbl[k] == v then
+			tbl[k] = nil
+		end
+	end
+
+	return tbl
+end
+
+local function copyDefaults(tbl, defaults)
+	for k, v in pairs(defaults) do
+		if type(v) == "table" then
+			tbl[k] = copyDefaults(tbl[k] or {}, v)
+		elseif tbl[k] == nil then
+			tbl[k] = v
+		end
+	end
+
+	return tbl
+end
+
+function Addon:GetDatabaseDefaults()
+	return {
+		-- how frequently we want to update, in seconds
+		updateDelay = 0.2,
+
+		-- enable range coloring on pet actions
+		petActions = true,
+
+		-- enable flash animations
+		flashAnimations = true,
+		flashDuration = ATTACK_BUTTON_FLASH_TIME * 1.5,
+
+		-- default colors (r, g, b, a, desaturate)
+		normal = {1, 1, 1, 1, desaturate = false},
+		oor = {1, 0.3, 0.1, 1, desaturate = true},
+		oom = {0.1, 0.3, 1, 1, desaturate = true},
+		unusable = {0.4, 0.4, 0.4, 1, desaturate = false}
+	}
+end
+
+--------------------------------------------------------------------------------
+-- Event Handlers
+--------------------------------------------------------------------------------
+
+-- addon intially loaded
+function Addon:OnLoad()
+	-- a table for the action buttons we want to periodically check the range of
+	self.watchedActions = {}
+
+	-- a table for the action buttons we want to periodically check the ranges of
+	self.watchedPetActions = {}
+
+	-- a table for all of the known action button states
+	self.buttonStates = {}
+
+	-- setup script handlers
 	self:SetScript("OnEvent", self.OnEvent)
+	self:SetScript("OnShow", self.OnShow)
+
+	-- register any events we need to watch
+	self:RegisterEvent("ADDON_LOADED")
 	self:RegisterEvent("PLAYER_LOGIN")
 	self:RegisterEvent("PLAYER_LOGOUT")
+
+	-- drop this method, as we won't need it again
+	self.OnLoad = nil
 end
 
--- Frame Events
-function tullaRange:OnEvent(event, ...)
-	local action = self[event]
-	if action then
-		action(self, event, ...)
+function Addon:OnEvent(event, ...)
+	local func = self[event]
+
+	if func then
+		func(self, event, ...)
 	end
 end
 
--- Game Events
-function tullaRange:PLAYER_LOGIN()
-	self.colors = {
-		normal = {1, 1, 1},
-		oor = {1, 0.3, 0.1},
-		oom = {0.1, 0.3, 1},
-		unusable = {0.4, 0.4, 0.4}
-	}
-
-	self.buttonsToUpdate = {}
-
-	hooksecurefunc("ActionButton_OnUpdate", self.RegisterButton)
-	hooksecurefunc("ActionButton_UpdateUsable", self.OnUpdateButtonUsable)
-	hooksecurefunc("ActionButton_Update", self.OnButtonUpdate)
-end
-
--- Actions
-function tullaRange:Update()
-	return self:UpdateButtons(UPDATE_DELAY)
-end
-
-function tullaRange:ForceColorUpdate()
-	for button in pairs(self.buttonsToUpdate) do
-		tullaRange.OnUpdateButtonUsable(button)
+-- when the addon finishes loading
+function Addon:ADDON_LOADED(event, addonName)
+	if addonName ~= AddonName then
+		return
 	end
+
+	-- setup our saved settings stuff
+	local sets = _G[DB_KEY]
+
+	if not sets then
+		sets = {}
+		_G[DB_KEY] = sets
+	end
+
+	self.sets = copyDefaults(sets, self:GetDatabaseDefaults())
+
+	-- get rid of the handler, as we don't need it anymore
+	self:UnregisterEvent(event)
+	self[event] = nil
 end
 
-function tullaRange:UpdateActive()
-	if next(self.buttonsToUpdate) then
-		if not self:Active() then
-			self:Start()
+-- when the player first logs in
+function Addon:PLAYER_LOGIN(event)
+	local function button_StartFlash(button)
+		if button:IsVisible() then
+			self:StartButtonFlashing(button)
 		end
-	else
-		self:Stop()
 	end
-end
 
-function tullaRange:UpdateButtons(elapsed)
-	if next(self.buttonsToUpdate) then
-		for button in pairs(self.buttonsToUpdate) do
-			self:UpdateButton(button, elapsed)
+	local function actionButton_OnShowHide(button)
+		self:UpdateActionButtonWatched(button)
+		self:UpdateButtonFlashing(button)
+	end
+
+	local function actionButton_Update(button)
+		self:UpdateActionButtonWatched(button)
+	end
+
+	local function actionButton_UpdateUsable(button)
+		local state = actionButton_GetState(button)
+
+		self.buttonStates[button] = state
+
+		local color = self.sets[state]
+		button.icon:SetDesaturated(color.desaturate)
+		button.icon:SetVertexColor(color[1], color[2], color[3], color[4], color[5])
+	end
+
+	-- register existing action buttons
+	-- the method varies between classic and shadowlands, as action buttons in
+	-- shadowlands use ActionBarActionButtonMixin
+	local ActionBarActionButtonMixin = ActionBarActionButtonDerivedMixin or ActionBarActionButtonMixin
+	if ActionBarActionButtonMixin and not T.Vanilla115 and not T.Cata then -- TODO: Does this need fixing?
+		local function actionButton_OnLoad(button)
+			button:SetScript("OnUpdate", nil)
+			button:HookScript("OnShow", actionButton_OnShowHide)
+			button:HookScript("OnHide", actionButton_OnShowHide)
+
+			-- Update is called whenever an action button changes, so we
+			-- check here to we if we need to pay attention to the button anymore
+			hooksecurefunc(button, "Update", actionButton_Update)
+
+			-- UpdateUsable is called when the button normally changes
+			-- color when unusuable, so we need to reapply our custom coloring
+			hooksecurefunc(button, "UpdateUsable", actionButton_UpdateUsable)
+
+			if self.sets.flashAnimations then
+				hooksecurefunc(button, "StartFlash", button_StartFlash)
+			end
+
+			self:UpdateActionButtonWatched(button)
 		end
-		return true
-	end
-	return false
-end
 
-function tullaRange:UpdateButton(button, elapsed)
-	tullaRange.UpdateButtonUsable(button)
-	tullaRange.UpdateButtonFlash(button, elapsed)
-end
+		-- hook any existing frames that are derived from ActionBarActionButtonMixin
+		local f = EnumerateFrames()
 
-function tullaRange:UpdateButtonStatus(button)
-	local action = button.action
-	if action and button:IsVisible() and HasAction(action) then
-		self.buttonsToUpdate[button] = true
+		while f do
+			if f.OnLoad == ActionBarActionButtonMixin.OnLoad then
+				actionButton_OnLoad(f)
+			end
+
+			f = EnumerateFrames(f)
+		end
+
+		-- grab later ones, too
+		hooksecurefunc(ActionBarActionButtonMixin, "OnLoad", actionButton_OnLoad)
 	else
-		self.buttonsToUpdate[button] = nil
+		local function actionButton_OnUpdate(button)
+			button:SetScript("OnUpdate", nil)
+			button:HookScript("OnShow", actionButton_OnShowHide)
+			button:HookScript("OnHide", actionButton_OnShowHide)
+
+			self:UpdateActionButtonWatched(button)
+		end
+
+		-- hook any action button events we need to take care of
+		-- register events on update initially, and wipe out their individual on
+		-- update handlers. This is why tullaRange has a negative performance
+		-- impact
+		hooksecurefunc("ActionButton_OnUpdate", actionButton_OnUpdate)
+
+		-- ActionButton_UpdateUsable is called when the button normally changes
+		-- color when unusuable, so we need to reapply our custom coloring at this
+		-- point
+		hooksecurefunc("ActionButton_UpdateUsable", actionButton_UpdateUsable)
+
+		-- ActionButton_Update is called whenever an action button changes, so we
+		-- check here to we if we need to pay attention to the button anymore or not
+		hooksecurefunc("ActionButton_Update", actionButton_Update)
+
+		-- setup flash animations
+		if self.sets.flashAnimations then
+			hooksecurefunc("ActionButton_StartFlash", button_StartFlash)
+		end
 	end
-	self:UpdateActive()
-end
 
--- Button Hooking
-function tullaRange.RegisterButton(button)
-	button:HookScript("OnShow", tullaRange.OnButtonUpdate)
-	button:HookScript("OnHide", tullaRange.OnButtonUpdate)
-	button:SetScript("OnUpdate", nil)
+	-- register pet actions, if we want to
+	if self.sets.petActions then
+		-- register all pet action slots
+		self.petActions = {}
 
-	tullaRange:UpdateButtonStatus(button)
-end
+		for i = 1, NUM_PET_ACTION_SLOTS do
+			self.petActions[i] =  _G["PetActionButton" .. i]
+		end
 
-function tullaRange.OnUpdateButtonUsable(button)
-	button.tullaRangeColor = nil
-	tullaRange.UpdateButtonUsable(button)
-end
+		local function petButton_OnShowHide(button)
+			self:UpdatePetActionButtonWatched(button)
+			self:UpdateButtonFlashing(button)
+		end
 
-function tullaRange.OnButtonUpdate(button)
-	tullaRange:UpdateButtonStatus(button)
-end
+		local function petButton_OnUpdate(button)
+			button:SetScript("OnUpdate", nil)
+			button:HookScript("OnShow", petButton_OnShowHide)
+			button:HookScript("OnHide", petButton_OnShowHide)
+			self:UpdatePetActionButtonWatched(button)
+		end
 
--- Range Coloring
-function tullaRange.UpdateButtonUsable(button)
-	local action = button.action
-	local isUsable, notEnoughMana = IsUsableAction(action)
+		local function petActionBar_Update(bar)
+			-- the UI does not actually use the self arg here
+			-- and sometimes calls the method without it
+			bar = bar or _G.PetActionBarFrame
 
-	-- Usable
-	if isUsable then
-		-- Out of range
-		if IsActionInRange(action) == false then
-			tullaRange.SetButtonColor(button, "oor")
-		-- In range
+			-- reset the timer on update, so that we don't trigger the bar's
+			-- own range updater code
+			bar.rangeTimer = nil
+
+			-- if we have a bar, update all the actions
+			if PetHasActionBar() then
+				for _, button in pairs(self.petActions) do
+					-- clear our current styling
+					self.buttonStates[button] = nil
+					self:UpdatePetActionButtonWatched(button)
+				end
+			else
+				-- if we don't, wipe any actions we currently are showing
+				wipe(self.watchedPetActions)
+			end
+		end
+
+		-- hook any pet button events we need to take care of
+		-- register events on update initially, and wipe out their individual on
+		-- update handlers
+		local PetActionBar = _G.PetActionBar
+
+		if type(PetActionBar) == "table" then
+			if type(PetActionBar.Update) == "function" then
+				hooksecurefunc(PetActionBar, "Update", petActionBar_Update)
+			end
+
+			if type(PetActionBar.actionButtons) == "table" then
+				for _, button in pairs(PetActionBar.actionButtons) do
+					hooksecurefunc(button, "OnUpdate", petButton_OnUpdate)
+					hooksecurefunc(button, "StartFlash", button_StartFlash)
+				end
+			end
 		else
-			tullaRange.SetButtonColor(button, "normal")
+			hooksecurefunc("PetActionButton_OnUpdate", petButton_OnUpdate)
+			hooksecurefunc("PetActionBar_Update", petActionBar_Update)
+
+			if self.sets.flashAnimations then
+				hooksecurefunc("PetActionButton_StartFlash", button_StartFlash)
+			end
 		end
-	-- Out of mana
-	elseif notEnoughMana then
-		tullaRange.SetButtonColor(button, "oom")
-	-- Unusable
-	else
-		tullaRange.SetButtonColor(button, "unusable")
+	end
+
+	-- get rid of the handler, as we don't need it anymore
+	self:UnregisterEvent(event)
+	self[event] = nil
+end
+
+function Addon:PLAYER_LOGOUT()
+	if self.sets then
+		removeDefaults(self.sets, self:GetDatabaseDefaults())
 	end
 end
 
-function tullaRange.SetButtonColor(button, colorType)
-	if button.tullaRangeColor ~= colorType then
-		button.tullaRangeColor = colorType
+--------------------------------------------------------------------------------
+-- Update API
+--------------------------------------------------------------------------------
 
-		local r, g, b = tullaRange:GetColor(colorType)
-		button.icon:SetVertexColor(r, g, b)
-	end
-end
 
-function tullaRange.UpdateButtonFlash(button, elapsed)
-	if button.flashing ~= 1 then return end
+function Addon:HandleUpdate()
+	local states = self.buttonStates
 
-	local flashtime = button.flashtime - elapsed
+	-- update actions
+	for button in pairs(self.watchedActions) do
+		local state = actionButton_GetState(button)
 
-	if flashtime <= 0 then
-		local overtime = -flashtime
-		if overtime >= ATTACK_BUTTON_FLASH_TIME then
-			overtime = 0
+		if states[button] ~= state then
+			states[button] = state
+
+			local color = self.sets[state]
+			button.icon:SetDesaturated(color.desaturate)
+			button.icon:SetVertexColor(color[1], color[2], color[3], color[4], color[5])
 		end
-		flashtime = ATTACK_BUTTON_FLASH_TIME - overtime
+	end
 
-		local flashTexture = button.Flash
-		if flashTexture:IsShown() then
-			flashTexture:Hide()
+	-- update pet actions
+	for button in pairs(self.watchedPetActions) do
+		-- pet action button specific stuff
+		local slot = button:GetID() or 0
+		local isUsable, notEnoughMana = GetPetActionSlotUsable(slot)
+		local state
+
+		-- usable (ignoring target information)
+		if isUsable then
+			local _, _, _, _, _, _, _, checksRange, inRange = GetPetActionInfo(slot)
+
+			-- but out of range
+			if checksRange and not inRange then
+				state = "oor"
+			else
+				state = "normal"
+			end
+		elseif notEnoughMana then
+			state = "oom"
 		else
-			flashTexture:Show()
+			state = "unusable"
+		end
+
+		if states[button] ~= state then
+			states[button] = state
+
+			local color = self.sets[state]
+			button.icon:SetDesaturated(color.desaturate)
+			button.icon:SetVertexColor(color[1], color[2], color[3], color[4], color[5])
+		end
+	end
+end
+
+function Addon:UpdateActionButtonWatched(button)
+	if button.action and button:IsVisible() and ActionHasRange(button.action) then
+		if not self.watchedActions[button] then
+			self.watchedActions[button] = true
+			self:UpdateActive()
+		end
+	elseif self.watchedActions[button] then
+		self.watchedActions[button] = nil
+		self:UpdateActive()
+	end
+end
+
+local function petActionHasRange(id)
+	local _, _, _, _, _, _, _, checksRange = GetPetActionInfo(id)
+
+	return checksRange
+end
+
+function Addon:UpdatePetActionButtonWatched(button)
+	if button:IsVisible() and petActionHasRange(button:GetID() or 0) then
+		if not self.watchedPetActions[button] then
+			self.watchedPetActions[button] = true
+			self:UpdateActive()
+		end
+	elseif self.watchedPetActions[button] then
+		self.watchedPetActions[button] = nil
+		self:UpdateActive()
+	end
+end
+
+function Addon:UpdateActive()
+	if next(self.watchedActions) or next(self.watchedPetActions) then
+		if not self.ticker then
+			self.ticker = C_Timer.NewTicker(self.sets.updateDelay, function()
+				self:HandleUpdate()
+			end)
+		end
+	elseif self.ticker then
+		self.ticker:Cancel()
+		self.ticker = nil
+	end
+end
+
+--------------------------------------------------------------------------------
+-- Flashing replacement
+--------------------------------------------------------------------------------
+
+local function alpha_OnFinished(self)
+	if self.owner.flashing ~= 1 then
+		Addon:StopButtonFlashing(self.owner)
+	end
+end
+
+function Addon:StartButtonFlashing(button)
+	local animation = self.flashAnimations and self.flashAnimations[button]
+
+	if not animation then
+		animation = button.Flash:CreateAnimationGroup()
+		animation:SetLooping("BOUNCE")
+
+		local alpha = animation:CreateAnimation("ALPHA")
+		alpha:SetDuration(self.sets.flashDuration)
+		alpha:SetFromAlpha(0)
+		alpha:SetToAlpha(1)
+		alpha:SetScript("OnFinished", alpha_OnFinished)
+		alpha.owner = button
+
+		if self.flashAnimations then
+			self.flashAnimations[button] = animation
+		else
+			self.flashAnimations = {[button] = animation}
 		end
 	end
 
-	button.flashtime = flashtime
+	button.Flash:Show()
+	animation:Play()
 end
 
-function tullaRange:GetColor(index)
-	local color = self.colors[index]
-	return color[1], color[2], color[3]
+function Addon:StopButtonFlashing(button)
+	local animation = self.flashAnimations and self.flashAnimations[button]
+
+	if animation then
+		animation:Stop()
+		button.Flash:Hide()
+	end
 end
 
--- Load The Thing
-tullaRange:Load()
+function Addon:UpdateButtonFlashing(button)
+	if button.flashing == 1 and button:IsVisible() then
+		self:StartButtonFlashing(button)
+	else
+		self:StopButtonFlashing(button)
+	end
+end
+
+-- load the addon
+Addon:OnLoad()

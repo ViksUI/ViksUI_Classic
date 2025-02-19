@@ -1,4 +1,4 @@
-local T, C, L = unpack(select(2, ...))
+local T, C, L = unpack(ViksUI)
 if C.unitframe.enable ~= true or C.unitframe.plugins_gcd ~= true then return end
 
 ----------------------------------------------------------------------------------------
@@ -10,25 +10,32 @@ local oUF = ns.oUF
 local starttime, duration, usingspell, spellid
 local GetTime = GetTime
 
+local function OnUpdateSpark(self)
+	self.Spark:ClearAllPoints()
+	local elapsed = GetTime() - starttime
+	local perc = elapsed / duration
+	if perc > 1 then
+		self:Hide()
+		return
+	else
+		self.Spark:SetPoint("CENTER", self, "LEFT", self.width * perc, 0)
+	end
+end
+
+local function OnHide(self)
+	self:SetScript("OnUpdate", nil)
+	usingspell = nil
+end
+
+local function OnShow(self)
+	self:SetScript("OnUpdate", OnUpdateSpark)
+end
+
 local spells
 
-if not T.classic then
+if T.Classic then
 	spells = {
-		["DEATHKNIGHT"] = 50977,
-		["DEMONHUNTER"] = 204157,
-		["DRUID"] = 8921,
-		["HUNTER"] = 982,
-		["MAGE"] = 118,
-		["MONK"] = 100780,
-		["PALADIN"] = 35395,
-		["PRIEST"] = 585,
-		["ROGUE"] = 1752,
-		["SHAMAN"] = 403,
-		["WARLOCK"] = 686,
-		["WARRIOR"] = 57755,
-	}
-else
-	spells = {
+		["DEATHKNIGHT"] = 45902,
 		["DRUID"] = 1126,
 		["HUNTER"] = 1978,
 		["MAGE"] = 168,
@@ -39,53 +46,37 @@ else
 		["WARLOCK"] = 687,
 		["WARRIOR"] = 6673,
 	}
+else
+	spells = {
+		["DEATHKNIGHT"] = 61304,
+		["DEMONHUNTER"] = 61304,
+		["DRUID"] = 61304,
+		["HUNTER"] = 61304,
+		["MAGE"] = 61304,
+		["MONK"] = 61304,
+		["PALADIN"] = 61304,
+		["PRIEST"] = 61304,
+		["ROGUE"] = 61304,
+		["SHAMAN"] = 61304,
+		["WARLOCK"] = 61304,
+		["WARRIOR"] = 61304,
+	}
 end
 
-local Enable = function(self)
-	if not self.GCD then return end
-	local bar = self.GCD
-	local width = bar:GetWidth()
-	bar:Hide()
-
-	bar.spark = bar:CreateTexture(nil, "DIALOG")
-	bar.spark:SetTexture(C.media.blank)
-	bar.spark:SetVertexColor(unpack(bar.Color))
-	bar.spark:SetHeight(bar.Height)
-	bar.spark:SetWidth(bar.Width)
-	bar.spark:SetBlendMode("ADD")
-
-	local function OnUpdateSpark()
-		bar.spark:ClearAllPoints()
-		local elapsed = GetTime() - starttime
-		local perc = elapsed / duration
-		if perc > 1 then
-			return bar:Hide()
-		else
-			bar.spark:SetPoint("CENTER", bar, "LEFT", width * perc, 0)
-		end
+local function Init()
+	local isKnown = IsSpellKnown(spells[T.class])
+	if isKnown then
+		spellid = spells[T.class]
 	end
-
-	local function Init()
-		local isKnown = IsSpellKnown(spells[T.class])
-		if isKnown then
-			spellid = spells[T.class]
-		end
-		if spellid == nil then
-			return
-		end
-		return spellid
+	if spellid == nil then
+		return
 	end
+	return spellid
+end
 
-	local function OnHide()
-		bar:SetScript("OnUpdate", nil)
-		usingspell = nil
-	end
-
-	local function OnShow()
-		bar:SetScript("OnUpdate", OnUpdateSpark)
-	end
-
-	local function UpdateGCD()
+local function Update(self)
+	local element = self.GCD
+	if(element) then
 		if spellid == nil then
 			if Init() == nil then
 				return
@@ -96,17 +87,46 @@ local Enable = function(self)
 			usingspell = 1
 			starttime = start
 			duration = dur
-			bar:Show()
+			element:Show()
 			return
 		elseif usingspell == 1 and dur == 0 then
-			bar:Hide()
+			element:Hide()
 		end
 	end
-
-	bar:SetScript("OnShow", OnShow)
-	bar:SetScript("OnHide", OnHide)
-
-	self:RegisterEvent("ACTIONBAR_UPDATE_COOLDOWN", UpdateGCD, true)
 end
 
-oUF:AddElement("GCD", UpdateGCD, Enable)
+local function Enable(self)
+	local element = self.GCD
+	if(element) then
+		element.__owner = self
+		element.ForceUpdate = ForceUpdate
+
+		element.width = element:GetWidth()
+		element:Hide()
+
+		element.Spark = element:CreateTexture(nil, "OVERLAY")
+		element.Spark:SetTexture(C.media.blank)
+		element.Spark:SetVertexColor(unpack(element.Color))
+		element.Spark:SetHeight(element.Height)
+		element.Spark:SetWidth(element.Width)
+		element.Spark:SetBlendMode("ADD")
+
+		element:SetScript("OnShow", OnShow)
+		element:SetScript("OnHide", OnHide)
+
+		self:RegisterEvent("ACTIONBAR_UPDATE_COOLDOWN", Update, true)
+
+		return true
+	end
+end
+
+local function Disable(self)
+	local element = self.GCD
+	if(element) then
+		element:Hide()
+
+		self:UnregisterEvent("ACTIONBAR_UPDATE_COOLDOWN", Update)
+	end
+end
+
+oUF:AddElement("GCD", Update, Enable, Disable)

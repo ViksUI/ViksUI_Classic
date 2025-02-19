@@ -1,4 +1,4 @@
-local T, C, L = unpack(select(2, ...))
+local T, C, L = unpack(ViksUI)
 if C.unitframe.enable ~= true or C.unitframe.plugins_aura_watch ~= true then return end
 
 ----------------------------------------------------------------------------------------
@@ -6,8 +6,6 @@ if C.unitframe.enable ~= true or C.unitframe.plugins_aura_watch ~= true then ret
 ----------------------------------------------------------------------------------------
 local _, ns = ...
 local oUF = ns.oUF
-
-local LibClassicDurations = oUF:IsClassic() and LibStub("LibClassicDurations")
 
 local GUIDs = {}
 
@@ -22,7 +20,7 @@ do
 	local cache = setmetatable({}, {__type = "k"})
 
 	local frame = CreateFrame("Frame")
-	frame:SetScript("OnEvent", function(self, event)
+	frame:SetScript("OnEvent", function()
 		for k,t in pairs(GUIDs) do
 			GUIDs[k] = nil
 			for a in pairs(t) do
@@ -56,10 +54,7 @@ local function resetIcon(icon, count, duration, remaining)
 		end
 	end
 	if icon.count then
-		icon.count:SetText((count > 1 and count))
-	end
-	if icon.overlay then
-		icon.overlay:Hide()
+		icon.count:SetText((count > 1 and count or ""))
 	end
 	icon:SetAlpha(1)
 end
@@ -68,14 +63,11 @@ local function expireIcon(icon)
 	if icon.cd then icon.cd:Hide() end
 	if icon.count then icon.count:SetText() end
 	icon:SetAlpha(0)
-	if icon.overlay then
-		icon.overlay:Show()
-	end
 	icon:Show()
 end
 
 local found = {}
-local function Update(frame, event, unit)
+local function Update(frame, _, unit)
 	if frame.unit ~= unit then return end
 	local watch = frame.AuraWatch
 	local index, icons = 1, watch.watched
@@ -106,14 +98,6 @@ local function Update(frame, event, unit)
 			end
 			icon = icons[key]
 			if icon and not T.RaidBuffsIgnore[spellID] and (icon.anyUnit or (caster and icon.fromUnits and icon.fromUnits[caster])) then
-				if LibClassicDurations then
-					local durationNew, expirationTimeNew = LibClassicDurations:GetAuraDurationByUnit(unit, spellID, caster, name)
-
-					if duration == 0 and durationNew then
-						duration = durationNew
-						remaining = expirationTimeNew
-					end
-				end
 				resetIcon(icon, count, duration, remaining)
 				GUIDs[guid][key] = true
 				found[key] = true
@@ -139,7 +123,6 @@ local function setupIcons(self)
 	watch.watched = {}
 
 	for _, icon in pairs(icons) do
-
 		local name, _, image = GetSpellInfo(icon.spellID)
 		if name then
 			icon.name = name
@@ -156,14 +139,6 @@ local function setupIcons(self)
 				tex:SetAllPoints(icon)
 				tex:SetTexture(image)
 				icon.icon = tex
-				if not icon.overlay then
-					local overlay = icon:CreateTexture(nil, "OVERLAY")
-					overlay:SetTexture("Interface\\Buttons\\UI-Debuff-Overlays")
-					overlay:SetAllPoints(icon)
-					overlay:SetTexCoord(0.296875, 0.5703125, 0, 0.515625)
-					overlay:SetVertexColor(1, 0, 0)
-					icon.overlay = overlay
-				end
 			end
 
 			if not icon.count and not (watch.hideCount or icon.hideCount) then
@@ -186,13 +161,9 @@ local function setupIcons(self)
 				watch.watched[name] = icon
 			end
 
-			if watch.PostCreateIcon then watch:PostCreateIcon(icon, icon.spellID, name, self) end
+			if watch.PostCreateButton then watch:PostCreateButton(icon, icon.spellID, name, self) end
 		else
-			if not T.classic then
-				print("|cffff0000WARNING: spell ID ["..tostring(icon.spellID).."] no longer exists! Report this to Shestak.|r")
-			else
-				print("|cffff0000WARNING: spell ID ["..tostring(icon.spellID).."] no longer exists! Report this to Vik.|r")
-			end
+			print("|cffff0000ViksUI: AuraWatch spell ID ["..tostring(icon.spellID).."] no longer exists!|r")
 		end
 	end
 end

@@ -1,4 +1,4 @@
-local T, C, L = unpack(select(2, ...))
+local T, C, L = unpack(ViksUI)
 if C.unitframe.enable ~= true or C.unitframe.show_arena ~= true then return end
 
 ----------------------------------------------------------------------------------------
@@ -7,7 +7,7 @@ if C.unitframe.enable ~= true or C.unitframe.show_arena ~= true then return end
 local _, ns = ...
 local oUF = ns.oUF
 
-local function Update(object, event, unit)
+local function Update(object, _, unit)
 	local _, instanceType = IsInInstance()
 	if instanceType ~= "arena" then
 		object.AuraTracker:Hide()
@@ -58,9 +58,11 @@ local function Update(object, event, unit)
 	if auraName then -- If an aura is found, display it and set the time left!
 		object.AuraTracker.icon:SetTexture(auraIcon)
 		object.AuraTracker.timeleft = auraExpTime - GetTime()
-		object.AuraTracker.active = true
+		if object.AuraTracker.timeleft > 0 then
+			object.AuraTracker.active = true
+		end
 	elseif not auraName then -- No aura found and one is shown? Kill it since it's no longer active!
-		object.AuraTracker.icon:SetTexture("")
+		object.AuraTracker.icon:SetTexture(0)
 		object.AuraTracker.text:SetText("")
 		object.AuraTracker.active = false
 	end

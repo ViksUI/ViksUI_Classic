@@ -4,7 +4,9 @@ local _, ns = ...
 local oUF = ns.oUF
 local Private = oUF.Private
 
-local UnitExists = Private.UnitExists
+local nierror = Private.nierror
+local unitExists = Private.unitExists
+local validateEvent = Private.validateEvent
 
 local _PATTERN = '%[..-%]+'
 
@@ -90,12 +92,21 @@ local tagStrings = {
 		return UnitCreatureFamily(u) or UnitCreatureType(u)
 	end]],
 
+	['pereclipse'] = [[function(u)
+		local m = UnitPowerMax('player', Enum.PowerType.Balance)
+		if(m == 0) then
+			return 0
+		else
+			return math.abs(UnitPower('player', Enum.PowerType.Balance) / m * 100)
+		end
+	end]],
+
 	['curmana'] = [[function(unit)
 		return UnitPower(unit, Enum.PowerType.Mana)
 	end]],
 
 	['dead'] = [[function(u)
-		if(UnitIsDead(u)) then
+		if(UnitIsDead(u) and not UnitIsFeignDeath(u)) then
 			return 'Dead'
 		elseif(UnitIsGhost(u)) then
 			return 'Ghost'
@@ -126,7 +137,7 @@ local tagStrings = {
 
 	['difficulty'] = [[function(u)
 		if UnitCanAttack('player', u) then
-			local l = UnitEffectiveLevel(u)
+			local l = (UnitEffectiveLevel or UnitLevel)(u)
 			return Hex(GetCreatureDifficultyColor((l > 0) and l or 999))
 		end
 	end]],
@@ -167,9 +178,8 @@ local tagStrings = {
 	end]],
 
 	['level'] = [[function(u)
-		local l = UnitLevel(u)
-
-		if((_G.WOW_PROJECT_ID ~= _G.WOW_PROJECT_CLASSIC) and (UnitIsWildBattlePet(u) or UnitIsBattlePetCompanion(u))) then
+		local l = (UnitEffectiveLevel or UnitLevel)(u)
+		if(_G.WOW_PROJECT_ID == _G.WOW_PROJECT_MAINLINE and (UnitIsWildBattlePet(u) or UnitIsBattlePetCompanion(u))) then
 			l = UnitBattlePetLevel(u)
 		end
 
@@ -245,7 +255,7 @@ local tagStrings = {
 					return Hex(altR, altG, altB)
 				end
 			else
-				return Hex(_COLORS.power[pType])
+				return Hex(_COLORS.power[pType] or _COLORS.power.MANA)
 			end
 		end
 
@@ -262,7 +272,7 @@ local tagStrings = {
 		local _, class = UnitClass(u)
 		if(class) then
 			return Hex(_COLORS.class[class])
-		else
+		elseif(_G.WOW_PROJECT_ID == _G.WOW_PROJECT_MAINLINE) then
 			local id = u:match('arena(%d)$')
 			if(id) then
 				local specID = GetArenaOpponentSpec(tonumber(id))
@@ -355,7 +365,7 @@ local tagStrings = {
 	end]],
 
 	['status'] = [[function(u)
-		if(UnitIsDead(u)) then
+		if(UnitIsDead(u) and not UnitIsFeignDeath(u)) then
 			return 'Dead'
 		elseif(UnitIsGhost(u)) then
 			return 'Ghost'
@@ -382,50 +392,66 @@ local tagStrings = {
 	end]],
 }
 
-local tags = setmetatable(
-	{
-		curhp = UnitHealth,
-		curpp = UnitPower,
-		maxhp = UnitHealthMax,
-		maxpp = UnitPowerMax,
-		class = UnitClass,
-		faction = UnitFactionGroup,
-		race = UnitRace,
-	},
-	{
-		__index = function(self, key)
-			local tagFunc = tagStrings[key]
-			if(tagFunc) then
-				local func, err = loadstring('return ' .. tagFunc)
-				if(func) then
-					func = func()
+local tagFuncs = setmetatable(
+{
+	curhp = UnitHealth,
+	curpp = UnitPower,
+	maxhp = UnitHealthMax,
+	maxpp = UnitPowerMax,
+	class = UnitClass,
+	faction = UnitFactionGroup,
+	race = UnitRace,
+},
+{
+	__index = function(self, key)
+		local tagString = tagStrings[key]
+		if(tagString) then
+			self[key] = tagString
+			tagStrings[key] = nil
+		end
 
-					-- Want to trigger __newindex, so no rawset.
-					self[key] = func
-					tagStrings[key] = nil
-
-					return func
-				else
-					error(err, 3)
-				end
+		return rawget(self, key)
+	end,
+	__newindex = function(self, key, val)
+		if(type(val) == 'string') then
+			local func, err = loadstring('return ' .. val)
+			if(func) then
+				val = func()
+			else
+				error(err, 3)
 			end
-		end,
-		__newindex = function(self, key, val)
-			if(type(val) == 'string') then
-				tagStrings[key] = val
-			elseif(type(val) == 'function') then
-				-- So we don't clash with any custom envs.
-				if(getfenv(val) == _G) then
-					setfenv(val, _PROXY)
-				end
+		end
 
-				rawset(self, key, val)
-			end
-		end,
-	}
+		assert(type(val) == 'function', 'Tag function must be a function or a string that evaluates to a function.')
+
+		-- We don't want to clash with any custom envs
+		if(getfenv(val) == _G) then
+			-- pcall is needed for cases when Blizz functions are passed as strings, for
+			-- intance, 'UnitPowerMax', an attempt to set a custom env will result in an error
+			pcall(setfenv, val, _PROXY)
+		end
+
+		rawset(self, key, val)
+	end,
+}
 )
 
-_ENV._TAGS = tags
+_ENV._TAGS = tagFuncs
+
+local vars = setmetatable({}, {
+	__newindex = function(self, key, val)
+		if(type(val) == 'string') then
+			local func = loadstring('return ' .. val)
+			if(func) then
+				val = func() or val
+			end
+		end
+
+		rawset(self, key, val)
+	end,
+})
+
+_ENV._VARS = vars
 
 local tagEvents = {
 	['affix']               = 'UNIT_CLASSIFICATION_CHANGED',
@@ -435,12 +461,13 @@ local tagEvents = {
 	['classification']      = 'UNIT_CLASSIFICATION_CHANGED',
 	['cpoints']             = 'UNIT_POWER_FREQUENT PLAYER_TARGET_CHANGED',
 	['curhp']               = 'UNIT_HEALTH UNIT_MAXHEALTH',
+	['pereclipse']			= 'UNIT_POWER_FREQUENT',
 	['curmana']             = 'UNIT_POWER_UPDATE UNIT_MAXPOWER',
 	['curpp']               = 'UNIT_POWER_UPDATE UNIT_MAXPOWER',
 	['dead']                = 'UNIT_HEALTH',
 	['deficit:name']        = 'UNIT_HEALTH UNIT_MAXHEALTH UNIT_NAME_UPDATE',
 	['difficulty']          = 'UNIT_FACTION',
-	['faction']             = 'NEUTRAL_FACTION_SELECT_RESULT',
+	['faction']             = 'UNIT_FACTION NEUTRAL_FACTION_SELECT_RESULT',
 	['group']               = 'GROUP_ROSTER_UPDATE',
 	['happiness']           = 'UNIT_HAPPINESS',
 	['holypower']           = 'UNIT_POWER_UPDATE PLAYER_TALENT_UPDATE',
@@ -472,43 +499,64 @@ local tagEvents = {
 
 local unitlessEvents = {
 	ARENA_PREP_OPPONENT_SPECIALIZATIONS = true,
+	CHARACTER_POINTS_CHANGED = true,
 	GROUP_ROSTER_UPDATE = true,
 	NEUTRAL_FACTION_SELECT_RESULT = true,
 	PARTY_LEADER_CHANGED = true,
 	PLAYER_LEVEL_UP = true,
+	PLAYER_TALENT_UPDATE = true,
 	PLAYER_TARGET_CHANGED = true,
 	PLAYER_UPDATE_RESTING = true,
 	RUNE_POWER_UPDATE = true,
 }
 
-local events = {}
-local frame = CreateFrame('Frame')
-frame:SetScript('OnEvent', function(self, event, unit)
-	local strings = events[event]
+local eventFontStrings = {}
+local stringsToUpdate = {}
+
+local eventFrame = CreateFrame('Frame')
+eventFrame:SetScript('OnEvent', function(self, event, unit)
+	local strings = eventFontStrings[event]
 	if(strings) then
-		for _, fs in next, strings do
-			if(fs:IsVisible() and (unitlessEvents[event] or fs.parent.unit == unit or (fs.extraUnits and fs.extraUnits[unit]))) then
-				fs:UpdateTag()
+		for fs in next, strings do
+			if(not stringsToUpdate[fs] and fs:IsVisible() and (unitlessEvents[event] or fs.parent.unit == unit or (fs.extraUnits and fs.extraUnits[unit]))) then
+				stringsToUpdate[fs] = true
 			end
 		end
 	end
 end)
 
-local onUpdates = {}
-local eventlessUnits = {}
+local eventTimer = 0
+local eventTimerThreshold = 0.1
 
-local function createOnUpdate(timer)
-	local OnUpdate = onUpdates[timer]
+eventFrame:SetScript('OnUpdate', function(self, elapsed)
+	eventTimer = eventTimer + elapsed
+	if(eventTimer >= eventTimerThreshold) then
+		for fs in next, stringsToUpdate do
+			if(fs:IsVisible()) then
+				fs:UpdateTag()
+			end
+		end
 
-	if(not OnUpdate) then
+		table.wipe(stringsToUpdate)
+
+		eventTimer = 0
+	end
+end)
+
+local timerFrames = {}
+local timerFontStrings = {}
+
+local function enableTimer(timer)
+	local frame = timerFrames[timer]
+	if(not frame) then
 		local total = timer
-		local frame = CreateFrame('Frame')
-		local strings = eventlessUnits[timer]
+		local strings = timerFontStrings[timer]
 
+		frame = CreateFrame('Frame')
 		frame:SetScript('OnUpdate', function(self, elapsed)
 			if(total >= timer) then
-				for _, fs in next, strings do
-					if(fs.parent:IsShown() and UnitExists(fs.parent.unit)) then
+				for fs in next, strings do
+					if(fs.parent:IsShown() and unitExists(fs.parent.unit)) then
 						fs:UpdateTag()
 					end
 				end
@@ -519,7 +567,16 @@ local function createOnUpdate(timer)
 			total = total + elapsed
 		end)
 
-		onUpdates[timer] = frame
+		timerFrames[timer] = frame
+	else
+		frame:Show()
+	end
+end
+
+local function disableTimer(timer)
+	local frame = timerFrames[timer]
+	if(frame) then
+		frame:Hide()
 	end
 end
 
@@ -530,230 +587,230 @@ Used to update all tags on a frame.
 --]]
 local function Update(self)
 	if(self.__tags) then
-		for _, fs in next, self.__tags do
+		for fs in next, self.__tags do
 			fs:UpdateTag()
 		end
 	end
 end
 
-local function getTagName(tag)
-	local tagStart = (tag:match('>+()') or 2)
-	local tagEnd = tag:match('.*()<+')
-	tagEnd = (tagEnd and tagEnd - 1) or -2
+-- full tag syntax: '[prefix$>tag-name<$suffix(a,r,g,s)]'
+-- for a small test case see https://github.com/oUF-wow/oUF/pull/602
+local bracketData = {}
 
-	return tag:sub(tagStart, tagEnd), tagStart, tagEnd
-end
-
-local function registerEvent(fontstr, event)
-	if(not events[event]) then events[event] = {} end
-
-	frame:RegisterEvent(event)
-	table.insert(events[event], fontstr)
-end
-
-local function registerEvents(fontstr, tagstr)
-	for tag in tagstr:gmatch(_PATTERN) do
-		tag = getTagName(tag)
-		local tagevents = tagEvents[tag]
-		if(tagevents) then
-			for event in tagevents:gmatch('%S+') do
-				registerEvent(fontstr, event)
-			end
+local function getBracketData(bracket)
+	local data = bracketData[bracket]
+	if(not data) then
+		local prefixEnd, prefixOffset = bracket:match('()$>'), 1
+		if(not prefixEnd) then
+			prefixEnd = 1
+		else
+			prefixEnd = prefixEnd - 1
+			prefixOffset = 3
 		end
-	end
-end
 
-local function unregisterEvents(fontstr)
-	for event, data in next, events do
-		for i, tagfsstr in next, data do
-			if(tagfsstr == fontstr) then
-				if(#data == 1) then
-					frame:UnregisterEvent(event)
-				end
-
-				table.remove(data, i)
-			end
+		local suffixEnd = (bracket:match('()%(', prefixOffset + 1) or -1) - 1
+		local suffixStart, suffixOffset = bracket:match('<$()', prefixEnd), 1
+		if(not suffixStart) then
+			suffixStart = suffixEnd + 1
+		else
+			suffixOffset = 3
 		end
-	end
-end
 
-local tagPool = {}
-local funcPool = {}
-local tmp = {}
+		data = {
+			bracket:sub(prefixEnd + prefixOffset, suffixStart - suffixOffset),
+			prefixEnd,
+			suffixStart,
+			suffixEnd,
+			bracket:match('%((.-)%)', suffixOffset + 1),
+		}
 
---[[ Tags: frame:Tag(fs, tagstr, ...)
-Used to register a tag on a unit frame.
-
-* self   - the unit frame on which to register the tag
-* fs     - the font string to display the tag (FontString)
-* tagstr - the tag string (string)
-* ...    - additional optional unitID(s) the tag should update for
---]]
-local function Tag(self, fs, tagstr, ...)
-	if(not fs or not tagstr) then return end
-
-	if(not self.__tags) then
-		self.__tags = {}
-		table.insert(self.__elements, Update)
-	else
-		-- Since people ignore everything that's good practice - unregister the tag
-		-- if it already exists.
-		for _, tag in pairs(self.__tags) do
-			if(fs == tag) then
-				-- We don't need to remove it from the __tags table as Untag handles
-				-- that for us.
-				self:Untag(fs)
-			end
-		end
+		bracketData[bracket] = data
 	end
 
-	fs.parent = self
+	return data[1], data[2], data[3], data[4], data[5]
+end
 
-	local func = tagPool[tagstr]
+local tagStringFuncs = {}
+local bracketFuncs = {}
+local invalidBrackets = {}
+local buffer = {}
+
+local function getTagFunc(tagstr)
+	local func = tagStringFuncs[tagstr]
 	if(not func) then
-		local format, numTags = tagstr:gsub('%%', '%%%%'):gsub(_PATTERN, '%%s')
-		local args = {}
+		local format, num = tagstr:gsub('%%', '%%%%'):gsub(_PATTERN, '%%s')
+		local funcs = {}
 
 		for bracket in tagstr:gmatch(_PATTERN) do
-			local tagFunc = funcPool[bracket] or tags[bracket:sub(2, -2)]
+			local tagFunc = bracketFuncs[bracket] or tagFuncs[bracket:sub(2, -2)]
 			if(not tagFunc) then
-				local tagName, tagStart, tagEnd = getTagName(bracket)
-
-				local tag = tags[tagName]
+				local tagName, prefixEnd, suffixStart, suffixEnd, customArgs = getBracketData(bracket)
+				local tag = tagFuncs[tagName]
 				if(tag) then
-					tagStart = tagStart - 2
-					tagEnd = tagEnd + 2
-
-					if(tagStart ~= 0 and tagEnd ~= 0) then
-						local prefix = bracket:sub(2, tagStart)
-						local suffix = bracket:sub(tagEnd, -2)
+					if(prefixEnd ~= 1 or suffixStart - suffixEnd ~= 1) then
+						local prefix = prefixEnd ~= 1 and bracket:sub(2, prefixEnd) or ''
+						local suffix = suffixStart - suffixEnd ~= 1 and bracket:sub(suffixStart, suffixEnd) or ''
 
 						tagFunc = function(unit, realUnit)
-							local str = tag(unit, realUnit)
-							if(str) then
+							local str
+							if(customArgs) then
+								str = tag(unit, realUnit, string.split(',', customArgs))
+							else
+								str = tag(unit, realUnit)
+							end
+
+							if(str and str ~= '') then
 								return prefix .. str .. suffix
 							end
 						end
-					elseif(tagStart ~= 0) then
-						local prefix = bracket:sub(2, tagStart)
-
+					else
 						tagFunc = function(unit, realUnit)
-							local str = tag(unit, realUnit)
-							if(str) then
-								return prefix .. str
+							local str
+							if(customArgs) then
+								str = tag(unit, realUnit, string.split(',', customArgs))
+							else
+								str = tag(unit, realUnit)
 							end
-						end
-					elseif(tagEnd ~= 0) then
-						local suffix = bracket:sub(tagEnd, -2)
 
-						tagFunc = function(unit, realUnit)
-							local str = tag(unit, realUnit)
-							if(str) then
-								return str .. suffix
+							if(str and str ~= '') then
+								return str
 							end
 						end
 					end
 
-					funcPool[bracket] = tagFunc
+					bracketFuncs[bracket] = tagFunc
 				end
 			end
 
-			if(tagFunc) then
-				table.insert(args, tagFunc)
-			else
-				return error(string.format('Attempted to use invalid tag %s.', bracket), 3)
+			if(not tagFunc) then
+				nierror(string.format('Attempted to use invalid tag %s.', bracket))
+
+				-- don't check for these earlier in the function because a valid tag under the same
+				-- name could've been created at some point
+				tagFunc = invalidBrackets[bracket]
+				if(not tagFunc) then
+					tagFunc = function()
+						return '|cffffffff' .. bracket .. '|r'
+					end
+
+					invalidBrackets[bracket] = tagFunc
+				end
 			end
+
+			table.insert(funcs, tagFunc)
 		end
 
-		if(numTags == 1) then
-			func = function(self)
-				local parent = self.parent
-				local realUnit
-				if(self.overrideUnit) then
-					realUnit = parent.realUnit
-				end
-
-				_ENV._COLORS = parent.colors
-				_ENV._FRAME = parent
-				return self:SetFormattedText(
-					format,
-					args[1](parent.unit, realUnit) or ''
-				)
+		func = function(self)
+			local parent = self.parent
+			local unit = parent.unit
+			local realUnit
+			if(self.overrideUnit) then
+				realUnit = parent.realUnit
 			end
-		elseif(numTags == 2) then
-			func = function(self)
-				local parent = self.parent
-				local unit = parent.unit
-				local realUnit
-				if(self.overrideUnit) then
-					realUnit = parent.realUnit
-				end
 
-				_ENV._COLORS = parent.colors
-				_ENV._FRAME = parent
-				return self:SetFormattedText(
-					format,
-					args[1](unit, realUnit) or '',
-					args[2](unit, realUnit) or ''
-				)
+			_ENV._COLORS = parent.colors
+			_ENV._FRAME = parent
+
+			for i, f in next, funcs do
+				buffer[i] = f(unit, realUnit) or ''
 			end
-		elseif(numTags == 3) then
-			func = function(self)
-				local parent = self.parent
-				local unit = parent.unit
-				local realUnit
-				if(self.overrideUnit) then
-					realUnit = parent.realUnit
-				end
 
-				_ENV._COLORS = parent.colors
-				_ENV._FRAME = parent
-				return self:SetFormattedText(
-					format,
-					args[1](unit, realUnit) or '',
-					args[2](unit, realUnit) or '',
-					args[3](unit, realUnit) or ''
-				)
-			end
-		else
-			func = function(self)
-				local parent = self.parent
-				local unit = parent.unit
-				local realUnit
-				if(self.overrideUnit) then
-					realUnit = parent.realUnit
-				end
-
-				_ENV._COLORS = parent.colors
-				_ENV._FRAME = parent
-				for i, func in next, args do
-					tmp[i] = func(unit, realUnit) or ''
-				end
-
-				-- We do 1, numTags because tmp can hold several unneeded variables.
-				return self:SetFormattedText(format, unpack(tmp, 1, numTags))
-			end
+			-- we do 1 to num because buffer is shared by all tags and can hold several unneeded vars
+			self:SetFormattedText(format, unpack(buffer, 1, num))
 		end
 
-		tagPool[tagstr] = func
+		tagStringFuncs[tagstr] = func
 	end
-	fs.UpdateTag = func
 
-	local unit = self.unit
+	return func
+end
+
+local function registerEvent(event, fs)
+	if(validateEvent(event)) then
+		if(not eventFontStrings[event]) then
+			eventFontStrings[event] = {}
+		end
+
+		eventFontStrings[event][fs] = true
+
+		eventFrame:RegisterEvent(event)
+	end
+end
+
+local function registerEvents(fs, ts)
+	for tag in ts:gmatch(_PATTERN) do
+		local tagevents = tagEvents[getBracketData(tag)]
+		if(tagevents) then
+			for event in tagevents:gmatch('%S+') do
+				registerEvent(event, fs)
+			end
+		end
+	end
+end
+
+local function unregisterEvents(fs)
+	for event, strings in next, eventFontStrings do
+		strings[fs] = nil
+
+		if(not next(strings)) then
+			eventFrame:UnregisterEvent(event)
+		end
+	end
+end
+
+local function registerTimer(fs, timer)
+	if(not timerFontStrings[timer]) then
+		timerFontStrings[timer] = {}
+	end
+
+	timerFontStrings[timer][fs] = true
+
+	enableTimer(timer)
+end
+
+local function unregisterTimer(fs)
+	for timer, strings in next, timerFontStrings do
+		strings[fs] = nil
+
+		if(not next(strings)) then
+			disableTimer(timer)
+		end
+	end
+end
+
+local taggedFontStrings = {}
+
+--[[ Tags: frame:Tag(fs, ts, ...)
+Used to register a tag on a unit frame.
+
+* self   - the unit frame on which to register the tag
+* fs     - the font string to display the tag (FontString)
+* ts     - the tag string (string)
+* ...    - additional optional unitID(s) the tag should update for
+--]]
+local function Tag(self, fs, ts, ...)
+	if(not fs or not ts) then return end
+
+	if(not self.__tags) then
+		self.__tags = {}
+		table.insert(self.__elements, Update)
+	elseif(self.__tags[fs]) then
+		-- We don't need to remove it from the __tags table as Untag handles that for us.
+		self:Untag(fs)
+	end
+
+	fs.parent = self
+	fs.UpdateTag = getTagFunc(ts)
+
 	if(self.__eventless or fs.frequentUpdates) then
-		local timer
+		local timer = 0.5
 		if(type(fs.frequentUpdates) == 'number') then
 			timer = fs.frequentUpdates
-		else
-			timer = .5
 		end
 
-		if(not eventlessUnits[timer]) then eventlessUnits[timer] = {} end
-		table.insert(eventlessUnits[timer], fs)
-
-		createOnUpdate(timer)
+		registerTimer(fs, timer)
 	else
-		registerEvents(fs, tagstr)
+		registerEvents(fs, ts)
 
 		if(...) then
 			if(not fs.extraUnits) then
@@ -761,13 +818,13 @@ local function Tag(self, fs, tagstr, ...)
 			end
 
 			for index = 1, select('#', ...) do
-				local unit = select(index, ...)
-				fs.extraUnits[unit] = true
+				fs.extraUnits[select(index, ...)] = true
 			end
 		end
 	end
 
-	table.insert(self.__tags, fs)
+	taggedFontStrings[fs] = ts
+	self.__tags[fs] = true
 end
 
 --[[ Tags: frame:Untag(fs)
@@ -780,27 +837,77 @@ local function Untag(self, fs)
 	if(not fs or not self.__tags) then return end
 
 	unregisterEvents(fs)
-	for _, timers in next, eventlessUnits do
-		for i, fontstr in next, timers do
-			if(fs == fontstr) then
-				table.remove(timers, i)
-			end
-		end
-	end
-
-	for i, fontstr in next, self.__tags do
-		if(fontstr == fs) then
-			table.remove(self.__tags, i)
-		end
-	end
+	unregisterTimer(fs)
 
 	fs.UpdateTag = nil
+
+	taggedFontStrings[fs] = nil
+	self.__tags[fs] = nil
+end
+
+local function strip(tag)
+	-- remove prefix, custom args, and suffix
+	return tag:gsub('%[.-$>', '['):gsub('%(.-%)%]', ']'):gsub('<$.-%]', ']')
 end
 
 oUF.Tags = {
-	Methods = tags,
+	Methods = tagFuncs,
 	Events = tagEvents,
 	SharedEvents = unitlessEvents,
+	Vars = vars,
+	RefreshMethods = function(self, tag)
+		if(not tag) then return end
+
+		-- if a tag's name contains magic chars, there's a chance that string.match will fail to
+		-- find the match
+		tag = '%[' .. tag:gsub('[%^%$%(%)%%%.%*%+%-%?]', '%%%1') .. '%]'
+
+		for bracket in next, bracketFuncs do
+			if(strip(bracket):match(tag)) then
+				bracketFuncs[bracket] = nil
+			end
+		end
+
+		for tagstr, func in next, tagStringFuncs do
+			if(strip(tagstr):match(tag)) then
+				tagStringFuncs[tagstr] = nil
+
+				for fs in next, taggedFontStrings do
+					if(fs.UpdateTag == func) then
+						fs.UpdateTag = getTagFunc(tagstr)
+
+						if(fs:IsVisible()) then
+							fs:UpdateTag()
+						end
+					end
+				end
+			end
+		end
+	end,
+	RefreshEvents = function(self, tag)
+		if(not tag) then return end
+
+		-- if a tag's name contains magic chars, there's a chance that string.match will fail to
+		-- find the match
+		tag = '%[' .. tag:gsub('[%^%$%(%)%%%.%*%+%-%?]', '%%%1') .. '%]'
+
+		for tagstr in next, tagStringFuncs do
+			if(strip(tagstr):match(tag)) then
+				for fs, ts in next, taggedFontStrings do
+					if(ts == tagstr) then
+						unregisterEvents(fs)
+						registerEvents(fs, tagstr)
+					end
+				end
+			end
+		end
+	end,
+	SetEventUpdateTimer = function(self, timer)
+		if(not timer) then return end
+		if(type(timer) ~= 'number') then return end
+
+		eventTimerThreshold = math.max(0.05, timer)
+	end,
 }
 
 oUF:RegisterMetaFunction('Tag', Tag)

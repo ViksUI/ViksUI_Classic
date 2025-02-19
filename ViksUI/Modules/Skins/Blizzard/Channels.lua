@@ -1,5 +1,5 @@
-local T, C, L, _ = unpack(select(2, ...))
-if T.classic or C.skins.blizzard_frames ~= true then return end
+local T, C, L = unpack(ViksUI)
+if C.skins.blizzard_frames ~= true then return end
 
 ----------------------------------------------------------------------------------------
 --	Channels skin
@@ -11,13 +11,21 @@ local function LoadSkin()
 	ChannelFrame.NewButton:SkinButton()
 	ChannelFrame.SettingsButton:SkinButton()
 
-	T.SkinScrollBar(ChannelFrame.ChannelRoster.ScrollFrame.scrollBar)
+	if T.Classic then
+		T.SkinScrollBar(ChannelFrame.ChannelRoster.ScrollFrame.scrollBar)
+	else
+		T.SkinScrollBar(ChannelFrame.ChannelRoster.ScrollBar)
+	end
 	T.SkinScrollBar(ChannelFrame.ChannelList.ScrollBar)
 
 	T.SkinCloseButton(ChannelFrameCloseButton)
 
 	CreateChannelPopup:StripTextures()
 	CreateChannelPopup:CreateBackdrop("Transparent")
+
+	if T.Mainline then
+		CreateChannelPopup.Header:StripTextures()
+	end
 
 	CreateChannelPopup.OKButton:SkinButton()
 	CreateChannelPopup.CancelButton:SkinButton()
@@ -26,6 +34,8 @@ local function LoadSkin()
 	CreateChannelPopup.CancelButton:ClearAllPoints()
 	CreateChannelPopup.CancelButton:SetPoint("BOTTOMRIGHT", -5, 5)
 
+	CreateChannelPopup.Name.Label:SetDrawLayer("OVERLAY")
+	CreateChannelPopup.Password.Label:SetDrawLayer("OVERLAY")
 	T.SkinEditBox(CreateChannelPopup.Name)
 	T.SkinEditBox(CreateChannelPopup.Password)
 

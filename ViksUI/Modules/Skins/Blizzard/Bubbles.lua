@@ -1,46 +1,48 @@
-local T, C, L, _ = unpack(select(2, ...))
-if T.classic or C.chat.bubbles ~= true then return end
+local T, C, L = unpack(ViksUI)
+if C.skins.bubbles ~= true then return end
 
 ----------------------------------------------------------------------------------------
---	ChatBubbles skin(by Haleth)
+--	ChatBubbles skin
 ----------------------------------------------------------------------------------------
-local f = CreateFrame("Frame", nil, UIParent)
-local total = 0
-local numKids = 0
+local offset = C.skins.bubbles_offset and C.skins.bubbles_offset or 2
 
-local function styleBubble(frame)
-	for i = 1, frame:GetNumRegions() do
-		local region = select(i, frame:GetRegions())
-		if region:GetObjectType() == "Texture" then
-			region:SetTexture(nil)
-		end
-	end
+local function styleBubble(bubble)
+	if bubble:IsForbidden() then return end
 
-	frame:SetBackdrop({
-		bgFile = C.media.blank, edgeFile = C.media.blank, edgeSize = T.noscalemult,
-		insets = {left = -T.noscalemult, right = -T.noscalemult, top = -T.noscalemult, bottom = -T.noscalemult}
-	})
-	frame:SetBackdropColor(C.media.backdrop_color[1], C.media.backdrop_color[2], C.media.backdrop_color[3], C.media.backdrop_alpha)
-	frame:SetBackdropBorderColor(unpack(C.media.border_color))
-	frame:SetClampedToScreen(false)
-	frame:SetFrameStrata("BACKGROUND")
+	local frame = bubble:GetChildren(1)
+
+	frame:DisableDrawLayer("BORDER")
+	frame.Tail:Hide()
+
+	frame:CreateBackdrop("Transparent")
+	frame.backdrop:SetPoint("TOPLEFT", offset, -offset)
+	frame.backdrop:SetPoint("BOTTOMRIGHT", -offset, offset)
+	frame.backdrop:SetScale(UIParent:GetScale())
+
+	bubble:SetClampedToScreen(false)
+	bubble:SetFrameStrata("BACKGROUND")
+	bubble.styled = true
 end
 
-f:SetScript("OnUpdate", function(self, elapsed)
-	total = total + elapsed
-	if total > 0.1 then
-		total = 0
-		local newNumKids = WorldFrame:GetNumChildren()
-		if newNumKids ~= numKids then
-			for i = numKids + 1, newNumKids do
-				local frame = select(i, WorldFrame:GetChildren())
-				if frame:IsForbidden() then return end -- 7.2 Fix for friendly nameplate in raid
-				local b = frame:GetBackdrop()
-				if b and b.bgFile == [[Interface\Tooltips\ChatBubble-Background]] then
-					styleBubble(frame)
-				end
-			end
-			numKids = newNumKids
+local function onUpdate(self, elapsed)
+	self.elapsed = (self.elapsed or 0) + elapsed
+	if self.elapsed < 0.1 then return end
+	self.elapsed = 0
+
+	for _, bubble in pairs(C_ChatBubbles.GetAllChatBubbles()) do
+		if not bubble.styled then
+			styleBubble(bubble)
 		end
+	end
+end
+
+local f = CreateFrame("Frame")
+f:RegisterEvent("PLAYER_ENTERING_WORLD")
+f:SetScript("OnEvent", function()
+	local _, instanceType = IsInInstance()
+	if instanceType == "party" or instanceType == "raid" then
+		f:SetScript("OnUpdate", nil)
+	else
+		f:SetScript("OnUpdate", onUpdate)
 	end
 end)

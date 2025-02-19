@@ -1,4 +1,4 @@
-local T, C, L, _ = unpack(select(2, ...))
+local T, C, L = unpack(ViksUI)
 if C.loot.lootframe ~= true then return end
 
 ----------------------------------------------------------------------------------------
@@ -14,10 +14,11 @@ Butsu:SetScript("OnEvent", function(self, event, ...)
 	self[event](self, event, ...)
 end)
 
-function Butsu:LOOT_OPENED(_, autoloot)
+function Butsu:LOOT_OPENED(_, ...)
 	self:Show()
 	lb:Show()
 
+	local autoLoot = ...
 	if not self:IsShown() then
 		CloseLoot(not autoLoot)
 	end
@@ -108,10 +109,10 @@ function Butsu:LOOT_OPENED(_, autoloot)
 
 		slot.name:SetText(EMPTY)
 		slot.name:SetTextColor(color.r, color.g, color.b)
-		if not T.classic then
-			slot.icon:SetTexture("Interface\\Icons\\INV_Misc_Herb_AncientLichen")
-		else
+		if T.Classic then
 			slot.icon:SetTexture("Interface\\Icons\\Inv_misc_questionmark")
+		else
+			slot.icon:SetTexture("Interface\\Icons\\INV_Misc_Herb_AncientLichen")
 		end
 
 		slot.count:Hide()
@@ -133,7 +134,9 @@ Butsu:RegisterEvent("LOOT_OPENED")
 function Butsu:LOOT_SLOT_CLEARED(_, slot)
 	if not self:IsShown() then return end
 
-	_NS.slots[slot]:Hide()
+	if _NS.slots[slot] then
+		_NS.slots[slot]:Hide()
+	end
 	self:AnchorSlots()
 end
 Butsu:RegisterEvent("LOOT_SLOT_CLEARED")
@@ -150,12 +153,20 @@ end
 Butsu:RegisterEvent("LOOT_CLOSED")
 
 function Butsu:OPEN_MASTER_LOOT_LIST()
-	ToggleDropDownMenu(nil, nil, GroupLootDropDown, LootFrame.selectedLootButton, 0, 0)
+	if GroupLootDropDown then
+		ToggleDropDownMenu(nil, nil, GroupLootDropDown, LootFrame.selectedLootButton, 0, 0)
+	elseif LootFrame.selectedLootButton then
+		MasterLooterFrame_Show(LootFrame.selectedLootButton)
+	end
 end
 Butsu:RegisterEvent("OPEN_MASTER_LOOT_LIST")
 
 function Butsu:UPDATE_MASTER_LOOT_LIST()
-	UIDropDownMenu_Refresh(GroupLootDropDown)
+	if GroupLootDropDown then
+		UIDropDownMenu_Refresh(GroupLootDropDown)
+	else
+		MasterLooterFrame_UpdatePlayers()
+	end
 end
 Butsu:RegisterEvent("UPDATE_MASTER_LOOT_LIST")
 
@@ -169,10 +180,12 @@ do
 end
 
 Butsu:SetScript("OnMouseDown", function(self, button)
-	if IsAltKeyDown() then
+	if IsAltKeyDown() or IsShiftKeyDown() then
 		self:StartMoving()
 	elseif IsControlKeyDown() and button == "RightButton" then
+		self:ClearAllPoints()
 		self:SetPoint(unpack(C.position.loot))
+		self:SetUserPlaced(false)
 	end
 end)
 
@@ -188,7 +201,6 @@ end)
 Butsu:SetMovable(true)
 Butsu:RegisterForClicks("AnyUp")
 Butsu:SetParent(UIParent)
-Butsu:SetUserPlaced(true)
 Butsu:SetPoint(unpack(C.position.loot))
 Butsu:SetTemplate("Transparent")
 Butsu:SetClampedToScreen(true)
@@ -198,7 +210,7 @@ Butsu:SetFrameLevel(10)
 
 local close = CreateFrame("Button", "LootCloseButton", Butsu, "UIPanelCloseButton")
 T.SkinCloseButton(close, nil, nil, true)
-close:SetSize(14, 14)
+close:SetSize(15, 15)
 close:SetScript("OnClick", function() CloseLoot() end)
 
 ----------------------------------------------------------------------------------------
@@ -268,9 +280,9 @@ local function LDD_Initialize()
 end
 
 T.SkinCloseButton(lb, LootCloseButton, "-", true)
-lb:SetSize(14, 14)
+lb:SetSize(15, 15)
 lb:ClearAllPoints()
-lb:SetPoint("BOTTOMRIGHT", Butsu, "TOPRIGHT", -21, -18)
+lb:SetPoint("BOTTOMRIGHT", Butsu, "TOPRIGHT", -22, -19)
 lb:SetFrameStrata("DIALOG")
 lb:RegisterForClicks("RightButtonUp", "LeftButtonUp")
 lb:SetScript("OnClick", function(_, button)

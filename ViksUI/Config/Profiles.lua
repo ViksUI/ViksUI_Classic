@@ -1,5 +1,4 @@
-﻿local T, C, L, _ = unpack(select(2, ...))
-if T.classic then return end
+local T, C, L = unpack(ViksUI)
 
 ----------------------------------------------------------------------------------------
 --	ViksUI personal configuration file
@@ -20,7 +19,9 @@ if T.classic then return end
 --		}
 -- end
 ----------------------------------------------------------------------------------------
-
+if T.name == "Drachlock" or "Viksdruid" or "Tøttan" or "Tryllefox" or "Týr" or "Deathstorms" or "Bompibjorn" or "Vìk" or "Sløv" or "Mechvik" or "Bauge" or "Reidmar" or "Sneskre" or "Skytter" or "Búre" or "Bure" or "Bor" or "Vikingdruid" or "Modi" or "ViksDK" or "Honir" or "Bloodwrath" or "Tjalla" and T.realm == "Quel'Thalas" then
+ Viks = true
+ end
 ----------------------------------------------------------------------------------------
 --	Per Class Config (overwrite general)
 --	Class need to be UPPERCASE
@@ -47,30 +48,11 @@ end
 ----------------------------------------------------------------------------------------
 --	Tank chars @Quel'Thalas Config
 ----------------------------------------------------------------------------------------
-if T.name == "Bauge" or "Vikingdruid" or "Modi" or "ViksDK" or "Honir" or "Bloodwrath" and T.realm == "Quel'Thalas" then
+if T.name == "Sløv" or "Bauge" or "Vikingdruid" or "Modi" or "ViksDK" or "Honir" or "Bloodwrath" and T.realm == "Quel'Thalas" then
 	C["nameplate"].enhance_threat = true
 end
 
-----------------------------------------------------------------------------------------
---	Viks Config all chars
-----------------------------------------------------------------------------------------
-if T.name == "Bauge" or "Reidmar" or "Sneskre" or "Skytter" or "Búre" or "Bure" or "Bor" or "Vikingdruid" or "Modi" or "ViksDK" or "Honir" or "Bloodwrath" and T.realm == "Quel'Thalas" then
-	C["general"].welcome_message = false
-	C["nameplate"].enhance_threat = true
-	C["skins"].rematch = true
-	C["skins"].pawn = true
-	C["skins"].bigwigs = true
-	C["misc"].hide_banner = false
-	C["media"].fontsize = 14
-	C["panels"].NoPanels = false
-	C["chat"].spam = false
-	C["announcements"].bad_gear = false
-	C["announcements"].feasts = false
-	C["announcements"].portals = false
-	C["unitframe"].RaidShowSolo = true
-	C["unitframe"].plugins_smooth_bar = true
-	C["filger"].disable_cd = true
-	C["filger"].enable = false
-	C["automation"].accept_quest = true
-	C["automation"].accept_invite = true
-end
+
+if ViksUICustomProfile then
+	ViksUICustomProfile()
+end 

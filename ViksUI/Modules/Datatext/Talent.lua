@@ -1,5 +1,5 @@
-local T, C, L, _ = unpack(select(2, ...))
-if T.classic then return end
+local T, C, L = unpack(ViksUI)
+if not T.Mainline then return end
 
 if not C.datatext.Talents or C.datatext.Talents == 0 then return end
 
@@ -28,20 +28,22 @@ local ViksUISpecSwap = CreateFrame("Frame", "ViksUISpecSwap", UIParent, "UIDropD
 ViksUISpecSwap:SetTemplate("Transparent")
 ViksUISpecSwap:RegisterEvent("PLAYER_LOGIN")
 ViksUISpecSwap:SetScript("OnEvent", function(...)
-	local specIndex
-	for specIndex = 1, GetNumSpecializations() do
-		LeftClickMenu[specIndex + 1] = {
-			text = tostring(select(2, GetSpecializationInfo(specIndex))),
-			notCheckable = true,
-			func = (function()
-				local getSpec = GetSpecialization()
-				if getSpec and getSpec == specIndex then
-					UIErrorsFrame:AddMessage("You're already in that spec!", 1.0, 0.0, 0.0, 53, 5);
-					return
-				end
-				SetSpecialization(specIndex)
-			end)
-		}
+	if T.Cata then
+		return GetPrimaryTalentTree(isInspect, isPet, specGroup)
+	else
+		if (isInspect or isPet) then
+			return
+		end
+		local specIndex
+		local max = 0
+		for tabIndex = 1, GetNumTalentTabs() do
+			local spent = select(5, GetTalentTabInfo(tabIndex, "player", T.Wrath and specGroup))
+			if spent > max then
+				specIndex = tabIndex
+				max = spent
+			end
+		end
+		return specIndex
 	end
 end)
 

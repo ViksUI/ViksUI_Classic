@@ -1,20 +1,29 @@
-local T, C, L, _ = unpack(select(2, ...))
+local T, C, L = unpack(ViksUI)
 if C.bag.enable == true then return end
 
 local hook
 local _E
 
 local pipe = function(self)
-	local id = self:GetID()
-	local name = self:GetName()
-	local size = self.size
+	if oGlow:IsClassic() then
+		local id = self:GetID()
+		local name = self:GetName()
+		local size = self.size
 
-	for i = 1, size do
-		local bid = size - i + 1
-		local slotFrame = _G[name.."Item"..bid]
-		local slotLink = GetContainerItemLink(id, i)
+		for i = 1, size do
+			local bid = size - i + 1
+			local slotFrame = _G[name.."Item"..bid]
+			local slotLink = C_Container.GetContainerItemLink(id, i)
+			oGlow:CallFilters("bags", slotFrame, _E and slotLink)
+		end
+	else
+		for _, button in self:EnumerateValidItems() do
+			local bagID = button:GetBagID()
+			local slotID = button:GetID()
+			local slotLink = C_Container.GetContainerItemLink(bagID, slotID)
 
-		oGlow:CallFilters("bags", slotFrame, _E and slotLink)
+			oGlow:CallFilters("bags", button, _E and slotLink)
+		end
 	end
 end
 
@@ -32,7 +41,16 @@ local enable = function(self)
 	_E = true
 
 	if not hook then
-		hooksecurefunc("ContainerFrame_Update", pipe)
+		if oGlow:IsClassic() then
+			hooksecurefunc("ContainerFrame_Update", pipe)
+		else
+			for i = 1, NUM_CONTAINER_FRAMES do
+				local frame = _G["ContainerFrame"..i]
+				hooksecurefunc(frame, "UpdateItems", pipe)
+			end
+			hooksecurefunc(ContainerFrameCombinedBags, "UpdateItems", pipe)
+		end
+
 		hook = true
 	end
 end

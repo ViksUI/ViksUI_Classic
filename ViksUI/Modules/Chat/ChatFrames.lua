@@ -1,4 +1,4 @@
-﻿local T, C, L, _ = unpack(select(2, ...))
+local T, C, L = unpack(ViksUI)
 if C.chat.enable ~= true then return end
 
 ----------------------------------------------------------------------------------------
@@ -17,140 +17,6 @@ local AddMessage = function(self, text, ...)
 		text = text:gsub("|Hplayer:(.-)|h%[(.-)%]|h", Strip)
 	end
 	return origs[self](self, text, ...)
-end
-SetCVar("chatStyle", "im")
-local format = string.format
-local gsub = string.gsub
-local sub = string.sub
-local find = string.find
-local len = string.len
-
-
-local smileyPack = {
-	['Angry'] = [[Interface\AddOns\ViksUI\Media\smileys\angry.blp]],
-	['BrokenHeart'] = [[Interface\AddOns\ViksUI\Media\smileys\brokenheart.blp]],
-	['Cool'] = [[Interface\AddOns\ViksUI\Media\smileys\cool.blp]],
-	['Gasp'] = [[Interface\AddOns\ViksUI\Media\smileys\gasp.blp]],
-	['Grin'] = [[Interface\AddOns\ViksUI\Media\smileys\grin2.blp]],
-	['Kiss'] = [[Interface\AddOns\ViksUI\Media\smileys\kiss.blp]],
-	['Like'] = [[Interface\AddOns\ViksUI\Media\smileys\like.blp]],
-	['Hmm'] = [[Interface\AddOns\ViksUI\Media\smileys\unsure.blp]],
-	['MiddleFinger'] = [[Interface\AddOns\ViksUI\Media\smileys\MiddleFinger.blp]],
-	['Sad'] = [[Interface\AddOns\ViksUI\Media\smileys\sad.blp]],
-	['Surprise'] = [[Interface\AddOns\ViksUI\Media\smileys\surprise.blp]],
-	['Tongue'] = [[Interface\AddOns\ViksUI\Media\smileys\tongue.blp]],
-	['Cry'] = [[Interface\AddOns\ViksUI\Media\smileys\cry.blp]],
-	['Wink'] = [[Interface\AddOns\ViksUI\Media\smileys\wink.blp]],
-	['Happy'] = [[Interface\AddOns\ViksUI\Media\smileys\happy.blp]],
-	['Heart'] = [[Interface\AddOns\ViksUI\Media\smileys\heart.blp]],
-}
-
-local smileyKeys = {
-	["%:%*"] = "Kiss",
-	["%:%B"] = "Cool",
-	["%(%y%)"] = "Like",
-	["%:%-%@"] = "Angry",
-	["%:%@"] = "Angry",
-	["%:%-%)"] = "Happy",
-	["%:%)"] = "Happy",
-	["%:D"] = "Grin",
-	["%:%-D"] = "Grin",
-	["%;%-D"] = "Grin",
-	["%;D"] = "Grin",
-	["%=D"] = "Grin",
-	["xD"] = "Grin",
-	["XD"] = "Grin",
-	["%:%-%("] = "Sad",
-	["%:%("] = "Sad",
-	["%:%o"] = "Gasp",
-	["%:%-o"] = "Surprise",
-	["%:%-O"] = "Surprise",
-	["%:O"] = "Gasp",
-	["%:%-0"] = "Surprise",
-	["%:P"] = "Tongue",
-	["%:%-P"] = "Tongue",
-	["%:p"] = "Tongue",
-	["%:%-p"] = "Tongue",
-	["%=P"] = "Tongue",
-	["%=p"] = "Tongue",
-	["%;%-p"] = "Tongue",
-	["%;p"] = "Tongue",
-	["%;P"] = "Tongue",
-	["%;%-P"] = "Tongue",
-	["%;%)"] = "Wink",
-	["%:S"] = "Hmm",
-	["%:%-S"] = "Hmm",
-	["%;%("] = "Cry",
-	["%:%,%-%("] = "Cry",
-	["%:%'%("] = "Cry",
-	["%:%'%-%("] = "Cry",
-	["%:%F"] = "MiddleFinger",
-	["<3"] = "Heart",
-	["</3"] = "BrokenHeart",
-}
-
-local function InsertEmotions( msg )
-	for k,v in pairs(smileyKeys) do
-		msg = gsub(msg,k,"|T"..smileyPack[v]..":20|t");
-	end
-
-	return msg;
-end
-
-local function GetSmileyReplacementText(msg)
-	if not msg then return end
-
-	if not C.chat.smileys or msg:find('/run') or msg:find('/dump') or msg:find('/script') then return msg end
-	local outstr = "";
-	local origlen = len(msg);
-	local startpos = 1;
-	local endpos;
-
-	while(startpos <= origlen) do
-		endpos = origlen;
-
-		local pos = find(msg,"|H",startpos,true);
-		if(pos ~= nil) then
-			endpos = pos;
-		end
-
-		outstr = outstr .. InsertEmotions(sub(msg,startpos,endpos)); --run replacement on this bit
-		startpos = endpos + 1;
-
-		if( pos ~= nil ) then
-			endpos = find(msg,"|h]|r",startpos,-1) or find(msg,"|h",startpos,-1);
-			endpos = endpos or origlen
-			if(startpos < endpos) then
-				outstr = outstr .. sub(msg,startpos,endpos); --don't run replacement on this bit
-				startpos = endpos + 1;
-			end
-		end
-	end
-
-	return outstr
-end
-
-local function AddMessage( Frame, String, ... )
-	local Smilies = true
-	local MessageString
-
-	String = String:gsub( '|Hplayer:(.-)|h%[(.-)%]|h', '|Hplayer:%1|h%2|h' )
-	String = String:gsub( '|HBNplayer:(.-)|h%[(.-)%]|h', '|HBNplayer:%1|h%2|h' )
-	--String = String:gsub( '^To (.-|h)', '|cffad2424@|r%1' )
-	--String = String:gsub( '^(.-|h) whispers', '%1' )
-	String = String:gsub( '^(.-|h) says', '%1' )
-	String = String:gsub( '^(.-|h) yells', '%1' )
-	String = String:gsub( '<' .. AFK .. '>', "AFK" )
-	String = String:gsub( '<' .. DND .. '>', "DND" )
-	String = String:gsub( '^%[' .. RAID_WARNING .. '%]', "Raid Warning" )
-
-	if( Smilies ) then
-		MessageString = origs[Frame]( Frame, GetSmileyReplacementText( String ), ... )
-	else
-		MessageString = origs[Frame]( Frame, String, ... )
-	end
-
-	return MessageString
 end
 
 -- Global strings
@@ -176,13 +42,18 @@ _G.CHAT_FLAG_GM = "|cff4154F5"..L_CHAT_GM.."|r "
 _G.ERR_FRIEND_ONLINE_SS = "|Hplayer:%s|h[%s]|h "..L_CHAT_COME_ONLINE
 _G.ERR_FRIEND_OFFLINE_S = "[%s] "..L_CHAT_GONE_OFFLINE
 
-
 -- Hide chat bubble menu button
 ChatFrameMenuButton:Kill()
 
 -- Kill channel and voice buttons
-ChatFrameChannelButton:Kill()
-if not T.classic then
+if T.Classic then
+	ChatFrameChannelButton:Kill()
+	-- ChatFrameChannelButton:SetSize(20, 20)
+	-- ChatFrameChannelButton:SkinButton()
+	-- ChatFrameChannelButton:ClearAllPoints()
+	-- ChatFrameChannelButton:SetPoint("TOPLEFT", ChatFrame1, "TOPLEFT", -24, 24)
+else
+	ChatFrameChannelButton:Kill()
 	ChatFrameToggleVoiceDeafenButton:Kill()
 	ChatFrameToggleVoiceMuteButton:Kill()
 end
@@ -207,28 +78,43 @@ local function SetChatStyle(frame)
 
 	-- Hide textures
 	for j = 1, #CHAT_FRAME_TEXTURES do
-		_G[chat..CHAT_FRAME_TEXTURES[j]]:SetTexture(nil)
+		_G[chat..CHAT_FRAME_TEXTURES[j]]:SetTexture(0)
 	end
 
 	-- Removes Default ChatFrame Tabs texture
-	_G[format("ChatFrame%sTabLeft", id)]:Kill()
-	_G[format("ChatFrame%sTabMiddle", id)]:Kill()
-	_G[format("ChatFrame%sTabRight", id)]:Kill()
+	if T.Classic then
+		_G[format("ChatFrame%sTabLeft", id)]:Kill()
+		_G[format("ChatFrame%sTabMiddle", id)]:Kill()
+		_G[format("ChatFrame%sTabRight", id)]:Kill()
 
-	_G[format("ChatFrame%sTabSelectedLeft", id)]:Kill()
-	_G[format("ChatFrame%sTabSelectedMiddle", id)]:Kill()
-	_G[format("ChatFrame%sTabSelectedRight", id)]:Kill()
+		_G[format("ChatFrame%sTabSelectedLeft", id)]:Kill()
+		_G[format("ChatFrame%sTabSelectedMiddle", id)]:Kill()
+		_G[format("ChatFrame%sTabSelectedRight", id)]:Kill()
 
-	_G[format("ChatFrame%sTabHighlightLeft", id)]:Kill()
-	_G[format("ChatFrame%sTabHighlightMiddle", id)]:Kill()
-	_G[format("ChatFrame%sTabHighlightRight", id)]:Kill()
+		_G[format("ChatFrame%sTabHighlightLeft", id)]:Kill()
+		_G[format("ChatFrame%sTabHighlightMiddle", id)]:Kill()
+		_G[format("ChatFrame%sTabHighlightRight", id)]:Kill()
+	else
+		_G[format("ChatFrame%sTab", id)].Left:Kill()
+		_G[format("ChatFrame%sTab", id)].Middle:Kill()
+		_G[format("ChatFrame%sTab", id)].Right:Kill()
+
+		_G[format("ChatFrame%sTab", id)].ActiveLeft:Kill()
+		_G[format("ChatFrame%sTab", id)].ActiveMiddle:Kill()
+		_G[format("ChatFrame%sTab", id)].ActiveRight:Kill()
+
+		_G[format("ChatFrame%sTab", id)].HighlightLeft:Kill()
+		_G[format("ChatFrame%sTab", id)].HighlightMiddle:Kill()
+		_G[format("ChatFrame%sTab", id)].HighlightRight:Kill()
+	end
 
 	-- Killing off the new chat tab selected feature
-	_G[format("ChatFrame%sTabSelectedLeft", id)]:Kill()
-	_G[format("ChatFrame%sTabSelectedMiddle", id)]:Kill()
-	_G[format("ChatFrame%sTabSelectedRight", id)]:Kill()
-
-	_G[format("ChatFrame%sButtonFrameMinimizeButton", id)]:Kill()
+	if T.Classic then
+		_G[format("ChatFrame%sTabSelectedLeft", id)]:Kill()
+		_G[format("ChatFrame%sTabSelectedMiddle", id)]:Kill()
+		_G[format("ChatFrame%sTabSelectedRight", id)]:Kill()
+	end
+	_G[format("ChatFrame%sMinimizeButton", id)]:Kill()
 	_G[format("ChatFrame%sButtonFrame", id)]:Kill()
 
 	-- Kills off the retarded new circle around the editbox
@@ -239,13 +125,13 @@ local function SetChatStyle(frame)
 	_G[format("ChatFrame%sTabGlow", id)]:Kill()
 
 	-- Kill scroll bar
-	if not T.classic then
+	if T.Mainline then
 		frame.ScrollBar:Kill()
 	end
 	frame.ScrollToBottomButton:Kill()
 
 	-- Kill off editbox artwork
-	if not T.classic then
+	if T.Mainline then
 		local a, b, c = select(6, _G[chat.."EditBox"]:GetRegions())
 		a:Kill() b:Kill() c:Kill()
 	end
@@ -261,7 +147,7 @@ local function SetChatStyle(frame)
 
 	-- Script to hide editbox instead of fading editbox to 0.35 alpha via IM Style
 	_G[chat.."EditBox"]:HookScript("OnEditFocusGained", function(self) self:Show() end)
-	_G[chat.."EditBox"]:HookScript("OnEditFocusLost", function(self) self:Hide() end)
+	_G[chat.."EditBox"]:HookScript("OnEditFocusLost", function(self) if self:GetText() == "" then self:Hide() end end)
 
 	-- Hide edit box every time we click on a tab
 	_G[chat.."Tab"]:HookScript("OnClick", function() _G[chat.."EditBox"]:Hide() end)
@@ -284,7 +170,7 @@ local function SetChatStyle(frame)
 		hooksecurefunc("ChatEdit_UpdateHeader", function()
 			local chatType = _G[chat.."EditBox"]:GetAttribute("chatType")
 			if not chatType then return end
-			
+
 			local chanTarget = _G[chat.."EditBox"]:GetAttribute("channelTarget")
 			local chanName = chanTarget and GetChannelName(chanTarget)
 			if chanName and chatType == "CHANNEL" then
@@ -301,17 +187,16 @@ local function SetChatStyle(frame)
 
 	-- Rename combat log tab
 	if _G[chat] == _G["ChatFrame2"] then
-		FCF_SetWindowName(_G[chat], GUILD_BANK_LOG)
 		CombatLogQuickButtonFrame_Custom:StripTextures()
 		CombatLogQuickButtonFrame_Custom:CreateBackdrop("Transparent")
 		CombatLogQuickButtonFrame_Custom.backdrop:SetPoint("TOPLEFT", 1, -4)
-		CombatLogQuickButtonFrame_Custom.backdrop:SetPoint("BOTTOMRIGHT", 0, 0)
+		CombatLogQuickButtonFrame_Custom.backdrop:SetPoint("BOTTOMRIGHT", -22, 0)
 		T.SkinCloseButton(CombatLogQuickButtonFrame_CustomAdditionalFilterButton, CombatLogQuickButtonFrame_Custom.backdrop, " ", true)
 		CombatLogQuickButtonFrame_CustomAdditionalFilterButton:SetSize(12, 12)
 		CombatLogQuickButtonFrame_CustomAdditionalFilterButton:SetHitRectInsets (0, 0, 0, 0)
 		CombatLogQuickButtonFrame_CustomProgressBar:ClearAllPoints()
-		CombatLogQuickButtonFrame_CustomProgressBar:SetPoint("TOPLEFT", CombatLogQuickButtonFrame_Custom.backdrop, 1, -4)
-		CombatLogQuickButtonFrame_CustomProgressBar:SetPoint("BOTTOMRIGHT", CombatLogQuickButtonFrame_Custom.backdrop, -22, 0)
+		CombatLogQuickButtonFrame_CustomProgressBar:SetPoint("TOPLEFT", CombatLogQuickButtonFrame_Custom.backdrop, 2, -2)
+		CombatLogQuickButtonFrame_CustomProgressBar:SetPoint("BOTTOMRIGHT", CombatLogQuickButtonFrame_Custom.backdrop, -2, 2)
 		CombatLogQuickButtonFrame_CustomProgressBar:SetStatusBarTexture(C.media.texture)
 		CombatLogQuickButtonFrameButton1:SetPoint("BOTTOM", 0, 0)
 	end
@@ -320,22 +205,20 @@ local function SetChatStyle(frame)
 		origs[_G[chat]] = _G[chat].AddMessage
 		_G[chat].AddMessage = AddMessage
 		-- Custom timestamps color
-		_G.TIMESTAMP_FORMAT_HHMM = T.RGBToHex(unpack(C.chat.time_color)).."[%I:%M]|r "
-		_G.TIMESTAMP_FORMAT_HHMMSS = T.RGBToHex(unpack(C.chat.time_color)).."[%I:%M:%S]|r "
-		_G.TIMESTAMP_FORMAT_HHMMSS_24HR = T.RGBToHex(unpack(C.chat.time_color)).."[%H:%M:%S]|r "
-		_G.TIMESTAMP_FORMAT_HHMMSS_AMPM = T.RGBToHex(unpack(C.chat.time_color)).."[%I:%M:%S %p]|r "
-		_G.TIMESTAMP_FORMAT_HHMM_24HR = T.RGBToHex(unpack(C.chat.time_color)).."[%H:%M]|r "
-		_G.TIMESTAMP_FORMAT_HHMM_AMPM = T.RGBToHex(unpack(C.chat.time_color)).."[%I:%M %p]|r "
+		local color = C.chat.custom_time_color and T.RGBToHex(unpack(C.chat.time_color)) or ""
+		_G.TIMESTAMP_FORMAT_HHMM = color.."[%I:%M]|r "
+		_G.TIMESTAMP_FORMAT_HHMMSS = color.."[%I:%M:%S]|r "
+		_G.TIMESTAMP_FORMAT_HHMMSS_24HR = color.."[%H:%M:%S]|r "
+		_G.TIMESTAMP_FORMAT_HHMMSS_AMPM = color.."[%I:%M:%S %p]|r "
+		_G.TIMESTAMP_FORMAT_HHMM_24HR = color.."[%H:%M]|r "
+		_G.TIMESTAMP_FORMAT_HHMM_AMPM = color.."[%I:%M %p]|r "
 	end
-	if id == 4 then
-		_G[chat.."TabText"]:ClearAllPoints()
-		_G[chat.."TabText"]:SetPoint("CENTER", _G[chat.."Tab"], 0, -4)
-	end
+
 	frame.skinned = true
 end
 
 -- Setup chatframes 1 to 10 on login
-local function SetupChat(self)
+local function SetupChat()
 	for i = 1, NUM_CHAT_WINDOWS do
 		local frame = _G[format("ChatFrame%s", i)]
 		SetChatStyle(frame)
@@ -362,12 +245,11 @@ local function SetupChat(self)
 	ChatTypeInfo.CHANNEL.sticky = var
 end
 
-local function SetupChatPosAndFont(self)
+local function SetupChatPosAndFont()
 	for i = 1, NUM_CHAT_WINDOWS do
 		local chat = _G[format("ChatFrame%s", i)]
 		local id = chat:GetID()
 		local _, fontSize = FCF_GetChatWindowInfo(id)
-		ChatFrame1:SetFrameLevel(LChat:GetFrameLevel()+2)    --//Force correct strata. Quick Fix for text hidden at start.
 
 		-- Min. size for chat font
 		if fontSize < 11 then
@@ -383,71 +265,70 @@ local function SetupChatPosAndFont(self)
 		-- Force chat position
 		if i == 1 then
 			chat:ClearAllPoints()
-			chat:SetSize(C.chat.width-20, C.chat.height)
+			chat:SetSize(C.chat.width, C.chat.height)
 			if C.chat.background == true then
 				chat:SetPoint(C.position.chat[1], C.position.chat[2], C.position.chat[3], C.position.chat[4], C.position.chat[5] + 4)
 			else
 				chat:SetPoint(C.position.chat[1], C.position.chat[2], C.position.chat[3], C.position.chat[4], C.position.chat[5])
-			end
-			if C.panels.NoPanels == true then
-				chat:SetSize(C.chat.width-20, C.chat.height-8)
-				chat:SetPoint(C.position.chat[1], C.position.chat[2], C.position.chat[3], C.position.chat[4]+10, C.position.chat[5] + 4)
-			end
-			FCF_SavePositionAndDimensions(chat)
-		elseif i == 4 then
-			chat:ClearAllPoints()
-			chat:SetSize(C.chat.width-20, C.chat.height)
-			if C.chat.background == true then
-				chat:SetPoint(C.position.chatr[1], C.position.chatr[2], C.position.chatr[3], C.position.chatr[4], C.position.chatr[5] + 4)
-			else
-				chat:SetPoint(C.position.chatr[1], C.position.chatr[2], C.position.chatr[3], C.position.chatr[4], C.position.chatr[5])
-			end
-			if C.panels.NoPanels == true then
-				chat:SetSize(C.chat.width-20, C.chat.height-8)
-				chat:SetPoint("BOTTOMLEFT",RChat,"BOTTOMLEFT",4,4)
-				chat:SetPoint("TOPRIGHT",RChat,"TOPRIGHT",-4,-25)
-			else
-				chat:SetWidth(RChat:GetWidth()-8)
-				chat:SetHeight(RChat:GetHeight()-8)
-				chat:SetPoint("BOTTOMLEFT",RChat,"BOTTOMLEFT",4,4)
-				chat:SetPoint("TOPRIGHT",RChat,"TOPRIGHT",-4,-2)
 			end
 			FCF_SavePositionAndDimensions(chat)
 		elseif i == 2 then
 			if C.chat.combatlog ~= true then
 				FCF_DockFrame(chat)
 				ChatFrame2Tab:EnableMouse(false)
-				ChatFrame2TabText:Hide()
+				ChatFrame2Tab.Text:Hide()
 				ChatFrame2Tab:SetWidth(0.001)
 				ChatFrame2Tab.SetWidth = T.dummy
 				FCF_DockUpdate()
 			end
 		end
 	end
-	
-	local bnet = CreateFrame('Frame', 'ViksUIBnetMover', UIParent)
-	bnet:Size(BNToastFrame:GetWidth(), BNToastFrame:GetHeight())
-	bnet:Point(unpack(C.position.bn_popup))
-	--move:RegisterFrame(bnet)
 
-	for i = 1, BNToastFrame:GetNumRegions() do
-		if i ~= 10 then
-			local region = select(i, BNToastFrame:GetRegions())
-			if region:GetObjectType() == "Texture" then region:SetTexture(nil) end
-		end
-	end	
-	BNToastFrame:SetTemplate("Transparent")
-	T.SkinCloseButton(BNToastFrame.CloseButton)
-	
 	-- Reposition Quick Join Toast and battle.net popup
-	if not T.classic then
+	if T.Mainline then
 		QuickJoinToastButton:ClearAllPoints()
-		QuickJoinToastButton:SetPoint(unpack(C.position.bn_popup))
-		QuickJoinToastButton:EnableMouse(false)
+		QuickJoinToastButton:SetPoint("TOPLEFT", 0, 90)
 		QuickJoinToastButton.ClearAllPoints = T.dummy
 		QuickJoinToastButton.SetPoint = T.dummy
-		QuickJoinToastButton:SetAlpha(0)
+
+		QuickJoinToastButton.Toast:ClearAllPoints()
+		QuickJoinToastButton.Toast:SetPoint(unpack(C.position.bn_popup))
+		QuickJoinToastButton.Toast.Background:SetTexture(0)
+		QuickJoinToastButton.Toast:CreateBackdrop("Transparent")
+		QuickJoinToastButton.Toast.backdrop:SetPoint("TOPLEFT", 0, 0)
+		QuickJoinToastButton.Toast.backdrop:SetPoint("BOTTOMRIGHT", 0, 0)
+		QuickJoinToastButton.Toast.backdrop:Hide()
+		QuickJoinToastButton.Toast:SetWidth(C.chat.width + 7)
+		QuickJoinToastButton.Toast.Text:SetWidth(C.chat.width - 20)
+
+		hooksecurefunc(QuickJoinToastButton, "ShowToast", function() QuickJoinToastButton.Toast.backdrop:Show() end)
+		hooksecurefunc(QuickJoinToastButton, "HideToast", function() QuickJoinToastButton.Toast.backdrop:Hide() end)
+
+		hooksecurefunc(BNToastFrame, "SetPoint", function(self, _, anchor)
+			if anchor == QuickJoinToastButton then
+				self:SetPoint(unpack(C.position.bn_popup))
+			end
+		end)
+
+		-- /run BNToastFrame:AddToast(BN_TOAST_TYPE_ONLINE, 1)
+		hooksecurefunc(BNToastFrame, "ShowToast", function(self)
+			if not self.IsSkinned then
+				T.SkinCloseButton(self.CloseButton, nil, "x")
+				self.CloseButton:SetSize(16, 16)
+				self.IsSkinned = true
+			end
+		end)
 	end
+end
+
+for i = 3, NUM_CHAT_WINDOWS do
+	local tab = _G[format("ChatFrame%sTab", i)]
+	hooksecurefunc(tab, "SetPoint", function(self, point, anchor, attachTo, x, y)
+		if anchor == GeneralDockManagerScrollFrameChild and y == -1 then
+			self:ClearAllPoints()
+			self:SetPoint(point, anchor, attachTo, x, -2)
+		end
+	end)
 end
 
 GeneralDockManagerOverflowButton:SetPoint("BOTTOMRIGHT", ChatFrame1, "TOPRIGHT", 0, 5)
@@ -487,7 +368,7 @@ function FCFManager_GetNumDedicatedFrames(...)
 end
 
 -- Remove player's realm name
-local function RemoveRealmName(self, event, msg, author, ...)
+local function RemoveRealmName(_, _, msg, author, ...)
 	local realm = string.gsub(T.realm, " ", "")
 	if msg:find("-" .. realm) then
 		return false, gsub(msg, "%-"..realm, ""), author, ...
@@ -499,7 +380,7 @@ ChatFrame_AddMessageEventFilter("CHAT_MSG_SYSTEM", RemoveRealmName)
 --	Save slash command typo
 ----------------------------------------------------------------------------------------
 local function TypoHistory_Posthook_AddMessage(chat, text)
-	if strfind(text, HELP_TEXT_SIMPLE) then
+	if text and strfind(text, HELP_TEXT_SIMPLE) then
 		ChatEdit_AddHistory(chat.editBox)
 	end
 end
@@ -509,3 +390,100 @@ for i = 1, NUM_CHAT_WINDOWS do
 		hooksecurefunc(_G["ChatFrame"..i], "AddMessage", TypoHistory_Posthook_AddMessage)
 	end
 end
+
+----------------------------------------------------------------------------------------
+--	Loot icons
+----------------------------------------------------------------------------------------
+if C.chat.loot_icons == true then
+	local function AddLootIcons(_, _, message, ...)
+		local function Icon(link)
+			local texture = GetItemIcon(link)
+			return "\124T"..texture..":12:12:0:0:64:64:5:59:5:59\124t"..link
+		end
+		message = message:gsub("(\124c%x+\124Hitem:.-\124h\124r)", Icon)
+		return false, message, ...
+	end
+
+	ChatFrame_AddMessageEventFilter("CHAT_MSG_LOOT", AddLootIcons)
+end
+
+----------------------------------------------------------------------------------------
+--	Swith channels by Tab
+----------------------------------------------------------------------------------------
+local cycles = {
+	{chatType = "SAY", use = function() return 1 end},
+	{chatType = "PARTY", use = function() return not IsInRaid() and IsInGroup(LE_PARTY_CATEGORY_HOME) end},
+	{chatType = "RAID", use = function() return IsInRaid(LE_PARTY_CATEGORY_HOME) end},
+	{chatType = "INSTANCE_CHAT", use = function() return T.Mainline and IsPartyLFG() end},
+	{chatType = "GUILD", use = function() return IsInGuild() end},
+	{chatType = "SAY", use = function() return 1 end},
+}
+
+local function UpdateTabChannelSwitch(self)
+	if strsub(tostring(self:GetText()), 1, 1) == "/" then return end
+	local currChatType = self:GetAttribute("chatType")
+	for i, curr in ipairs(cycles) do
+		if curr.chatType == currChatType then
+			local h, r, step = i + 1, #cycles, 1
+			if IsShiftKeyDown() then h, r, step = i - 1, 1, -1 end
+			for j = h, r, step do
+				if cycles[j]:use(self, currChatType) then
+					self:SetAttribute("chatType", cycles[j].chatType)
+					ChatEdit_UpdateHeader(self)
+					return
+				end
+			end
+		end
+	end
+end
+hooksecurefunc("ChatEdit_CustomTabPressed", UpdateTabChannelSwitch)
+
+----------------------------------------------------------------------------------------
+--	Role icons
+----------------------------------------------------------------------------------------
+if (T.Wrath or T.Cata or T.Mainline) and C.chat.role_icons == true then
+	local chats = {
+		CHAT_MSG_SAY = 1, CHAT_MSG_YELL = 1,
+		CHAT_MSG_WHISPER = 1, CHAT_MSG_WHISPER_INFORM = 1,
+		CHAT_MSG_PARTY = 1, CHAT_MSG_PARTY_LEADER = 1,
+		CHAT_MSG_INSTANCE_CHAT = 1, CHAT_MSG_INSTANCE_CHAT_LEADER = 1,
+		CHAT_MSG_RAID = 1, CHAT_MSG_RAID_LEADER = 1, CHAT_MSG_RAID_WARNING = 1,
+	}
+
+	local role_tex = {
+		TANK = "\124T"..[[Interface\AddOns\ViksUI\Media\Textures\Tank.tga]]..":12:12:0:0:64:64:5:59:5:59\124t",
+		HEALER	= "\124T"..[[Interface\AddOns\ViksUI\Media\Textures\Healer.tga]]..":12:12:0:0:64:64:5:59:5:59\124t",
+		DAMAGER = "\124T"..[[Interface\AddOns\ViksUI\Media\Textures\Damager.tga]]..":12:12:0:0:64:64:5:59:5:59\124t",
+	}
+
+	local GetColoredName_orig = _G.GetColoredName
+	local function GetColoredName_hook(event, arg1, arg2, ...)
+		local ret = GetColoredName_orig(event, arg1, arg2, ...)
+		if chats[event] then
+			local role = UnitGroupRolesAssigned(arg2)
+			if role == "NONE" and arg2:match(" *- *"..GetRealmName().."$") then
+				role = UnitGroupRolesAssigned(arg2:gsub(" *-[^-]+$",""))
+			end
+			if role and role ~= "NONE" then
+				ret = role_tex[role]..""..ret
+			end
+		end
+		return ret
+	end
+	_G.GetColoredName = GetColoredName_hook
+end
+
+----------------------------------------------------------------------------------------
+--	Prevent reposition ChatFrame
+----------------------------------------------------------------------------------------
+hooksecurefunc(ChatFrame1, "SetPoint", function(self, _, _, _, x)
+	if x ~= C.position.chat[4] then
+		self:ClearAllPoints()
+		self:SetSize(C.chat.width, C.chat.height)
+		if C.chat.background == true then
+			self:SetPoint(C.position.chat[1], C.position.chat[2], C.position.chat[3], C.position.chat[4], C.position.chat[5] + 4)
+		else
+			self:SetPoint(C.position.chat[1], C.position.chat[2], C.position.chat[3], C.position.chat[4], C.position.chat[5])
+		end
+	end
+end)

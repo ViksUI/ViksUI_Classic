@@ -1,4 +1,4 @@
-﻿local T, C, L, _ = unpack(select(2, ...))
+local T, C, L = unpack(ViksUI)
 if C.skins.recount ~= true or not IsAddOnLoaded("Recount") then return end
 
 ----------------------------------------------------------------------------------------
@@ -27,9 +27,9 @@ local function SkinFrame(frame)
 end
 
 local function SkinButton(frame, text)
-	if frame.SetNormalTexture then frame:SetNormalTexture("") end
-	if frame.SetHighlightTexture then frame:SetHighlightTexture("") end
-	if frame.SetPushedTexture then frame:SetPushedTexture("") end
+	if frame.SetNormalTexture then frame:SetNormalTexture(0) end
+	if frame.SetHighlightTexture then frame:SetHighlightTexture(0) end
+	if frame.SetPushedTexture then frame:SetPushedTexture(0) end
 
 	if not frame.text then
 		frame:FontString("text", C.font.stylization_font, C.font.stylization_font_size, C.font.stylization_font_style)

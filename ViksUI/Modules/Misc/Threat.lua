@@ -1,5 +1,5 @@
-﻿local T, C, L, _ = unpack(select(2, ...))
-if T.classic or C.threat.enable ~= true then return end
+local T, C, L = unpack(ViksUI)
+if C.threat.enable ~= true then return end
 
 ----------------------------------------------------------------------------------------
 --	Based on alThreatMeter(by Allez)
@@ -15,10 +15,10 @@ else
 end
 
 local bar, tList, barList = {}, {}, {}
-local max = math.max
 local targeted = false
 
-RAID_CLASS_COLORS["PET"] = {r = 0, g = 0.7, b = 0, colorStr = "ff00b200"}
+local pet_color = {r = 0, g = 0.7, b = 0, colorStr = "ff00b200"}
+local shaman_color = {r = 0, g = 0.44, b = 0.98, colorStr = "ff0070de"}
 
 local CreateFS = function(frame)
 	local fstring = frame:CreateFontString(nil, "OVERLAY")
@@ -27,21 +27,16 @@ local CreateFS = function(frame)
 	return fstring
 end
 
-local truncate = function(value)
-	if value >= 1e6 then
-		return string.format("%.2fb", value / 1e6)
-	elseif value >= 1e3 then
-		return string.format("%.2fm", value / 1e3)
-	else
-		return string.format("%.0fk", value)
-	end
-end
-
 local AddUnit = function(unit)
 	local threatpct, _, threatval = select(3, UnitDetailedThreatSituation(unit, "target"))
 	if threatval and threatval < 0 then
 		threatval = threatval + 410065408
 	end
+
+	if T.Classic then
+		threatval = threatval and math.floor(threatval / 100)
+	end
+
 	local guid = UnitGUID(unit)
 	if not tList[guid] then
 		tinsert(barList, guid)
@@ -96,8 +91,8 @@ local UpdateBars = function()
 	end
 	table.sort(barList, SortMethod)
 	for i = 1, #barList do
-		cur = tList[barList[i]]
-		max = tList[barList[1]]
+		local cur = tList[barList[i]]
+		local max = tList[barList[1]]
 		if i > C.threat.bar_rows or not cur or cur.pct == 0 then break end
 		if not bar[i] then
 			bar[i] = CreateBar()
@@ -108,11 +103,18 @@ local UpdateBars = function()
 			end
 		end
 		bar[i]:SetValue(100 * cur.pct / max.pct)
-		local color = (CUSTOM_CLASS_COLORS or RAID_CLASS_COLORS)[cur.class]
+		local color
+		if T.Vanilla and cur.class == "SHAMAN" then
+			color = shaman_color
+		elseif cur.class == "PET" then
+			color = pet_color
+		else
+			color = (CUSTOM_CLASS_COLORS or RAID_CLASS_COLORS)[cur.class]
+		end
 		bar[i]:SetStatusBarColor(color.r, color.g, color.b)
 		bar[i].bg:SetVertexColor(color.r, color.g, color.b, 0.2)
 		bar[i].left:SetText(cur.name)
-		bar[i].right:SetText(string.format("%s [%d%%]", truncate(cur.val / 1000), cur.pct))
+		bar[i].right:SetText(string.format("%s [%d%%]", T.ShortValue(cur.val), cur.pct))
 		bar[i]:Show()
 	end
 end
@@ -131,10 +133,8 @@ local UpdateThreat = function()
 	UpdateBars()
 end
 
-local lastCombatLogUpdate = 0
-
 local OnEvent = function(_, event)
-	if event == "PLAYER_TARGET_CHANGED" or event == "UNIT_THREAT_LIST_UPDATE" or event == "PLAYER_REGEN_DISABLED" then
+	if event == "PLAYER_TARGET_CHANGED" or event == "UNIT_THREAT_LIST_UPDATE" then
 		if C.threat.hide_solo == true and GetNumGroupMembers() == 0 then
 			targeted = false
 		else
@@ -148,36 +148,14 @@ local OnEvent = function(_, event)
 	if event == "PLAYER_TARGET_CHANGED" or event == "PLAYER_REGEN_ENABLED" then
 		wipe(tList)
 		wipe(barList)
-		if T.classic then
-			lastCombatLogUpdate = 0
-			if event == "PLAYER_REGEN_ENABLED" then
-				targeted = false
-			end
-		end
 	end
 	UpdateThreat()
-end
-
-if T.classic then
-	local UpdateFromCombatLog = CreateFrame("Frame")
-	UpdateFromCombatLog:SetScript("OnEvent", function(self, event, ...)
-		if not UnitAffectingCombat("player") then return end
-		if GetTime() - lastCombatLogUpdate > 0.25 then
-			lastCombatLogUpdate = GetTime()
-			OnEvent()
-		end
-	end)
-	UpdateFromCombatLog:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 end
 
 local addon = CreateFrame("Frame")
 addon:SetScript("OnEvent", OnEvent)
 addon:RegisterEvent("PLAYER_TARGET_CHANGED")
-if not T.classic then
-	addon:RegisterEvent("UNIT_THREAT_LIST_UPDATE")
-else
-	addon:RegisterEvent("PLAYER_REGEN_DISABLED")
-end
+addon:RegisterEvent("UNIT_THREAT_LIST_UPDATE")
 addon:RegisterEvent("PLAYER_REGEN_ENABLED")
 
 SlashCmdList.alThreat = function()

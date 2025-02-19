@@ -1,4 +1,4 @@
-local T, C, L, _ = unpack(select(2, ...))
+local T, C, L = unpack(ViksUI)
 if C.chat.enable ~= true or C.tooltip.enable ~= true or IsAddOnLoaded("tekKompare") then return end
 
 ----------------------------------------------------------------------------------------
@@ -24,14 +24,14 @@ local function OnHyperlinkEnter(frame, link, ...)
 end
 
 local function OnHyperlinkLeave(frame, link, ...)
-	if not T.classic then
+	if T.Classic then
+		GameTooltip:Hide()
+	else
 		if BattlePetTooltip:IsShown() then
 			BattlePetTooltip:Hide()
 		else
 			GameTooltip:Hide()
 		end
-	else
-		GameTooltip:Hide()
 	end
 
 	if orig1[frame] then return orig1[frame](frame, link, ...) end

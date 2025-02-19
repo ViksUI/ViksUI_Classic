@@ -1,45 +1,20 @@
-local T, C, L, _ = unpack(select(2, ...))
+local T, C, L = unpack(ViksUI)
 if C.stats.battleground ~= true then return end
 
 ----------------------------------------------------------------------------------------
 --	BGScore(by Elv22, edited by Tukz)
 ----------------------------------------------------------------------------------------
--- Map IDs
-local WSG = 92
-local TP = 206
-local AV = 91
-local SOTA = 128
-local IOC = 169
-local EOTS = 112
-local TBFG = 275
-local AB = 93
-local TOK = 417
-local SSM = 423
-local DG = 519
-local SS = 907
-local pvpStatIDs
-
 local classcolor = ("|cff%.2x%.2x%.2x"):format(T.color.r * 255, T.color.g * 255, T.color.b * 255)
 
 local BGFrame = CreateFrame("Frame", "InfoBattleGround", UIParent)
 BGFrame:CreatePanel("Transparent", 300, C.font.stats_font_size+4, "BOTTOMLEFT", RChatTab, "TOPLEFT", 0, 14)
 BGFrame:EnableMouse(true)
 BGFrame:SetScript("OnEnter", function(self)
-	local numScores = GetNumBattlefieldScores()
-	if not T.classic then
-		pvpStatIDs = C_PvP.GetMatchPVPStatIDs()
-	end
+	local columns = C_PvP.GetMatchPVPStatColumns()
 
-	for i = 1, numScores do
-		local name, honorableKills, deaths, damageDone, healingDone, rank
-		if not T.classic then
-			name, _, honorableKills, deaths, _, _, _, _, _, damageDone, healingDone = GetBattlefieldScore(i)
-		else
-			-- build 30786 changed returns, removing dmg/heals/spec and adding rank
-			name, _, honorableKills, deaths, _, _, rank = GetBattlefieldScore(i)
-		end
+	for i = 1, GetNumBattlefieldScores() do
+		local name, _, honorableKills, deaths, _, _, _, _, _, damageDone, healingDone = GetBattlefieldScore(i)
 		if name and name == T.name then
-			local areaID = C_Map.GetBestMapForUnit("player") or 0
 			GameTooltip:SetOwner(self, "ANCHOR_TOPLEFT", 0, T.Scale(4))
 			GameTooltip:ClearLines()
 			GameTooltip:SetPoint("BOTTOM", self, "TOP", 0, 1)
@@ -48,65 +23,32 @@ BGFrame:SetScript("OnEnter", function(self)
 			GameTooltip:AddLine(" ")
 			GameTooltip:AddDoubleLine(HONORABLE_KILLS..":", honorableKills, 1, 1, 1)
 			GameTooltip:AddDoubleLine(DEATHS..":", deaths, 1, 1, 1)
-			if not T.classic then
-				GameTooltip:AddDoubleLine(DAMAGE..":", damageDone, 1, 1, 1)
-				GameTooltip:AddDoubleLine(SHOW_COMBAT_HEALING..":", healingDone, 1, 1, 1)
-			else
-				GameTooltip:AddDoubleLine(RANK..":", rank, 1, 1, 1)
+			GameTooltip:AddDoubleLine(DAMAGE..":", T.ShortValue(damageDone), 1, 1, 1)
+			GameTooltip:AddDoubleLine(SHOW_COMBAT_HEALING..":", T.ShortValue(healingDone), 1, 1, 1)
+
+			-- Add extra statistics depending on what BG you are
+			if columns then
+				for j, stat in ipairs(columns) do
+					local name = stat.name
+					if name and strlen(name) > 0 then
+						GameTooltip:AddDoubleLine(name, GetBattlefieldStatData(i, j), 1, 1, 1)
+					end
+				end
 			end
 
-			if not T.classic then
-				for j = 1, #pvpStatIDs do
-					GameTooltip:AddDoubleLine(C_PvP.GetMatchPVPStatColumn(pvpStatIDs[j])..":", GetBattlefieldStatData(i, j), 1, 1, 1)
-				end
-				break
-			else
-				-- Add extra statistics depending on what BG you are
-				if areaID == WSG or areaID == TP then
-					GameTooltip:AddDoubleLine(GetBattlefieldStatInfo(1)..":", GetBattlefieldStatData(i, 1), 1, 1, 1)
-					GameTooltip:AddDoubleLine(GetBattlefieldStatInfo(2)..":", GetBattlefieldStatData(i, 2), 1, 1, 1)
-				elseif areaID == EOTS then
-					GameTooltip:AddDoubleLine(GetBattlefieldStatInfo(1)..":", GetBattlefieldStatData(i, 1), 1, 1, 1)
-				elseif areaID == AV then
-					GameTooltip:AddDoubleLine(GetBattlefieldStatInfo(1)..":", GetBattlefieldStatData(i, 1), 1, 1, 1)
-					GameTooltip:AddDoubleLine(GetBattlefieldStatInfo(2)..":", GetBattlefieldStatData(i, 2), 1, 1, 1)
-					GameTooltip:AddDoubleLine(GetBattlefieldStatInfo(3)..":", GetBattlefieldStatData(i, 3), 1, 1, 1)
-					GameTooltip:AddDoubleLine(GetBattlefieldStatInfo(4)..":", GetBattlefieldStatData(i, 4), 1, 1, 1)
-				elseif areaID == SOTA then
-					GameTooltip:AddDoubleLine(GetBattlefieldStatInfo(1)..":", GetBattlefieldStatData(i, 1), 1, 1, 1)
-					GameTooltip:AddDoubleLine(GetBattlefieldStatInfo(2)..":", GetBattlefieldStatData(i, 2), 1, 1, 1)
-				elseif areaID == IOC or areaID == TBFG or areaID == AB then
-					GameTooltip:AddDoubleLine(GetBattlefieldStatInfo(1)..":", GetBattlefieldStatData(i, 1), 1, 1, 1)
-					GameTooltip:AddDoubleLine(GetBattlefieldStatInfo(2)..":", GetBattlefieldStatData(i, 2), 1, 1, 1)
-				elseif areaID == TOK then
-					GameTooltip:AddDoubleLine(GetBattlefieldStatInfo(1)..":", GetBattlefieldStatData(i, 1), 1, 1, 1)
-					GameTooltip:AddDoubleLine(GetBattlefieldStatInfo(2)..":", GetBattlefieldStatData(i, 2), 1, 1, 1)
-				elseif areaID == SSM then
-					GameTooltip:AddDoubleLine(GetBattlefieldStatInfo(1)..":", GetBattlefieldStatData(i, 1), 1, 1, 1)
-				elseif areaID == DG then
-					GameTooltip:AddDoubleLine(GetBattlefieldStatInfo(1)..":", GetBattlefieldStatData(i, 1), 1, 1, 1)
-					GameTooltip:AddDoubleLine(GetBattlefieldStatInfo(2)..":", GetBattlefieldStatData(i, 3), 1, 1, 1)
-					GameTooltip:AddDoubleLine(GetBattlefieldStatInfo(3)..":", GetBattlefieldStatData(i, 4), 1, 1, 1)
-				elseif areaID == SS then
-					GameTooltip:AddDoubleLine(GetBattlefieldStatInfo(1)..":", GetBattlefieldStatData(i, 1), 1, 1, 1)
-				end
-				break
-			end
+			break
 		end
 	end
 	GameTooltip:Show()
 end)
 
-BGFrame:SetScript("OnLeave", function(self) GameTooltip:Hide() end)
-BGFrame:SetScript("OnMouseUp", function(self, button)
-	if not T.classic then
-		if QueueStatusMinimapButton:IsShown() then return end
-	end
-	if MiniMapBattlefieldFrame:IsShown() then
+BGFrame:SetScript("OnLeave", function() GameTooltip:Hide() end)
+BGFrame:SetScript("OnMouseUp", function(_, button)
+	if QueueStatusMinimapButton:IsShown() then
 		if button == "RightButton" then
 			ToggleBattlefieldMap()
 		else
-			ToggleWorldStateScoreFrame()
+			TogglePVPScoreboardOrResults()
 		end
 	end
 end)
@@ -133,31 +75,22 @@ Text3:SetPoint("LEFT", Text2, "RIGHT", 5, 0)
 Text3:SetHeight(C.font.stats_font_size)
 
 local int = 2
-local function Update(self, t)
+local function Update(_, t)
 	int = int - t
 	if int < 0 then
-		local dmgtxt, ranktxt
+		local dmgtxt
 		RequestBattlefieldScoreData()
 		local numScores = GetNumBattlefieldScores()
-		for i = 1, numScores do
-			local name, killingBlows, honorGained, damageDone, healingDone, rank
-			if not T.classic then
-				name, killingBlows, _, _, honorGained, _, _, _, _, damageDone, healingDone = GetBattlefieldScore(i)
-			else
-				-- build 30786 changed returns, removing dmg/heals/spec and adding rank
-				name, killingBlows, _, _, honorGained, _, rank = GetBattlefieldScore(i)
-			end
-			if not T.classic then
+		for i = 1, GetNumBattlefieldScores() do
+			local name, killingBlows, _, _, honorGained, _, _, _, _, damageDone, healingDone = GetBattlefieldScore(i)
+
+			if name and name == T.name then
 				if healingDone > damageDone then
 					dmgtxt = (classcolor..SHOW_COMBAT_HEALING.." :|r "..T.ShortValue(healingDone))
 				else
 					dmgtxt = (classcolor..DAMAGE.." :|r "..T.ShortValue(damageDone))
 				end
-			else
-				ranktxt = (classcolor..RANK.." :|r "..rank)
-			end
-			if name and name == T.name then
-				Text1:SetText(not T.classic and dmgtxt or ranktxt)
+				Text1:SetText(dmgtxt)
 				Text2:SetText(classcolor..COMBAT_HONOR_GAIN.." :|r "..format("%d", honorGained))
 				Text3:SetText(classcolor..KILLING_BLOWS.." :|r "..killingBlows)
 			end
@@ -167,7 +100,7 @@ local function Update(self, t)
 end
 
 -- Hide text when not in an bg
-local function OnEvent(self, event)
+local function OnEvent(_, event)
 	if event == "PLAYER_ENTERING_WORLD" then
 		local _, instanceType = IsInInstance()
 		if instanceType == "pvp" then

@@ -1,5 +1,5 @@
 local parent, ns = ...
-local global = GetAddOnMetadata(parent, 'X-oUF')
+local global = C_AddOns.GetAddOnMetadata(parent, 'X-oUF')
 local _VERSION = '@project-version@'
 if(_VERSION:find('project%-version')) then
 	_VERSION = 'devel'
@@ -10,8 +10,8 @@ local Private = oUF.Private
 
 local argcheck = Private.argcheck
 local error = Private.error
-local print = Private.print
-local UnitExists = Private.UnitExists
+local print = Private.print --luacheck: no unused
+local unitExists = Private.unitExists
 
 local styles, style = {}
 local callback, objects, headers = {}, {}, {}
@@ -19,31 +19,15 @@ local callback, objects, headers = {}, {}, {}
 local elements = {}
 local activeElements = {}
 
-local PetBattleFrameHider = CreateFrame('Frame', (global or parent) .. '_PetBattleFrameHider', UIParent, 'SecureHandlerStateTemplate')
-PetBattleFrameHider:SetAllPoints()
-PetBattleFrameHider:SetFrameStrata('LOW')
-RegisterStateDriver(PetBattleFrameHider, 'visibility', '[petbattle] hide; show')
-
--- updating of "invalid" units.
-local function enableTargetUpdate(object)
-	object.onUpdateFrequency = object.onUpdateFrequency or .5
-	object.__eventless = true
-
-	local total = 0
-	object:SetScript('OnUpdate', function(self, elapsed)
-		if(not self.unit) then
-			return
-		elseif(total > self.onUpdateFrequency) then
-			self:UpdateAllElements('OnUpdate')
-			total = 0
-		end
-
-		total = total + elapsed
-	end)
+local PetBattleFrameHider
+if _G.WOW_PROJECT_ID == _G.WOW_PROJECT_MAINLINE then
+	PetBattleFrameHider = CreateFrame('Frame', (global or parent) .. '_PetBattleFrameHider', UIParent, 'SecureHandlerStateTemplate')
+	PetBattleFrameHider:SetAllPoints()
+	PetBattleFrameHider:SetFrameStrata('LOW')
+	RegisterStateDriver(PetBattleFrameHider, 'visibility', '[petbattle] hide; show')
 end
-Private.enableTargetUpdate = enableTargetUpdate
 
-local function updateActiveUnit(self, event, unit)
+local function updateActiveUnit(self, event)
 	-- Calculate units to work with
 	local realUnit, modUnit = SecureButton_GetUnit(self), SecureButton_GetModifiedUnit(self)
 
@@ -58,13 +42,19 @@ local function updateActiveUnit(self, event, unit)
 		modUnit = 'vehicle'
 	end
 
-	if(not UnitExists(modUnit)) then return end
+	if(not unitExists(modUnit)) then return end
 
 	-- Change the active unit and run a full update.
 	if(Private.UpdateUnits(self, modUnit, realUnit)) then
-		self:UpdateAllElements('RefreshUnit')
+		self:UpdateAllElements(event or 'RefreshUnit')
 
 		return true
+	end
+end
+
+local function evalUnitAndUpdate(self, event)
+	if(not updateActiveUnit(self, event)) then
+		return self:UpdateAllElements(event)
 	end
 end
 
@@ -132,10 +122,12 @@ for k, v in next, {
 		if(not enabled) then return end
 
 		local update = elements[name].update
-		for k, func in next, self.__elements do
-			if(func == update) then
-				table.remove(self.__elements, k)
-				break
+		if(update) then
+			for k, func in next, self.__elements do
+				if(func == update) then
+					table.remove(self.__elements, k)
+					break
+				end
 			end
 		end
 
@@ -193,7 +185,7 @@ for k, v in next, {
 	--]]
 	UpdateAllElements = function(self, event)
 		local unit = self.unit
-		if(not UnitExists(unit)) then return end
+		if(not unitExists(unit)) then return end
 
 		assert(type(event) == 'string', "Invalid argument 'event' in UpdateAllElements.")
 
@@ -226,9 +218,7 @@ for k, v in next, {
 end
 
 local function onShow(self)
-	if(not updateActiveUnit(self, 'OnShow')) then
-		return self:UpdateAllElements('OnShow')
-	end
+	evalUnitAndUpdate(self, 'OnShow')
 end
 
 local function updatePet(self, event, unit)
@@ -243,9 +233,8 @@ local function updatePet(self, event, unit)
 	end
 
 	if(self.unit ~= petUnit) then return end
-	if(not updateActiveUnit(self, event)) then
-		return self:UpdateAllElements(event)
-	end
+
+	evalUnitAndUpdate(self, event)
 end
 
 local function updateRaid(self, event)
@@ -257,12 +246,30 @@ local function updateRaid(self, event)
 	end
 end
 
+-- boss6-8 exsist in some encounters, but unit event registration seems to be
+-- completely broken for them, so instead we use OnUpdate to update them.
+local eventlessUnits = {
+	boss6 = true,
+	boss7 = true,
+	boss8 = true,
+}
+
+local function isEventlessUnit(unit)
+	return unit and unit:match('%w+target') or eventlessUnits[unit]
+end
+
 local function initObject(unit, style, styleFunc, header, ...)
 	local num = select('#', ...)
 	for i = 1, num do
 		local object = select(i, ...)
 		local objectUnit = object:GetAttribute('oUF-guessUnit') or unit
 		local suffix = object:GetAttribute('unitsuffix')
+
+		-- Handle the case where someone has modified the unitsuffix attribute in
+		-- oUF-initialConfigFunction.
+		if(suffix and not objectUnit:match(suffix)) then
+			objectUnit = objectUnit .. suffix
+		end
 
 		object.__elements = {}
 		object.style = style
@@ -272,22 +279,20 @@ local function initObject(unit, style, styleFunc, header, ...)
 		table.insert(objects, object)
 
 		-- We have to force update the frames when PEW fires.
-		object:RegisterEvent('PLAYER_ENTERING_WORLD', object.UpdateAllElements, true)
+		-- It's also important to evaluate units before running an update
+		-- because sometimes events that are required for unit updates end up
+		-- not firing because of loading screens. For instance, there's a slight
+		-- delay between UNIT_EXITING_VEHICLE and UNIT_EXITED_VEHICLE during
+		-- which a user can go through a loading screen after which the player
+		-- frame will be stuck with the 'vehicle' unit.
+		object:RegisterEvent('PLAYER_ENTERING_WORLD', evalUnitAndUpdate, true)
 
-		-- Handle the case where someone has modified the unitsuffix attribute in
-		-- oUF-initialConfigFunction.
-		if(suffix and not objectUnit:match(suffix)) then
-			objectUnit = objectUnit .. suffix
-		end
-
-		if(not (suffix == 'target' or objectUnit and objectUnit:match('target'))) then
-			if not oUF:IsClassic() then
-				object:RegisterEvent('UNIT_ENTERED_VEHICLE', updateActiveUnit)
-				object:RegisterEvent('UNIT_EXITED_VEHICLE', updateActiveUnit)
-			end
+		if(not isEventlessUnit(objectUnit)) then
+			object:RegisterEvent('UNIT_ENTERED_VEHICLE', evalUnitAndUpdate)
+			object:RegisterEvent('UNIT_EXITED_VEHICLE', evalUnitAndUpdate)
 
 			-- We don't need to register UNIT_PET for the player unit. We register it
-			-- mainly because UNIT_EXITED_VEHICLE and UNIT_ENTERED_VEHICLE doesn't always
+			-- mainly because UNIT_EXITED_VEHICLE and UNIT_ENTERED_VEHICLE don't always
 			-- have pet information when they fire for party and raid units.
 			if(objectUnit ~= 'player') then
 				object:RegisterEvent('UNIT_PET', updatePet)
@@ -299,14 +304,21 @@ local function initObject(unit, style, styleFunc, header, ...)
 			object:SetAttribute('*type1', 'target')
 			object:SetAttribute('*type2', 'togglemenu')
 
-			-- No need to enable this for *target frames.
-			if(not (unit:match('target') or suffix == 'target')) then
+			if(not oUF:IsVanilla() and not oUF:IsTBC()) then
 				object:SetAttribute('toggleForVehicle', true)
 			end
 
-			-- Other boss and target units are handled by :HandleUnit().
-			if(suffix == 'target') then
-				enableTargetUpdate(object)
+			--[[ frame.IsPingable
+			This boolean can be set to false to disable the frame from being pingable. Enabled by default.
+			--]]
+			--[[ Override: frame:GetContextualPingType()
+			Used to define which contextual ping is used for the frame.
+			By default this wraps `C_Ping.GetContextualPingTypeForUnit(UnitGUID(frame.unit))`.
+			--]]
+			object:SetAttribute('ping-receiver', true)
+
+			if(isEventlessUnit(objectUnit)) then
+				oUF:HandleEventlessUnit(object)
 			else
 				oUF:HandleUnit(object)
 			end
@@ -324,7 +336,7 @@ local function initObject(unit, style, styleFunc, header, ...)
 			end
 
 			if(suffix == 'target') then
-				enableTargetUpdate(object)
+				oUF:HandleEventlessUnit(object)
 			end
 		end
 
@@ -349,10 +361,14 @@ local function initObject(unit, style, styleFunc, header, ...)
 			func(object)
 		end
 
+		if(oUF:IsMainline()) then
+			Mixin(object, PingableType_UnitFrameMixin)
+		end
+
 		-- Make Clique kinda happy
 		if(not object.isNamePlate) then
-			_G.ClickCastFrames = ClickCastFrames or {}
-			ClickCastFrames[object] = true
+			_G.ClickCastFrames = _G.ClickCastFrames or {}
+			_G.ClickCastFrames[object] = true
 		end
 	end
 end
@@ -374,13 +390,58 @@ local function walkObject(object, unit)
 	return initObject(unit, style, styleFunc, header, object, object:GetChildren())
 end
 
+--[[ oUF:IsMainline()
+Used to determine if running retail.
+
+* self - the global oUF object
+--]]
+function oUF:IsMainline()
+	return _G.WOW_PROJECT_ID == _G.WOW_PROJECT_MAINLINE
+end
+
 --[[ oUF:IsClassic()
-Used to determine if runninig retail or classic.
+Used to determine if running any version of classic.
 
 * self - the global oUF object
 --]]
 function oUF:IsClassic()
+	return _G.WOW_PROJECT_ID ~= _G.WOW_PROJECT_MAINLINE
+end
+
+--[[ oUF:IsVanilla()
+Used to determine if running World of Warcraft: Classic.
+
+* self - the global oUF object
+--]]
+function oUF:IsVanilla()
 	return _G.WOW_PROJECT_ID == _G.WOW_PROJECT_CLASSIC
+end
+
+--[[ oUF:IsTBC()
+Used to determine if running Burning Crusade Classic.
+
+* self - the global oUF object
+--]]
+function oUF:IsTBC()
+	return _G.WOW_PROJECT_ID == _G.WOW_PROJECT_BURNING_CRUSADE_CLASSIC
+end
+
+--[[ oUF:IsWrath()
+Used to determine if running Wrath of the Lich King Classic.
+
+* self - the global oUF object
+--]]
+function oUF:IsWrath()
+    return _G.WOW_PROJECT_ID == _G.WOW_PROJECT_WRATH_CLASSIC
+end
+
+--[[ oUF:IsCata()
+Used to determine if running Cataclysm Classic.
+
+* self - the global oUF object
+--]]
+function oUF:IsCata()
+	return _G.WOW_PROJECT_ID == _G.WOW_PROJECT_CATACLYSM_CLASSIC
 end
 
 --[[ oUF:RegisterInitCallback(func)
@@ -439,6 +500,15 @@ function oUF:SetActiveStyle(name)
 	if(not styles[name]) then return error('Style [%s] does not exist.', name) end
 
 	style = name
+end
+
+--[[ oUF:GetActiveStyle()
+Used to get the active style.
+
+* self - the global oUF object
+--]]
+function oUF:GetActiveStyle()
+	return style
 end
 
 do
@@ -549,7 +619,7 @@ local function generateName(unit, ...)
 end
 
 do
-	local function styleProxy(self, frame, ...)
+	local function styleProxy(self, frame)
 		return walkObject(_G[frame])
 	end
 
@@ -597,6 +667,8 @@ do
 				frame:SetAttribute('*type1', 'target')
 				frame:SetAttribute('*type2', 'togglemenu')
 				frame:SetAttribute('oUF-guessUnit', unit)
+
+				frame:SetAttribute('ping-receiver', true)
 			end
 
 			local body = header:GetAttribute('oUF-initialConfigFunction')
@@ -640,7 +712,7 @@ do
 
 		local isPetHeader = template:match('PetHeader')
 		local name = overrideName or generateName(nil, ...)
-		local header = CreateFrame('Frame', name, PetBattleFrameHider, template)
+		local header = CreateFrame('Frame', name, PetBattleFrameHider or UIParent, template)
 
 		header:SetAttribute('template', 'SecureUnitButtonTemplate, SecureHandlerStateTemplate, SecureHandlerEnterLeaveTemplate')
 		for i = 1, select('#', ...), 2 do
@@ -689,8 +761,8 @@ do
 		]])
 		header:SetAttribute('oUF-headerType', isPetHeader and 'pet' or 'group')
 
-		if(Clique) then
-			SecureHandlerSetFrameRef(header, 'clickcast_header', Clique.header)
+		if(_G.Clique) then
+			SecureHandlerSetFrameRef(header, 'clickcast_header', _G.Clique.header)
 		end
 
 		if(header:GetAttribute('showParty')) then
@@ -730,7 +802,7 @@ function oUF:Spawn(unit, overrideName)
 	if(not style) then return error('Unable to create frame. No styles have been registered.') end
 
 	unit = unit:lower()
-
+-- Don't replace oUF_PetBattleFrameHider with PetBattleFrameHider
 	local name = overrideName or generateName(unit)
 	local object = CreateFrame('Button', name, oUF_PetBattleFrameHider, 'SecureUnitButtonTemplate')
 	Private.UpdateUnits(object, unit)
@@ -758,7 +830,7 @@ function oUF:SpawnNamePlates(namePrefix, nameplateCallback, nameplateCVars)
 	argcheck(nameplateCallback, 3, 'function', 'nil')
 	argcheck(nameplateCVars, 4, 'table', 'nil')
 	if(not style) then return error('Unable to create frame. No styles have been registered.') end
-	if(oUF_NamePlateDriver) then return error('oUF nameplate driver has already been initialized.') end
+	if(_G.oUF_NamePlateDriver) then return error('oUF nameplate driver has already been initialized.') end
 
 	local style = style
 	local prefix = namePrefix or generateName()
@@ -767,11 +839,7 @@ function oUF:SpawnNamePlates(namePrefix, nameplateCallback, nameplateCVars)
 	-- and because forbidden nameplates exist, we have to allow default nameplate
 	-- driver to create, update, and remove Blizz nameplates.
 	-- Disable only not forbidden nameplates.
-	NamePlateDriverFrame:HookScript('OnEvent', function(_, event, unit)
-		if(event == 'NAME_PLATE_UNIT_ADDED' and unit) then
-			self:DisableBlizzard(unit)
-		end
-	end)
+	hooksecurefunc(NamePlateDriverFrame, 'AcquireUnitFrame', self.DisableNamePlate)
 
 	local eventHandler = CreateFrame('Frame', 'oUF_NamePlateDriver')
 	eventHandler:RegisterEvent('NAME_PLATE_UNIT_ADDED')
@@ -804,7 +872,6 @@ function oUF:SpawnNamePlates(namePrefix, nameplateCallback, nameplateCVars)
 			-- UAE is called after the callback to reduce the number of
 			-- ForceUpdate calls layout devs have to do themselves
 			if(nameplate) then
-
 				nameplate.unitFrame:UpdateAllElements(event)
 			end
 		elseif(event == 'NAME_PLATE_UNIT_ADDED' and unit) then
@@ -826,6 +893,19 @@ function oUF:SpawnNamePlates(namePrefix, nameplateCallback, nameplateCVars)
 			end
 
 			nameplate.unitFrame:SetAttribute('unit', unit)
+
+			if(nameplate.UnitFrame) then
+				if(nameplate.UnitFrame.WidgetContainer) then
+					nameplate.UnitFrame.WidgetContainer:SetParent(nameplate.unitFrame)
+					nameplate.unitFrame.WidgetContainer = nameplate.UnitFrame.WidgetContainer
+				end
+
+				if(nameplate.UnitFrame.SoftTargetFrame) then
+					nameplate.UnitFrame.SoftTargetFrame:SetParent(nameplate.unitFrame)
+					nameplate.unitFrame.SoftTargetFrame = nameplate.UnitFrame.SoftTargetFrame
+				end
+			end
+
 
 			if(nameplateCallback) then
 				nameplateCallback(nameplate.unitFrame, event, unit)
@@ -852,14 +932,14 @@ Used to register an element with oUF.
 
 * self    - the global oUF object
 * name    - unique name of the element (string)
-* update  - used to update the element (function?)
-* enable  - used to enable the element for a given unit frame and unit (function?)
-* disable - used to disable the element for a given unit frame (function?)
+* update  - used to update the element (function)
+* enable  - used to enable the element for a given unit frame and unit (function)
+* disable - used to disable the element for a given unit frame (function)
 --]]
 function oUF:AddElement(name, update, enable, disable)
 	argcheck(name, 2, 'string')
 	argcheck(update, 3, 'function', 'nil')
-	argcheck(enable, 4, 'function', 'nil')
+	argcheck(enable, 4, 'function', 'nil') -- Don't remove 'nil'
 	argcheck(disable, 5, 'function', 'nil')
 
 	if(elements[name]) then return error('Element [%s] is already registered.', name) end

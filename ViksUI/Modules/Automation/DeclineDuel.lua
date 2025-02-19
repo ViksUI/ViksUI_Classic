@@ -1,4 +1,4 @@
-local T, C, L, _ = unpack(select(2, ...))
+local T, C, L = unpack(ViksUI)
 if C.automation.decline_duel ~= true then return end
 
 ----------------------------------------------------------------------------------------
@@ -7,10 +7,10 @@ if C.automation.decline_duel ~= true then return end
 local disable = false
 local frame = CreateFrame("Frame")
 frame:RegisterEvent("DUEL_REQUESTED")
-if not T.classic then
+if T.Mainline then
 	frame:RegisterEvent("PET_BATTLE_PVP_DUEL_REQUESTED")
 end
-frame:SetScript("OnEvent", function(self, event, name)
+frame:SetScript("OnEvent", function(_, event, name)
 	if disable == true then return end
 	if event == "DUEL_REQUESTED" then
 		CancelDuel()

@@ -15,7 +15,7 @@ A default texture will be applied if the widget is a Texture and doesn't have a 
 ## Options
 
 .feedbackUnit - The unit whose threat situation is being requested. If defined, it'll be passed as the first argument to
-                [GetThreatStatusColor](http://wowprogramming.com/docs/api/UnitThreatSituation.html).
+                [UnitThreatSituation](https://wow.gamepedia.com/API_UnitThreatSituation).
 
 ## Examples
 
@@ -30,6 +30,9 @@ A default texture will be applied if the widget is a Texture and doesn't have a 
 
 local _, ns = ...
 local oUF = ns.oUF
+local Private = oUF.Private
+
+local unitExists = Private.unitExists
 
 local function Update(self, event, unit)
 	if(unit ~= self.unit) then return end
@@ -48,8 +51,8 @@ local function Update(self, event, unit)
 
 	local status
 	-- BUG: Non-existent '*target' or '*pet' units cause UnitThreatSituation() errors
-	if(UnitExists(unit)) then
-		if(feedbackUnit and feedbackUnit ~= unit and UnitExists(feedbackUnit)) then
+	if(unitExists(unit)) then
+		if(feedbackUnit and feedbackUnit ~= unit and unitExists(feedbackUnit)) then
 			status = UnitThreatSituation(feedbackUnit, unit)
 		else
 			status = UnitThreatSituation(unit)
@@ -58,7 +61,8 @@ local function Update(self, event, unit)
 
 	local r, g, b
 	if(status and status > 0) then
-		r, g, b = GetThreatStatusColor(status)
+		local color = self.colors.threat[status]
+		r, g, b = color[1], color[2], color[3]
 
 		if(element.SetVertexColor) then
 			element:SetVertexColor(r, g, b)
@@ -105,12 +109,11 @@ local function Enable(self)
 		element.__owner = self
 		element.ForceUpdate = ForceUpdate
 
-		self:RegisterEvent('UNIT_THREAT_LIST_UPDATE', Path)
+		self:RegisterEvent('UNIT_THREAT_SITUATION_UPDATE', Path)
 		self:RegisterEvent('UNIT_THREAT_LIST_UPDATE', Path)
 
 		if(element:IsObjectType('Texture') and not element:GetTexture()) then
-			element:SetTexture([[Interface\Minimap\ObjectIcons]])
-			element:SetTexCoord(6/8, 7/8, 1/8, 2/8)
+			element:SetTexture([[Interface\RAIDFRAME\UI-RaidFrame-Threat]])
 		end
 
 		return true
@@ -122,7 +125,7 @@ local function Disable(self)
 	if(element) then
 		element:Hide()
 
-		self:UnregisterEvent('UNIT_THREAT_LIST_UPDATE', Path)
+		self:UnregisterEvent('UNIT_THREAT_SITUATION_UPDATE', Path)
 		self:UnregisterEvent('UNIT_THREAT_LIST_UPDATE', Path)
 	end
 end

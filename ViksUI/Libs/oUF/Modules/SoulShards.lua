@@ -1,7 +1,10 @@
-if(select(2, UnitClass("player")) ~= "WARLOCK") then return end
+local T, C, L = unpack(ViksUI)
+if C.unitframe.enable ~= true or T.class ~= "WARLOCK" then return end
 
 local _, ns = ...
 local oUF = ns.oUF
+
+if(oUF:IsClassic() and not oUF:IsCata()) then return end
 
 local SPELL_POWER_SOUL_SHARDS = Enum.PowerType.SoulShards or 7
 

@@ -7,10 +7,11 @@ local unitSelectionType = Private.unitSelectionType
 -- sourced from FrameXML/UnitPowerBarAlt.lua
 local ALTERNATE_POWER_INDEX = Enum.PowerType.Alternate or 10
 
-local function getDisplayPower(unit)
-	local _, min, _, _, _, _, showOnRaid = UnitAlternatePowerInfo(unit)
-	if(showOnRaid) then
-		return ALTERNATE_POWER_INDEX, min
+local function GetDisplayPower(element)
+	local unit = element.__owner.unit
+	local barInfo = GetUnitPowerBarInfo(unit)
+	if(barInfo and barInfo.showOnRaid and (UnitInParty(unit) or UnitInRaid(unit))) then
+		return ALTERNATE_POWER_INDEX, barInfo.minPower
 	end
 end
 
@@ -42,8 +43,8 @@ local function UpdateColor(element, unit, cur, min, max, displayType)
 			end
 		end
 	elseif(element.colorClass and UnitIsPlayer(unit)) or
-		(element.colorClassNPC and not UnitIsPlayer(unit)) or
-		(element.colorClassPet and UnitPlayerControlled(unit) and not UnitIsPlayer(unit)) then
+	(element.colorClassNPC and not UnitIsPlayer(unit)) or
+	(element.colorClassPet and UnitPlayerControlled(unit) and not UnitIsPlayer(unit)) then
 		local _, class = UnitClass(unit)
 		t = parent.colors.class[class]
 	elseif(element.colorSelection and unitSelectionType(unit, element.considerSelectionInCombatHostile)) then
@@ -59,33 +60,14 @@ local function UpdateColor(element, unit, cur, min, max, displayType)
 		r, g, b = t[1], t[2], t[3]
 	end
 
-	t = parent.colors.power[ptoken or ptype]
+	if(b) then
+		element:SetStatusBarColor(r, g, b)
 
-	local atlas = element.atlas or (t and t.atlas)
-	if(element.useAtlas and atlas and displayType ~= ALTERNATE_POWER_INDEX) then
-		element:SetStatusBarAtlas(atlas)
-		element:SetStatusBarColor(1, 1, 1)
-
-		if(element.colorTapping or element.colorDisconnected) then
-			t = element.disconnected and parent.colors.disconnected or parent.colors.tapped
-			element:GetStatusBarTexture():SetDesaturated(element.disconnected or element.tapped)
+		local bg = element.bg
+		if(bg) then
+			local mu = bg.multiplier or 1
+			bg:SetVertexColor(r * mu, g * mu, b * mu)
 		end
-
-		if(t and (r or g or b)) then
-			r, g, b = t[1], t[2], t[3]
-		end
-	else
-		element:SetStatusBarTexture(element.texture)
-
-		if(r or g or b) then
-			element:SetStatusBarColor(r, g, b)
-		end
-	end
-
-	local bg = element.bg
-	if(bg and b) then
-		local mu = bg.multiplier or 1
-		bg:SetVertexColor(r * mu, g * mu, b * mu)
 	end
 end
 
@@ -105,7 +87,7 @@ local function Update(self, event, unit)
 
 	local displayType, min
 	if(element.displayAltPower) then
-		displayType, min = getDisplayPower(unit)
+		displayType, min = element:GetDisplayPower()
 	end
 
 	local cur, max = UnitPower(unit, displayType), UnitPowerMax(unit, displayType)
@@ -203,17 +185,20 @@ local function Enable(self)
 		self:RegisterEvent('UNIT_MAXPOWER', Path)
 		self:RegisterEvent('UNIT_FACTION', Path) -- For tapping
 		self:RegisterEvent('UNIT_FLAGS', Path) -- For selection
-		if(oUF:IsClassic()) then
+		if(oUF:IsClassic() and not oUF:IsCata()) then
 			self:RegisterEvent('UNIT_HAPPINESS', Path)
 		end
 
-		if(element:IsObjectType('StatusBar')) then
-			element.texture = element:GetStatusBarTexture() and element:GetStatusBarTexture():GetTexture() or [[Interface\TargetingFrame\UI-StatusBar]]
-			element:SetStatusBarTexture(element.texture)
+		if(element:IsObjectType('StatusBar') and not element:GetStatusBarTexture()) then
+			element:SetStatusBarTexture([[Interface\TargetingFrame\UI-StatusBar]])
 		end
 
 		if(not element.UpdateColor) then
 			element.UpdateColor = UpdateColor
+		end
+
+		if(not element.GetDisplayPower) then
+			element.GetDisplayPower = GetDisplayPower
 		end
 
 		element:Show()
@@ -236,7 +221,7 @@ local function Disable(self)
 		self:UnregisterEvent('UNIT_MAXPOWER', Path)
 		self:UnregisterEvent('UNIT_FACTION', Path)
 		self:UnregisterEvent('UNIT_FLAGS', Path)
-		if(oUF:IsClassic()) then
+		if(oUF:IsClassic() and not oUF:IsCata()) then
 			self:UnregisterEvent('UNIT_HAPPINESS', Path)
 		end
 	end

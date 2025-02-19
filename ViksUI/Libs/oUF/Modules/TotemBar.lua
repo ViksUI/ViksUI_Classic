@@ -1,4 +1,4 @@
-local T, C, L = unpack(select(2, ...))
+local T, C, L = unpack(ViksUI)
 if C.unitframe.enable ~= true or C.unitframe_class_bar.totem ~= true then return end
 
 ----------------------------------------------------------------------------------------
@@ -6,9 +6,6 @@ if C.unitframe.enable ~= true or C.unitframe_class_bar.totem ~= true then return
 ----------------------------------------------------------------------------------------
 local _, ns = ...
 local oUF = ns.oUF
-
-local total = 0
-local delay = 0.01
 
 -- In the order, fire, earth, water, air
 local colors = {
@@ -18,59 +15,50 @@ local colors = {
 	[4] = {0.42, 0.18, 0.74},
 }
 
+local function onUpdate(self, elapsed)
+	self.elapsed = (self.elapsed or 0) + elapsed
+	if self.elapsed < 0.1 then return end
+	self.elapsed = 0
+	local time = self.finish - GetTime()
+	self:SetValue(time)
+end
+
 local function UpdateSlot(self, slot)
-	local totem = self.TotemBar
-	if not totem[slot] then return end
+	local element = self.TotemBar
+	if not element[slot] then return end
+
+	local totem = element[slot]
 	local haveTotem, _, startTime, duration = GetTotemInfo(slot)
 
-	totem[slot]:SetStatusBarColor(unpack(totem.colors[slot]))
-	totem[slot]:SetValue(0)
+	totem:SetStatusBarColor(unpack(element.colors[slot]))
 
 	-- Multipliers
-	if totem[slot].bg.multiplier then
-		local mu = totem[slot].bg.multiplier
-		local r, g, b = totem[slot]:GetStatusBarColor()
+	if totem.bg.multiplier then
+		local mu = totem.bg.multiplier
+		local r, g, b = totem:GetStatusBarColor()
 		r, g, b = r * mu, g * mu, b * mu
-		totem[slot].bg:SetVertexColor(r, g, b)
+		totem.bg:SetVertexColor(r, g, b)
 	end
 
-	totem[slot].ID = slot
+	if haveTotem and duration > 0 then
+		totem.finish = startTime + duration
+		totem:SetMinMaxValues(0, duration)
+		totem:SetValue(duration)
+		totem:SetScript('OnUpdate', onUpdate)
 
-	-- If we have a totem then set his value
-	if haveTotem then
-		if duration > 0 then
-			totem[slot]:SetValue(1 - ((GetTime() - startTime) / duration))
-			-- Status bar update
-			totem[slot]:SetScript("OnUpdate", function(self, elapsed)
-				total = total + elapsed
-				if total >= delay then
-					total = 0
-					haveTotem, _, startTime, duration = GetTotemInfo(self.ID)
-					if startTime == 0 then return end
-					if ((GetTime() - startTime) == 0) then
-						self:SetValue(0)
-					else
-						self:SetValue(1 - ((GetTime() - startTime) / duration))
-					end
-				end
-			end)
-		else
-			-- There's no need to update because it doesn't have any duration
-			totem[slot]:SetScript("OnUpdate", nil)
-			totem[slot]:SetValue(0)
-		end
 		if T.class ~= "SHAMAN" then
-			totem[slot]:Show()
+			totem:Show()
 		end
 	else
-		totem[slot]:SetValue(0)
+		totem:SetValue(0)
+		totem:SetScript("OnUpdate", nil)
 		if T.class ~= "SHAMAN" then
-			totem[slot]:Hide()
+			totem:Hide()
 		end
 	end
 end
 
-local function Update(self, unit)
+local function Update(self)
 	-- Update every slot on login, still have issues with it
 	for i = 1, MAX_TOTEMS do
 		UpdateSlot(self, i)
@@ -83,44 +71,64 @@ local function Event(self, event, ...)
 	end
 end
 
-local function Enable(self, unit)
-	local totem = self.TotemBar
+local function anchorTotems(element)
+	for t in next, _G.TotemFrame.totemPool.activeObjects do
+		local i = t.slot
+		t:ClearAllPoints()
+		t:SetParent(element[i])
+		t:SetAllPoints(element[i])
+		t:SetFrameLevel(element[i]:GetFrameLevel() + 1)
+		t:SetFrameStrata(element[i]:GetFrameStrata())
+		t:SetAlpha(0)
+		t.Icon:Hide()
+	end
+end
 
-	if totem then
+local function Enable(self)
+	local element = self.TotemBar
+	if element then
 		self:RegisterEvent("PLAYER_TOTEM_UPDATE", Event, true)
-		totem.colors = setmetatable(totem.colors or {}, {__index = colors})
-		delay = totem.delay or delay
-		if totem.Destroy then
-			for i = 1, MAX_TOTEMS do
-				if totem[i] then
-					local t = _G["TotemFrameTotem"..i]
-					t:ClearAllPoints()
-					t:SetParent(totem[i])
-					t:SetAllPoints(totem[i])
-					t:SetFrameLevel(totem[i]:GetFrameLevel() + 1)
-					t:SetFrameStrata(totem[i]:GetFrameStrata())
-					t:SetAlpha(0)
-					_G["TotemFrameTotem"..i.."Icon"]:Hide()
-				end
-			end
-			hooksecurefunc("TotemFrame_Update", function()
+		element.colors = setmetatable(element.colors or {}, {__index = colors})
+		if element.Destroy then
+			if oUF:IsClassic() then
 				for i = 1, MAX_TOTEMS do
-					local t = _G["TotemFrameTotem"..i]
-					local slot = t.slot
-					if slot and slot > 0 then
+					if element[i] then
+						local t = _G["TotemFrameTotem"..i]
 						t:ClearAllPoints()
-						t:SetAllPoints(totem[slot])
+						t:SetParent(element[i])
+						t:SetAllPoints(element[i])
+						t:SetFrameLevel(element[i]:GetFrameLevel() + 1)
+						t:SetFrameStrata(element[i]:GetFrameStrata())
+						t:SetAlpha(0)
+						_G["TotemFrameTotem"..i.."Icon"]:Hide()
 					end
 				end
-			end)
+				if not oUF:IsCata() then
+					hooksecurefunc("TotemFrame_Update", function()
+						for i = 1, MAX_TOTEMS do
+							local t = _G["TotemFrameTotem"..i]
+							local slot = t.slot
+							if slot and slot > 0 then
+								t:ClearAllPoints()
+								t:SetAllPoints(element[slot])
+							end
+						end
+					end)
+				end
+			else
+				anchorTotems(element)
+				hooksecurefunc(TotemFrame, "Update", function()
+					anchorTotems(element)
+				end)
+			end
 		end
 		return true
 	end
 end
 
-local function Disable(self, unit)
-	local totem = self.TotemBar
-	if totem then
+local function Disable(self)
+	local element = self.TotemBar
+	if element then
 		self:UnregisterEvent("PLAYER_TOTEM_UPDATE", Event)
 		TotemFrame:Show()
 	end

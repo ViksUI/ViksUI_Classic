@@ -11,8 +11,14 @@ local buttons = {}
 local prototype = {}
 local STATE_USABLE, STATE_NOMANA, STATE_NORANGE, STATE_UNUSABLE = 0, 1, 2, 3
 
-function prototype:SetIcon(texture)
+function prototype:SetIcon(texture, aspect)
+	-- Not sure if we need to handle the aspect here
 	self.Icon:SetTexture(texture)
+end
+
+function prototype:SetIconAtlas(atlas, aspect)
+	-- Not sure if we need to handle the aspect here
+	self.Icon:SetAtlas(atlas)
 end
 
 function prototype:SetIconTexCoord(a, b, c, d, e, f, g, h)
@@ -49,7 +55,7 @@ function prototype:SetDominantColor(r, g, b)
 	self.Border:SetAlpha(SPECIAL_COLOR_ALPHA)
 end
 
-function prototype:SetOverlayIcon(texture, w, h, ...) -- not entirely sure what this is for
+function prototype:SetOverlayIcon(texture, w, h, ...)
 	if not texture then
 		self.OverlayIcon:Hide()
 	else
@@ -64,6 +70,10 @@ end
 
 function prototype:SetCount(count)
 	self.Count:SetText(count or "")
+end
+
+function prototype:SetOverlayIconVertexColor(...)
+	self.OverlayIcon:SetVertexColor(...)
 end
 
 local displaySubs = {
@@ -109,7 +119,7 @@ function prototype:SetCooldown(remain, duration, usable)
 	end
 end
 
-function prototype:SetCooldownFormattedText()
+function prototype:SetCooldownFormattedText(pattern, ...)
 	-- do nothing
 end
 
@@ -145,7 +155,19 @@ end
 
 local id = 0
 
-local function CreateIndicator(name, parent, size)
+function prototype:SetQualityOverlay(quality)
+	if not self.ProfessionQualityOverlayFrame then
+		return
+	end
+	if quality ~= 0 then
+		self.ProfessionQualityOverlayFrame.Texture:SetAtlas("Professions-Icon-Quality-Tier" .. quality .. "-Inv", true)
+		self.ProfessionQualityOverlayFrame:Show()
+	else
+		self.ProfessionQualityOverlayFrame:Hide()
+	end
+end
+
+local function CreateIndicator(name, parent, size, ghost)
 	id = id + 1
 	name = name or "OPieSliceButton"..id
 	parent = parent or UIParent
@@ -163,10 +185,16 @@ local function CreateIndicator(name, parent, size)
 	button.Icon          = _G[name .. "Icon"]
 	button.NormalTexture = _G[name .. "NormalTexture"] -- border
 
-	-- Overlay icon (???)
-	button.OverlayIcon = button:CreateTexture(nil, "BACKGROUND", 1)
+	-- Overlay icon
+	button.OverlayIcon = button:CreateTexture(nil, "ARTWORK", nil, 1)
 	button.OverlayIcon:SetPoint("BOTTOMLEFT", button, "BOTTOMLEFT", 4, 4)
 
+	-- Profession Overlay icon (Dragonflight only)
+	--if ver >= 100000 then
+		button.ProfessionQualityOverlayFrame = CreateFrame("Frame", nil, button, "ActionButtonProfessionOverlayTemplate")
+		button.ProfessionQualityOverlayFrame:SetPoint("TOPLEFT", 14, -14)
+	--end
+	
 	-- Outer glow (doesn't seem to do anything?)
 	button.GlowTextures = {}
 
@@ -177,10 +205,10 @@ local function CreateIndicator(name, parent, size)
 	-- ViksUI Skin
 
 	if not button.isSkinned then
-		button.NormalTexture:SetTexture(nil)
+		button.NormalTexture:SetTexture(0)
 		button:CreateBackdrop("Overlay")
 		button:StyleButton(nil, 4)
-		button:CreateBackdrop("Default")
+		button.backdrop:SetAllPoints()
 
 		button.icon:SetTexCoord(0.1, 0.9, 0.1, 0.9)
 		button.icon:SetDrawLayer("ARTWORK")
@@ -210,4 +238,8 @@ local function CreateIndicator(name, parent, size)
 	return button
 end
 
-OneRingLib.ext.OPieUI:SetIndicatorConstructor(CreateIndicator)
+local function onParentAlphaChanged(button, alpha)
+button:SetAlpha(alpha)
+end
+	
+OPie.UI:RegisterIndicatorConstructor("OpieMasque", {CreateIndicator=CreateIndicator, name="OpieMasque", apiLevel=3, onParentAlphaChanged=onParentAlphaChanged})

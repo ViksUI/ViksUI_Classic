@@ -1,11 +1,77 @@
-local T, C, L, _ = unpack(select(2, ...))
-if T.class ~= "MAGE" or T.level < 17 then return end
+local T, C, L = unpack(ViksUI)
+if T.class ~= "MAGE" or T.level < 11 then return end
 
 ----------------------------------------------------------------------------------------
 --	Mage portals menu(by Foof and Tohveli)
 ----------------------------------------------------------------------------------------
 local spells
-if not T.classic then
+if T.Classic then
+	if T.Vanilla then
+		spells = (UnitFactionGroup("player") == "Horde") and {
+			[1] = {3567,11417},			-- Orgrimmar
+			[2] = {3563,11418},			-- Undercity
+			[3] = {3566,11420},			-- Thunder Bluff
+		} or { -- Alliance
+			[1] = {3561,10059},			-- Stormwind
+			[2] = {3562,11416},			-- Ironforge
+			[3] = {3565,11419},			-- Darnassus
+		}
+	elseif T.TBC then
+		spells = (UnitFactionGroup("player") == "Horde") and {
+			[1] = {3567,11417},			-- Orgrimmar
+			[2] = {3563,11418},			-- Undercity
+			[3] = {3566,11420},			-- Thunder Bluff
+			[4] = {32272,32267},		-- Silvermoon
+			[5] = {49358,49361},		-- Stonard
+			[6] = {35715,35717},		-- Shattrath
+		} or { -- Alliance
+			[1] = {3561,10059},			-- Stormwind
+			[2] = {3562,11416},			-- Ironforge
+			[3] = {3565,11419},			-- Darnassus
+			[4] = {32271,32266},		-- Exodar
+			[5] = {49359,49360},		-- Theramore
+			[6] = {33690,33691},		-- Shattrath
+		}
+	elseif T.Wrath then
+		spells = (UnitFactionGroup("player") == "Horde") and {
+			[1] = {3567,11417},			-- Orgrimmar
+			[2] = {3563,11418},			-- Undercity
+			[3] = {3566,11420},			-- Thunder Bluff
+			[4] = {32272,32267},		-- Silvermoon
+			[5] = {49358,49361},		-- Stonard
+			[6] = {35715,35717},		-- Shattrath
+			[7] = {53140,53142},		-- Dalaran
+		} or { -- Alliance
+			[1] = {3561,10059},			-- Stormwind
+			[2] = {3562,11416},			-- Ironforge
+			[3] = {3565,11419},			-- Darnassus
+			[4] = {32271,32266},		-- Exodar
+			[5] = {49359,49360},		-- Theramore
+			[6] = {33690,33691},		-- Shattrath
+			[7] = {53140,53142},		-- Dalaran
+		}
+	elseif T.Cata then
+		spells = (UnitFactionGroup("player") == "Horde") and {
+			[1] = {3567,11417},			-- Orgrimmar
+			[2] = {3563,11418},			-- Undercity
+			[3] = {3566,11420},			-- Thunder Bluff
+			[4] = {32272,32267},		-- Silvermoon
+			[5] = {49358,49361},		-- Stonard
+			[6] = {35715,35717},		-- Shattrath
+			[7] = {53140,53142},		-- Dalaran
+			[8] = {88344,88346},		-- Tol Barad
+		} or { -- Alliance
+			[1] = {3561,10059},			-- Stormwind
+			[2] = {3562,11416},			-- Ironforge
+			[3] = {3565,11419},			-- Darnassus
+			[4] = {32271,32266},		-- Exodar
+			[5] = {49359,49360},		-- Theramore
+			[6] = {33690,33691},		-- Shattrath
+			[7] = {53140,53142},		-- Dalaran
+			[8] = {88342,88345},		-- Tol Barad
+		}
+	end
+else
 	spells = (UnitFactionGroup("player") == "Horde") and {
 		[1] = {3567,11417},			-- Orgrimmar
 		[2] = {3563,11418},			-- Undercity
@@ -21,6 +87,8 @@ if not T.classic then
 		[12] = {193759, 193759}, 	-- Hall of the Guardian (OrderHall)
 		[13] = {224869, 224871}, 	-- Dalaran, Broken Isles
 		[14] = {281404, 281402}, 	-- Dazar'alor
+		[15] = {344587, 344597}, 	-- Oribos
+		[16] = {395277, 395289}, 	-- Valdrakken
 	} or { -- Alliance
 		[1] = {3561,10059},			-- Stormwind
 		[2] = {3562,11416},			-- Ironforge
@@ -36,24 +104,16 @@ if not T.classic then
 		[12] = {193759, 193759}, 	-- Hall of the Guardian (OrderHall)
 		[13] = {224869, 224871}, 	-- Dalaran, Broken Isles
 		[14] = {281403, 281400}, 	-- Boralus
-	}
-else
-	spells = (UnitFactionGroup("player") == "Horde") and {
-		[1] = {3567,11417},			-- Orgrimmar
-		[2] = {3563,11418},			-- Undercity
-		[3] = {3566,11420},			-- Thunder Bluff
-	} or { -- Alliance
-		[1] = {3561,10059},			-- Stormwind
-		[2] = {3562,11416},			-- Ironforge
-		[3] = {3565,11419},			-- Darnassus
+		[15] = {344587, 344597}, 	-- Oribos
+		[16] = {395277, 395289}, 	-- Valdrakken
 	}
 end
 
 local frame = CreateFrame("Frame", "TeleportMenu", UIParent)
-frame:CreatePanel("Invisible", C.minimap.size, (#spells) * 20 + 4, "BOTTOMLEFT", RChatTab, "TOPLEFT", -2, 3)
+frame:CreatePanel("Invisible", C.minimap.size, (#spells) * 20 + 4, "BOTTOMLEFT", RChat, "TOPLEFT", -2, 20)
 frame:SetFrameStrata("MEDIUM")
 frame:EnableMouse(true)
-frame:RegisterEvent("UNIT_SPELLCAST_START")
+frame:RegisterUnitEvent("UNIT_SPELLCAST_START", "player", "")
 frame:SetScript("OnEvent", function(self)
 	if self:IsShown() then
 		self:Hide()
@@ -71,8 +131,10 @@ for i, spell in pairs(spells) do
 	b:SetFrameStrata("HIGH")
 
 	local l = b:CreateFontString("TeleportMenuName"..i, "OVERLAY")
-	l:SetFont(C.media.pixel_font, C.media.fontsize, C.media.pixel_font_style)
-	if i == 9 then
+	l:SetFont(C.media.pixel_font, C.media.pixel_font_size, C.media.pixel_font_style)
+	if i == 5 and UnitFactionGroup("player") == "Horde" then
+		l:SetText(C_Map.GetAreaInfo(75))
+	elseif i == 9 then
 		l:SetText(L_ZONE_ANCIENTDALARAN)
 	else
 		l:SetText(string.sub(teleport, (string.find(teleport, ":") and string.find(teleport, ":") + 1) or 0))
@@ -80,11 +142,11 @@ for i, spell in pairs(spells) do
 
 	l:SetPoint("LEFT", b, "LEFT", 2, 0)
 	l:SetPoint("RIGHT", b, "RIGHT", -2, 0)
-	l:SetHeight(C.media.fontsize)
+	l:SetWordWrap(false)
 
 	b:SetFontString(l)
 
-	b:RegisterForClicks("LeftButtonDown", "RightButtonDown")
+	b:RegisterForClicks("AnyUp", "AnyDown")
 	b:SetAttribute("type1", "spell")
 	b:SetAttribute("spell1", teleport)
 	b:SetAttribute("type2", "spell")
@@ -105,8 +167,8 @@ learnSpell:SetScript("OnEvent", function()
 end)
 
 local button = CreateFrame("Button", nil, UIParent)
-button:SetTemplate("Transparent")
-button:SetPoint("TOPLEFT", RChatTab, "TOPLEFT")
+button:SetTemplate("ClassColor")
+button:SetPoint("TOPLEFT", RChat, "TOPLEFT")
 button:SetSize(20, 20)
 button:SetAlpha(0)
 
@@ -116,7 +178,7 @@ button.t:SetTexCoord(0.1, 0.9, 0.1, 0.9)
 button.t:SetPoint("TOPLEFT", button, 2, -2)
 button.t:SetPoint("BOTTOMRIGHT", button, -2, 2)
 
-button:SetScript("OnClick", function(self)
+button:SetScript("OnClick", function()
 	if not InCombatLockdown() then
 		if _G["TeleportMenu"]:IsShown() then
 			_G["TeleportMenu"]:Hide()

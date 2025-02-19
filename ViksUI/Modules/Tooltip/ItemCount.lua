@@ -1,30 +1,26 @@
-﻿local T, C, L, _ = unpack(select(2, ...))
+local T, C, L = unpack(ViksUI)
 if C.tooltip.enable ~= true or C.tooltip.item_count ~= true then return end
 
 ----------------------------------------------------------------------------------------
---	Item count in tooltip(by Tukz)
+--	Item count in bags and bank(by Tukz)
 ----------------------------------------------------------------------------------------
-GameTooltip:HookScript("OnTooltipCleared", function(self) self.UIItemTooltip = nil end)
-GameTooltip:HookScript("OnTooltipSetItem", function(self)
-	if UIItemTooltip and not self.UIItemTooltip and UIItemTooltip.count then
+local function OnTooltipSetItem(self, data)
+	if self ~= GameTooltip or self:IsForbidden() then return end
+	local num
+	if T.Classic then
 		local _, link = self:GetItem()
-		local num = GetItemCount(link, true)
-		local item_count = ""
-
-		if UIItemTooltip.count and num > 1 then
-			item_count = "|cffffffff"..L_TOOLTIP_ITEM_COUNT.." "..num
-		end
-
-		self:AddLine(item_count)
-		self.UIItemTooltip = 1
+		num = GetItemCount(link, true)
+	else
+		num = GetItemCount(data.id, true)
 	end
-end)
 
-local f = CreateFrame("Frame")
-f:RegisterEvent("ADDON_LOADED")
-f:SetScript("OnEvent", function(_, _, name)
-	if name ~= "ViksUI" then return end
-	f:UnregisterEvent("ADDON_LOADED")
-	f:SetScript("OnEvent", nil)
-	UIItemTooltip = UIItemTooltip or {count = true}
-end)
+	if num > 1 then
+		self:AddLine("|cffffffff"..L_TOOLTIP_ITEM_COUNT.." "..num.."|r")
+	end
+end
+
+if T.Classic then
+	GameTooltip:HookScript("OnTooltipSetItem", OnTooltipSetItem)
+else
+	TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Item, OnTooltipSetItem)
+end

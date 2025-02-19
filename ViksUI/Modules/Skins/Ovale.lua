@@ -1,4 +1,4 @@
-﻿local T, C, L, _ = unpack(select(2, ...))
+local T, C, L = unpack(ViksUI)
 if C.skins.ovale ~= true then return end
 
 ----------------------------------------------------------------------------------------
@@ -26,7 +26,7 @@ frame:SetScript("OnEvent", function()
 			if button and not button.isSkinned then
 				button.cd.noCooldownCount = true
 				button:StyleButton()
-				button:SetNormalTexture("")
+				button:SetNormalTexture(0)
 				button:CreateBackdrop("Transparent")
 				button.backdrop:SetAllPoints()
 

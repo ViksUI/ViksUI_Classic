@@ -1,19 +1,18 @@
-## Interface: 80100
+## Interface: 11505
 ## Title: |cff105c92ViksUI Config|r
 ## Notes: In-game configuration for ViksUI
 ## Credits to: Wetxius, Tukz, Dawn, Shestak, Haste, Roth, P3lim, Monolit, AlleyKat.
 ## Author: Viks, Tryllemann
-## Version: 8.80
+## Version: 11.12
 ## RequiredDeps: ViksUI
 ## SavedVariables: ViksUIOptionsGlobal, ViksUIOptions
 ## SavedVariablesPerCharacter: ViksUIOptionsPerChar
-## X-Curse-Packaged-Version: 8.80
-## X-Curse-Project-Name: ViksUI
-## X-Curse-Project-ID: viksui
-## X-WoWI-ID: 21462
-## X-Website: http://www.wowinterface.com/downloads/info21462-ViksUI.html
+## IconTexture: Interface\AddOns\ViksUI\Media\Textures\viksicon.blp
 
-Core.lua
+## X-Curse-Project-ID: 83550
+## X-WoWI-ID: 21462
+## X-Wago-ID: q96dn1GO
+## X-Website: https://github.com/ViksUI/ViksUI
 
 Locales\English.lua
 Locales\Chinese.lua
@@ -24,4 +23,5 @@ Locales\Russian.lua
 Locales\Spanish.lua
 Locales\Taiwan.lua
 
+Core.lua
 Options.lua

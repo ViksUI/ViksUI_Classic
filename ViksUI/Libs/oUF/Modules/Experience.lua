@@ -1,4 +1,4 @@
-local T, C, L = unpack(select(2, ...))
+local T, C, L = unpack(ViksUI)
 if C.unitframe.enable ~= true or C.unitframe.plugins_experience_bar ~= true then return end
 
 ----------------------------------------------------------------------------------------
@@ -17,54 +17,31 @@ oUF.colors.experience = {
 
 oUF.colors.honor = {
 	{1, 0.71, 0}, -- Normal
-	{1, 0.71, 0}, -- Rested
 }
 
-local function WatchingHonor()
-	return UnitLevel('player') >= MAX_PLAYER_LEVEL and
-		(IsWatchingHonorAsXP() or InActiveBattlefield() or IsInActiveWorldPVP())
+local function IsPlayerMaxLevel()
+	local maxLevel = GetRestrictedAccountData()
+	if(maxLevel == 0) then
+		maxLevel = T.Classic and GetMaxPlayerLevel() or GetMaxLevelForPlayerExpansion()
+	end
+
+	return maxLevel == UnitLevel('player')
 end
 
-for tag, func in next, {
-	['experience:cur'] = function(unit)
-		return (WatchingHonor() and UnitHonor or UnitXP) ('player')
-	end,
-	['experience:max'] = function(unit)
-		return (WatchingHonor() and UnitHonorMax or UnitXPMax) ('player')
-	end,
-	['experience:per'] = function(unit)
-		return math_floor(_TAGS['experience:cur'](unit) / _TAGS['experience:max'](unit) * 100 + 0.5)
-	end,
-	['experience:currested'] = function()
-		if(not WatchingHonor()) then
-			return GetXPExhaustion()
-		else
-			return GetHonorExhaustion and GetHonorExhaustion()
-		end
-	end,
-	['experience:perrested'] = function(unit)
-		local rested = _TAGS['experience:currested']()
-		if(rested and rested > 0) then
-			return math_floor(rested / _TAGS['experience:max'](unit) * 100 + 0.5)
-		end
-	end,
-} do
-	oUF.Tags.Methods[tag] = func
-	oUF.Tags.Events[tag] = 'PLAYER_XP_UPDATE UPDATE_EXHAUSTION HONOR_XP_UPDATE ZONE_CHANGED ZONE_CHANGED_NEW_AREA'
+local function IsPlayerMaxHonorLevel()
+	return not C_PvP.GetNextHonorLevelForReward(UnitHonorLevel('player'))
+end
+
+local function ShouldShowHonor()
+	return IsPlayerMaxLevel() and (IsWatchingHonorAsXP() or C_PvP.IsActiveBattlefield() or IsInActiveWorldPVP())
 end
 
 local function GetValues()
-	local isHonor = WatchingHonor()
+	local isHonor = oUF:IsMainline() and ShouldShowHonor()
 	local cur = (isHonor and UnitHonor or UnitXP)('player')
 	local max = (isHonor and UnitHonorMax or UnitXPMax)('player')
 	local level = (isHonor and UnitHonorLevel or UnitLevel)('player')
-
-	local rested
-	if(not isHonor) then
-		rested = GetXPExhaustion() or 0
-	else
-		rested = GetHonorExhaustion and GetHonorExhaustion() or 0
-	end
+	local rested = not isHonor and (GetXPExhaustion() or 0) or 0
 
 	local perc = math_floor(cur / max * 100 + 0.5)
 	local restedPerc = math_floor(rested / max * 100 + 0.5)
@@ -74,9 +51,9 @@ end
 
 -- Changed tooltip for ViksUI
 local function UpdateTooltip()
-	local cur, max, perc, rested, restedPerc, _, isHonor = GetValues()
+	local cur, max, perc, rested, restedPerc, level, isHonor = GetValues()
 
-	GameTooltip:SetText(isHonor and HONOR or COMBAT_XP_GAIN.." "..format(LEVEL_GAINED, T.level), 0.40, 0.78, 1)
+	GameTooltip:SetText(isHonor and HONOR_LEVEL_LABEL:format(level) or COMBAT_XP_GAIN.." "..format(LEVEL_GAINED, T.level), 0.40, 0.78, 1)
 	GameTooltip:AddLine(" ")
 	GameTooltip:AddLine(format(L_STATS_CURRENT_XP..": %s / %s (%d%%)", BreakUpLargeNumbers(cur), BreakUpLargeNumbers(max), perc), 0.75, 0.9, 1)
 	GameTooltip:AddLine(format(L_STATS_REMAINING_XP..": %s (%d%%)", BreakUpLargeNumbers(max - cur), (max - cur) / max * 100 + 0.5), 0.75, 0.9, 1)
@@ -91,7 +68,7 @@ end
 local function OnEnter(element)
 	element:SetAlpha(element.inAlpha)
 	GameTooltip:SetOwner(element, "ANCHOR_BOTTOM", 0, -5)	-- ViksUI
-	element:UpdateTooltip()
+	UpdateTooltip(element)
 end
 
 local function OnLeave(element)
@@ -103,16 +80,16 @@ local function OnMouseUp(element, btn)
 	if btn == "MiddleButton" then
 		if element.outAlpha == 0 then
 			element.outAlpha = 1
-			SavedOptions.Experience = true
+			ViksUISettings.Experience = true
 		else
 			element.outAlpha = 0
-			SavedOptions.Experience = false
+			ViksUISettings.Experience = false
 		end
 	end
 end
 
 local function CheckAlpha(element)
-	if SavedOptions and SavedOptions.Experience == true then
+	if ViksUISettings and ViksUISettings.Experience == true then
 		element.outAlpha = 1
 		element:SetAlpha(element.outAlpha or 1)
 	end
@@ -128,7 +105,7 @@ local function UpdateColor(element, isHonor, isRested)
 
 	local r, g, b = unpack(colors[isRested and 2 or 1])
 	element:SetStatusBarColor(r, g, b)
-	element.bg:SetVertexColor(r, g, b, 0.2) -- ViksUI
+	--element.bg:SetVertexColor(r, g, b, 0.2) -- ViksUI
 	if(element.SetAnimatedTextureColors) then
 		element:SetAnimatedTextureColors(r, g, b)
 	end
@@ -145,10 +122,6 @@ local function Update(self, event, unit)
 	if(element.PreUpdate) then element:PreUpdate(unit) end
 
 	local cur, max, _, rested, _, level, isHonor = GetValues()
-	if(isHonor and GetMaxPlayerHonorLevel and level == GetMaxPlayerHonorLevel()) then
-		cur, max = 1, 1
-	end
-
 	if(element.SetAnimatedValues) then
 		element:SetAnimatedValues(cur, 0, max, level)
 	else
@@ -175,7 +148,7 @@ end
 local function ElementEnable(self)
 	local element = self.Experience
 	self:RegisterEvent('PLAYER_XP_UPDATE', Path, true)
-	if(not oUF:IsClassic()) then
+	if(oUF:IsMainline()) then
 		self:RegisterEvent('HONOR_XP_UPDATE', Path, true)
 	end
 	self:RegisterEvent('ZONE_CHANGED', Path, true)
@@ -210,11 +183,17 @@ local function Visibility(self, event, unit)
 	local element = self.Experience
 	local shouldEnable
 
-	if(not UnitHasVehicleUI('player') and not IsXPUserDisabled()) then
-		if(UnitLevel('player') ~= element.__accountMaxLevel) then
-			shouldEnable = true
-		elseif(WatchingHonor()) then
-			shouldEnable = true
+	if(not UnitHasVehicleUI('player')) then
+		if(oUF:IsClassic()) then
+			if(UnitLevel('player') ~= element.__accountMaxLevel) then
+				shouldEnable = true
+			end
+		else
+			if(not IsPlayerMaxLevel() and not IsXPUserDisabled()) then
+				shouldEnable = true
+			elseif(ShouldShowHonor() and not IsPlayerMaxHonorLevel()) then
+				shouldEnable = true
+			end
 		end
 	end
 
@@ -238,24 +217,19 @@ local function Enable(self, unit)
 	if(element and unit == 'player') then
 		element.__owner = self
 
-		local levelRestriction = GetRestrictedAccountData()
-		if(levelRestriction > 0) then
-			element.__accountMaxLevel = levelRestriction
-		else
-			element.__accountMaxLevel = MAX_PLAYER_LEVEL
-		end
-
 		element.ForceUpdate = ForceUpdate
 		element.restedAlpha = element.restedAlpha or 0.15
 
 		self:RegisterEvent('PLAYER_LEVEL_UP', VisibilityPath, true)
-		if(not oUF:IsClassic()) then
-			self:RegisterEvent('HONOR_LEVEL_UPDATE', VisibilityPath, true)
-		end
 		self:RegisterEvent('DISABLE_XP_GAIN', VisibilityPath, true)
 		self:RegisterEvent('ENABLE_XP_GAIN', VisibilityPath, true)
+		self:RegisterEvent('UPDATE_EXPANSION_LEVEL', VisibilityPath, true)
 
-		if(not oUF:IsClassic()) then
+		if(oUF:IsClassic()) then
+			self:RegisterEvent('PLAYER_MAX_LEVEL_UPDATE', VisibilityPath, true)
+		else
+			self:RegisterEvent('HONOR_LEVEL_UPDATE', VisibilityPath, true)
+
 			hooksecurefunc('SetWatchingHonorAsXP', function()
 				if(self:IsElementEnabled('Experience')) then
 					VisibilityPath(self, 'SetWatchingHonorAsXP', 'player')
@@ -277,7 +251,6 @@ local function Enable(self, unit)
 		end
 
 		if(element:IsMouseEnabled()) then
-			element.UpdateTooltip = element.UpdateTooltip or UpdateTooltip
 			element.tooltipAnchor = element.tooltipAnchor or 'ANCHOR_BOTTOMRIGHT'
 			element.inAlpha = element.inAlpha or 1
 			element.outAlpha = element.outAlpha or 1
@@ -294,9 +267,9 @@ local function Enable(self, unit)
 				element:SetScript('OnMouseUp', OnMouseUp)
 			end
 
-			element.hadler = CreateFrame("Frame", nil, element)
-			element.hadler:RegisterEvent("PLAYER_LOGIN")
-			element.hadler:SetScript("OnEvent", function() CheckAlpha(element) end)
+			element.handler = CreateFrame("Frame", nil, element)
+			element.handler:RegisterEvent("PLAYER_LOGIN")
+			element.handler:SetScript("OnEvent", function() CheckAlpha(element) end)
 		end
 
 		return true
@@ -307,11 +280,15 @@ local function Disable(self)
 	local element = self.Experience
 	if(element) then
 		self:UnregisterEvent('PLAYER_LEVEL_UP', VisibilityPath)
-		if(not oUF:IsClassic()) then
-			self:UnregisterEvent('HONOR_LEVEL_UPDATE', VisibilityPath)
-		end
 		self:UnregisterEvent('DISABLE_XP_GAIN', VisibilityPath)
 		self:UnregisterEvent('ENABLE_XP_GAIN', VisibilityPath)
+		self:UnregisterEvent('UPDATE_EXPANSION_LEVEL', VisibilityPath)
+
+		if(oUF:IsClassic()) then
+			self:UnregisterEvent('PLAYER_MAX_LEVEL_UPDATE', VisibilityPath)
+		else
+			self:UnregisterEvent('HONOR_LEVEL_UPDATE', VisibilityPath)
+		end
 
 		ElementDisable(self)
 	end

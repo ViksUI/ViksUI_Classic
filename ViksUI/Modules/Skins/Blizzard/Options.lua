@@ -1,239 +1,145 @@
-local T, C, L, _ = unpack(select(2, ...))
-if T.classic or C.skins.blizzard_frames ~= true then return end
+local T, C, L = unpack(ViksUI)
+if C.skins.blizzard_frames ~= true then return end
 
 ----------------------------------------------------------------------------------------
 --	Options skin
 ----------------------------------------------------------------------------------------
 local function LoadSkin()
-	VideoOptionsFrame:StripTextures()
-	VideoOptionsFrame:SetTemplate("Transparent")
+	local frame = SettingsPanel
+	frame:StripTextures()
+	frame:SetTemplate("Transparent")
+	frame.Bg:Hide()
 
-	VideoOptionsFrameHeader:SetTexture(nil)
-	VideoOptionsFrameHeader:ClearAllPoints()
-	VideoOptionsFrameHeader:SetPoint("TOP", VideoOptionsFrame, 0, 0)
-
-	local frames = {
-		"VideoOptionsFrameCategoryFrame",
-		"VideoOptionsFramePanelContainer",
-		"AudioOptionsSoundPanel",
-		"AudioOptionsSoundPanelPlayback",
-		"AudioOptionsSoundPanelHardware",
-		"AudioOptionsSoundPanelVolume",
-		"AudioOptionsVoicePanel",
-		"Display_",
-		"Graphics_",
-		"RaidGraphics_"
+	local tabs = {
+		frame.GameTab,
+		frame.AddOnsTab
 	}
 
-	for i = 1, getn(frames) do
-		local frame = _G[frames[i]]
-		if frame then
-			frame:SetTemplate("Overlay")
+	for i = 1, #tabs do
+		local tab = tabs[i]
+		tab:SkinButton(true)
+		tab:SetHeight(25)
+	end
+
+	SettingsPanel.GameTab:SetPoint("TOPLEFT", 17, -40)
+
+	T.SkinCloseButton(frame.ClosePanelButton)
+
+	T.SkinEditBox(frame.SearchBox, nil, 20)
+	frame.ApplyButton:SkinButton()
+	frame.CloseButton:SkinButton()
+	frame.Container.SettingsList.Header.DefaultsButton:SkinButton()
+
+	T.SkinScrollBar(SettingsPanel.Container.SettingsList.ScrollBar)
+	SettingsPanel.Container.SettingsList.ScrollBar.Back:SetSize(17, 15)
+	SettingsPanel.Container.SettingsList.ScrollBar.Track.Thumb:SetWidth(17)
+	SettingsPanel.Container.SettingsList.ScrollBar.Forward:SetSize(17, 15)
+
+	SettingsPanel.CategoryList:CreateBackdrop("Overlay")
+	SettingsPanel.Container.SettingsList:CreateBackdrop("Overlay")
+	SettingsPanel.Container.SettingsList.backdrop:SetPoint("BOTTOMRIGHT", 6, -3)
+
+	hooksecurefunc(SettingsPanel.CategoryList.ScrollBox, "Update", function(frame)
+		for _, child in next, {frame.ScrollTarget:GetChildren()} do
+			if not child.isSkinned then
+				if child.Background then
+					child.Background:SetAlpha(0)
+				end
+
+				local toggle = child.Toggle
+				if toggle then
+					toggle:GetPushedTexture():SetAlpha(0)
+				end
+
+				child.isSkinned = true
+			end
+		end
+	end)
+
+	local function UpdateKeybindButtons(self)
+		if not self.bindingsPool then return end
+		for panel in self.bindingsPool:EnumerateActive() do
+			if not panel.isSkinned then
+				panel.Button1:SkinButton()
+				panel.Button2:SkinButton()
+				panel.Button2:SetPoint("LEFT", panel.Button1, "RIGHT", 2, 0)
+				if panel.CustomButton then
+					panel.CustomButton:SkinButton()
+				end
+				local selected = panel.Button1.SelectedHighlight
+				selected:SetPoint("TOPLEFT", 2, -2)
+				selected:SetPoint("BOTTOMRIGHT", -2, 2)
+				selected:SetColorTexture(1, 0.82, 0, 0.3)
+
+				selected = panel.Button2.SelectedHighlight
+				selected:SetPoint("TOPLEFT", 2, -2)
+				selected:SetPoint("BOTTOMRIGHT", -2, 2)
+				selected:SetColorTexture(1, 0.82, 0, 0.3)
+				panel.isSkinned = true
+			end
 		end
 	end
 
-	local voice = {
-		"AudioOptionsVoicePanelTalking",
-		"AudioOptionsVoicePanelBinding",
-		"AudioOptionsVoicePanelListening"
-	}
+	local function UpdateHeaderExpand(self, expanded)
+		self.collapseTex:SetAtlas(expanded and "Soulbinds_Collection_CategoryHeader_Collapse" or "Soulbinds_Collection_CategoryHeader_Expand", true)
 
-	for i = 1, getn(voice) do
-		local frame = _G[voice[i]]
-		if frame then
-			frame:StripTextures()
-			frame:SetBackdrop({
-				bgFile = C.media.blank, edgeFile = C.media.blank, edgeSize = T.mult,
-				insets = {left = -T.mult, right = -T.mult, top = -T.mult, bottom = -T.mult}
-			})
-			frame:CreateBorder(true, true)
-			frame:SetBackdropColor(0, 0, 0, 0)
-			frame:SetBackdropBorderColor(unpack(C.media.border_color))
+		UpdateKeybindButtons(self)
+	end
+
+	hooksecurefunc(SettingsPanel.Container.SettingsList.ScrollBox, "Update", function(frame)
+		for _, child in next, { frame.ScrollTarget:GetChildren() } do
+			if not child.isSkinned then
+				if child.CheckBox then
+					child.CheckBox:SetSize(28, 28)
+					T.SkinCheckBoxAtlas(child.CheckBox)
+				end
+
+				if child.Button then
+					if child.Button:GetWidth() < 250 then
+						child.Button:SkinButton()
+					else
+						child.Button:StripTextures()
+						child.Button.Right:SetAlpha(0)
+						child.Button:CreateBackdrop("Overlay")
+						child.Button.backdrop:SetPoint("TOPLEFT", 2, -1)
+						child.Button.backdrop:SetPoint("BOTTOMRIGHT", -2, 3)
+						child.Button.backdrop.overlay:SetVertexColor(0.08, 0.08, 0.08, 1)
+
+						child.Button.hl = child.Button:CreateTexture(nil, "HIGHLIGHT")
+						child.Button.hl:SetColorTexture(1, 1, 1, 0.3)
+						child.Button.hl:SetInside(child.Button.backdrop)
+						child.Button.hl:SetBlendMode("ADD")
+
+						child.collapseTex = child.Button.backdrop:CreateTexture(nil, "OVERLAY")
+						child.collapseTex:SetPoint("RIGHT", -10, 0)
+
+						UpdateHeaderExpand(child, false)
+						hooksecurefunc(child, "EvaluateVisibility", UpdateHeaderExpand)
+					end
+				end
+				if child.ToggleTest then
+					child.ToggleTest:SkinButton()
+					child.VUMeter:StripTextures()
+					child.VUMeter.NineSlice:Hide()
+					child.VUMeter:CreateBackdrop("Overlay")
+					child.VUMeter.backdrop:SetInside(4, 4)
+					child.VUMeter.Status:SetStatusBarTexture(C.media.texture)
+				end
+				if child.PushToTalkKeybindButton then
+					child.PushToTalkKeybindButton:SkinButton()
+				end
+				if child.SliderWithSteppers then
+					T.SkinSliderStep(child.SliderWithSteppers)
+				end
+				if child.Button1 and child.Button2 then
+					child.Button1:SkinButton()
+					child.Button2:SkinButton()
+				end
+
+				child.isSkinned = true
+			end
 		end
-	end
-
-	local buttons = {
-		"VideoOptionsFrameOkay",
-		"VideoOptionsFrameCancel",
-		"VideoOptionsFrameDefaults",
-		"VideoOptionsFrameApply",
-		"RecordLoopbackSoundButton",
-		"PlayLoopbackSoundButton"
-	}
-
-	for i = 1, getn(buttons) do
-		local button = _G[buttons[i]]
-		if button then
-			button:SkinButton()
-		end
-	end
-
-	local checkboxes = {
-		"Advanced_MaxFPSCheckBox",
-		"Advanced_MaxFPSBKCheckBox",
-		"Advanced_DesktopGamma",
-		"AudioOptionsSoundPanelEnableSound",
-		"AudioOptionsSoundPanelSoundEffects",
-		"AudioOptionsSoundPanelErrorSpeech",
-		"AudioOptionsSoundPanelEmoteSounds",
-		"AudioOptionsSoundPanelPetSounds",
-		"AudioOptionsSoundPanelMusic",
-		"AudioOptionsSoundPanelLoopMusic",
-		"AudioOptionsSoundPanelAmbientSounds",
-		"AudioOptionsSoundPanelSoundInBG",
-		"AudioOptionsSoundPanelReverb",
-		"AudioOptionsSoundPanelHRTF",
-		"AudioOptionsSoundPanelEnableDSPs",
-		"AudioOptionsSoundPanelPetBattleMusic",
-		"AudioOptionsSoundPanelDialogSounds",
-		"NetworkOptionsPanelOptimizeSpeed",
-		"NetworkOptionsPanelUseIPv6",
-		"NetworkOptionsPanelAdvancedCombatLogging",
-		"Advanced_ShowHDModels",
-		"Display_RaidSettingsEnabledCheckBox"
-	}
-
-	for i = 1, getn(checkboxes) do
-		local checkbox = _G[checkboxes[i]]
-		if checkbox then
-			T.SkinCheckBox(checkbox)
-		end
-	end
-
-	local dropdown = {
-		"Display_DisplayModeDropDown",
-		"Display_ResolutionDropDown",
-		"Display_RefreshDropDown",
-		"Display_PrimaryMonitorDropDown",
-		"Display_AntiAliasingDropDown",
-		"Display_VerticalSyncDropDown",
-		"Graphics_TextureResolutionDropDown",
-		"Graphics_FilteringDropDown",
-		"Graphics_ProjectedTexturesDropDown",
-		"Graphics_ViewDistanceDropDown",
-		"Graphics_EnvironmentalDetailDropDown",
-		"Graphics_GroundClutterDropDown",
-		"Graphics_ShadowsDropDown",
-		"Graphics_LiquidDetailDropDown",
-		"Graphics_SunshaftsDropDown",
-		"Graphics_ParticleDensityDropDown",
-		"Graphics_DepthEffectsDropDown",
-		"Graphics_LightingQualityDropDown",
-		"Graphics_OutlineModeDropDown",
-		"Advanced_BufferingDropDown",
-		"Advanced_LagDropDown",
-		"Advanced_HardwareCursorDropDown",
-		"Advanced_GraphicsAPIDropDown",
-		"Advanced_PhysicsInteractionDropDown",
-		"Advanced_MultisampleAntiAliasingDropDown",
-		"Advanced_MultisampleAlphaTest",
-		"Advanced_PostProcessAntiAliasingDropDown",
-		"Advanced_ResampleQualityDropDown",
-		"Advanced_AdapterDropDown",
-		"AudioOptionsSoundPanelHardwareDropDown",
-		"AudioOptionsSoundPanelSoundChannelsDropDown",
-		"AudioOptionsSoundPanelSoundCacheSizeDropDown",
-		"AudioOptionsVoicePanelInputDeviceDropDown",
-		"AudioOptionsVoicePanelMicDeviceDropdown",
-		"AudioOptionsVoicePanelOutputDeviceDropdown",
-		"Graphics_SSAODropDown",
-		"Graphics_RefractionDropDown",
-		"RaidGraphics_TextureResolutionDropDown",
-		"RaidGraphics_FilteringDropDown",
-		"RaidGraphics_ProjectedTexturesDropDown",
-		"RaidGraphics_ViewDistanceDropDown",
-		"RaidGraphics_EnvironmentalDetailDropDown",
-		"RaidGraphics_GroundClutterDropDown",
-		"RaidGraphics_ShadowsDropDown",
-		"RaidGraphics_LiquidDetailDropDown",
-		"RaidGraphics_SunshaftsDropDown",
-		"RaidGraphics_ParticleDensityDropDown",
-		"RaidGraphics_RefractionDropDown",
-		"RaidGraphics_SSAODropDown",
-		"RaidGraphics_DepthEffectsDropDown",
-		"RaidGraphics_LightingQualityDropDown",
-		"RaidGraphics_OutlineModeDropDown"
-	}
-
-	for i = 1, getn(dropdown) do
-		local frame = _G[dropdown[i]]
-		if frame then
-			T.SkinDropDownBox(frame, 165)
-		end
-	end
-
-	local sliders = {
-		"Graphics_Quality",
-		"Graphics_ViewDistanceSlider",
-		"Graphics_EnvironmentalDetailSlider",
-		"Graphics_GroundClutterSlider",
-		"Advanced_UIScaleSlider",
-		"Advanced_MaxFPSSlider",
-		"Advanced_MaxFPSBKSlider",
-		"Advanced_GammaSlider",
-		"Advanced_RenderScaleSlider",
-		"Advanced_ContrastSlider",
-		"Advanced_BrightnessSlider",
-		"AudioOptionsSoundPanelSoundQuality",
-		"AudioOptionsSoundPanelMasterVolume",
-		"AudioOptionsSoundPanelSoundVolume",
-		"AudioOptionsSoundPanelMusicVolume",
-		"AudioOptionsSoundPanelAmbienceVolume",
-		"AudioOptionsVoicePanelMicrophoneVolume",
-		"AudioOptionsVoicePanelSpeakerVolume",
-		"AudioOptionsVoicePanelSoundFade",
-		"AudioOptionsVoicePanelMusicFade",
-		"AudioOptionsVoicePanelAmbienceFade",
-		"AudioOptionsSoundPanelDialogVolume",
-		"AudioOptionsVoicePanelVoiceChatMicVolume",
-		"AudioOptionsVoicePanelVoiceChatMicSensitivity",
-		"AudioOptionsVoicePanelVoiceChatVolume",
-		"AudioOptionsVoicePanelVoiceChatDucking",
-		"RaidGraphics_Quality",
-		"RaidGraphics_ViewDistanceSlider",
-		"RaidGraphics_EnvironmentalDetailSlider",
-		"RaidGraphics_GroundClutterSlider",
-		"Display_RenderScaleSlider"
-	}
-
-	for i = 1, getn(sliders) do
-		local slider = _G[sliders[i]]
-		if slider then
-			T.SkinSlider(slider)
-			slider:SetFrameLevel(slider:GetFrameLevel() + 2)
-		end
-	end
-
-	_G["Graphics_Quality"].SetBackdrop = T.dummy
-	_G["RaidGraphics_Quality"].SetBackdrop = T.dummy
-
-	local VUMeter = AudioOptionsVoicePanelTestInputDevice.VUMeter
-	VUMeter:SetBackdrop(nil)
-	VUMeter.Status:CreateBackdrop("Overlay")
-
-	_G["VideoOptionsFrameDefaults"]:ClearAllPoints()
-	_G["VideoOptionsFrameDefaults"]:SetPoint("TOPLEFT", _G["VideoOptionsFrameCategoryFrame"], "BOTTOMLEFT", 0, -14)
-	_G["VideoOptionsFrameCancel"]:ClearAllPoints()
-	_G["VideoOptionsFrameCancel"]:SetPoint("TOPRIGHT", _G["VideoOptionsFramePanelContainer"], "BOTTOMRIGHT", 0, -14)
-	_G["VideoOptionsFrameOkay"]:ClearAllPoints()
-	_G["VideoOptionsFrameOkay"]:SetPoint("RIGHT", _G["VideoOptionsFrameCancel"], "LEFT", -4, 0)
-	_G["VideoOptionsFrameApply"]:ClearAllPoints()
-	_G["VideoOptionsFrameApply"]:SetPoint("RIGHT", _G["VideoOptionsFrameOkay"], "LEFT", -4, 0)
-
-	GraphicsButton:SetPoint("BOTTOMLEFT", "Graphics_", "TOPLEFT", 0, 3)
-	GraphicsButton:SkinButton(true)
-	RaidButton:SkinButton(true)
-
-	AudioOptionsVoicePanelTestInputDevice.ToggleTest:SkinButton()
-
-	local function InitializeCommunicationMode(self)
-		self.PushToTalkKeybindButton:SkinButton()
-	end
-	hooksecurefunc("AudioOptionsVoicePanel_InitializeCommunicationModeUI", InitializeCommunicationMode)
-
-	T.SkinDropDownBox(InterfaceOptionsLanguagesPanelAudioLocaleDropDown, 250)
-	T.SkinDropDownBox(InterfaceOptionsLanguagesPanelLocaleDropDown, 250)
-	T.SkinDropDownBox(AudioOptionsVoicePanelChatModeDropdown, 183)
+	end)
 end
 
 tinsert(T.SkinFuncs["ViksUI"], LoadSkin)

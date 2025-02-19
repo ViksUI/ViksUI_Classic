@@ -1,4 +1,4 @@
-local T, C, L, _ = unpack(select(2, ...))
+local T, C, L = unpack(ViksUI)
 if C.automation.release ~= true then return end
 
 ----------------------------------------------------------------------------------------
@@ -6,7 +6,7 @@ if C.automation.release ~= true then return end
 ----------------------------------------------------------------------------------------
 local frame = CreateFrame("Frame")
 frame:RegisterEvent("PLAYER_DEAD")
-frame:SetScript("OnEvent", function(self, event)
+frame:SetScript("OnEvent", function()
 	local inBattlefield = false
 	for i = 1, GetMaxBattlefieldID() do
 		local status = GetBattlefieldStatus(i)

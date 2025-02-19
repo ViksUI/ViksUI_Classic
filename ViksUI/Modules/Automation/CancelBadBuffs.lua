@@ -1,21 +1,22 @@
-local T, C, L, _ = unpack(select(2, ...))
+local T, C, L = unpack(ViksUI)
 if C.automation.cancel_bad_buffs ~= true then return end
 
 ----------------------------------------------------------------------------------------
 --	Auto cancel various buffs(by Unknown)
 ----------------------------------------------------------------------------------------
 local frame = CreateFrame("Frame")
-frame:RegisterEvent("UNIT_AURA")
-frame:SetScript("OnEvent", function(self, event, unit)
-	if unit ~= "player" then return end
-
+frame:RegisterUnitEvent("UNIT_AURA", "player", "")
+frame:SetScript("OnEvent", function(_, event, unit)
 	if event == "UNIT_AURA" and not InCombatLockdown() then
-		for buff, enabled in next, T.BadBuffs do
-			local icon = T.CheckPlayerBuff(buff)
-			if icon and enabled then
-				CancelUnitBuff(unit, icon)
-				print("|cffffff00"..ACTION_SPELL_AURA_REMOVED.."|r "..(GetSpellLink(buff) or ("|cffffff00["..buff.."]|r")).."|cffffff00.|r")
+		local i = 1
+		while true do
+			local name = UnitBuff(unit, i)
+			if not name then return end
+			if T.BadBuffs[name] then
+				CancelSpellByName(name)
+				print("|cffffff00"..ACTION_SPELL_AURA_REMOVED.." ["..name.."].|r")
 			end
+			i = i + 1
 		end
 	end
 end)

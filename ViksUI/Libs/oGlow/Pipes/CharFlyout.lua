@@ -1,17 +1,15 @@
 if oGlow:IsClassic() then return end
-
-local _E
-
 local hook
+local _E
 
 local getID = function(loc)
 	local player, bank, bags, voidStorage, slot, bag = EquipmentManager_UnpackLocation(loc)
 	if not player and not bank and not bags and not voidStorage then return end
 
 	if not bags then
-		return GetInventoryItemID("player", slot)
+		return GetInventoryItemLink("player", slot)
 	else
-		return GetContainerItemID(bag, slot)
+		return C_Container.GetContainerItemLink(bag, slot)
 	end
 end
 

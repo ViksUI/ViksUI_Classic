@@ -1,38 +1,47 @@
-local T, C, L, _ = unpack(select(2, ...))
-if T.classic or C.skins.blizzard_frames ~= true then return end
+local T, C, L = unpack(ViksUI)
+if C.skins.blizzard_frames ~= true then return end
 
 ----------------------------------------------------------------------------------------
 --	ItemUpgrade skin
 ----------------------------------------------------------------------------------------
 local function LoadSkin()
-	ItemUpgradeFrame:StripTextures()
-	ItemUpgradeFrame:SetTemplate("Transparent")
+	local frame = ItemUpgradeFrame
+	T.SkinCloseButton(frame.CloseButton)
 
-	ItemUpgradeFrameMoneyFrame:StripTextures()
-	ItemUpgradeFrame.ButtonFrame:StripTextures()
+	frame:StripTextures()
+	frame:SetTemplate("Transparent")
+	ItemUpgradeFramePortrait:SetAlpha(0)
 
-	ItemUpgradeFrameUpgradeButton:ClearAllPoints()
-	ItemUpgradeFrameUpgradeButton:SetPoint("BOTTOMRIGHT", ItemUpgradeFrame, "BOTTOMRIGHT", -3, 3)
-	ItemUpgradeFrameUpgradeButton:SkinButton(true)
+	frame.UpgradeItemButton:StripTextures()
+	frame.UpgradeItemButton:SetTemplate("Default")
+	frame.UpgradeItemButton:StyleButton()
+	frame.UpgradeItemButton:GetNormalTexture():SetInside()
+	frame.UpgradeItemButton.IconBorder:SetAlpha(0)
+	frame.UpgradeItemButton.icon:SetInside()
+	frame.UpgradeItemButton.icon:SetTexCoord(0.1, 0.9, 0.1, 0.9)
 
-	ItemUpgradeFrame.ItemButton:StripTextures()
-	ItemUpgradeFrame.ItemButton:SetTemplate("Default")
-	ItemUpgradeFrame.ItemButton:StyleButton()
-	ItemUpgradeFrame.ItemButton.IconTexture:ClearAllPoints()
-	ItemUpgradeFrame.ItemButton.IconTexture:SetPoint("TOPLEFT", 2, -2)
-	ItemUpgradeFrame.ItemButton.IconTexture:SetPoint("BOTTOMRIGHT", -2, 2)
+	T.SkinDropDownBox(frame.ItemInfo.Dropdown)
 
-	hooksecurefunc("ItemUpgradeFrame_Update", function()
-		if GetItemUpgradeItemInfo() then
-			ItemUpgradeFrame.ItemButton.IconTexture:SetTexCoord(0.1, 0.9, 0.1, 0.9)
-		else
-			ItemUpgradeFrame.ItemButton.IconTexture:SetTexture(nil)
+	frame.UpgradeButton:SkinButton(true)
+
+	frame.UpgradeCostFrame.BGTex:Hide()
+
+	ItemUpgradeFrameLeftItemPreviewFrame.NineSlice:SetTemplate("Overlay")
+	ItemUpgradeFrameRightItemPreviewFrame.NineSlice:SetTemplate("Overlay")
+
+	ItemUpgradeFramePlayerCurrenciesBorder:StripTextures()
+
+	local function reskinCurrencyIcon(self)
+		for frame in self.iconPool:EnumerateActive() do
+			if not frame.Icon.styled then
+				frame.Icon:SkinIcon(true)
+				frame.Icon.styled = true
+			end
 		end
-	end)
+	end
 
-	ItemUpgradeFrame.FinishedGlow:Kill()
-
-	T.SkinCloseButton(ItemUpgradeFrameCloseButton)
+	hooksecurefunc(frame.UpgradeCostFrame, "GetIconFrame", reskinCurrencyIcon)
+	hooksecurefunc(frame.PlayerCurrencies, "GetIconFrame", reskinCurrencyIcon)
 end
 
 T.SkinFuncs["Blizzard_ItemUpgradeUI"] = LoadSkin

@@ -1,4 +1,4 @@
-local T, C, L, _ = unpack(select(2, ...))
+local T, C, L = unpack(ViksUI)
 local _, class = UnitClass("player")
 local r, g, b = unpack(C.media.pxcolor1)
 if not C.datatext.Wowtime and not C.datatext.Wowtime > 0 then return end
@@ -166,7 +166,7 @@ Stat:SetScript("OnEnter", function(self)
 	GameTooltip:SetOwner(self, "ANCHOR_BOTTOMLEFT", -4, 16)
 	GameTooltip:ClearLines()
 
-	if not T.classic then
+	if T.Mainline then
 		local c = 0
 		for i,q in ipairs({52840,52834,52835,52837,52839,52838}) do if (IsQuestFlaggedCompleted(q)) then c=c+1 end end
 		GameTooltip:AddDoubleLine( L_STATS_SEALS .. ": ", c)
@@ -255,7 +255,7 @@ Stat:SetScript("OnEnter", function(self)
 		end
 	end
 	
-	if not T.classic then
+	if T.Mainline then
 		local addedLine
 		for i = 1, GetNumSavedWorldBosses() do
 			local name, _, reset = GetSavedWorldBossInfo(i)

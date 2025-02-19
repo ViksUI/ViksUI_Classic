@@ -1,4 +1,4 @@
-﻿local T, C, L, _ = unpack(select(2, ...))
+local T, C, L = unpack(ViksUI)
 if C.actionbar.enable ~= true or C.actionbar.micromenu ~= true then return end
 
 ----------------------------------------------------------------------------------------
@@ -6,122 +6,174 @@ if C.actionbar.enable ~= true or C.actionbar.micromenu ~= true then return end
 ----------------------------------------------------------------------------------------
 local frame = CreateFrame("Frame", "MicroAnchor", T_PetBattleFrameHider or UIParent)
 frame:SetPoint(unpack(C.position.micro_menu))
-frame:SetSize(T.classic and 208 or 284, 30)
-frame.shown = false
+frame:SetSize(250, 25)
 
-UpdateMicroButtonsParent(frame)
-if C.actionbar.micromenu_mouseover == true then frame:SetAlpha(0) end
-
-local function CheckFade()
-	local mouseactive
-	for _, button in pairs(MICRO_BUTTONS) do
-		local b = _G[button]
-		if b.mouseover == true then
-			mouseactive = true
-		end
-	end
-
-	if C.actionbar.micromenu_mouseover ~= true then return end
-
-	if frame.mouseover == true then
-		mouseactive = true
-		if GameTooltip:IsShown() then
-			GameTooltip:Hide()
-		end
-	end
-
-	if mouseactive == true then
-		if frame.shown ~= true then
-			frame:SetAlpha(1)
-			frame.shown = true
-		end
-	else
-		if frame.shown == true then
-			frame:SetAlpha(0)
-			frame.shown = false
-		end
-	end
+if T.Classic then
+	UpdateMicroButtonsParent(frame)
 end
-frame:SetScript("OnUpdate", CheckFade)
 
-for _, button in pairs(MICRO_BUTTONS) do
-	local m = _G[button]
-	local pushed = m:GetPushedTexture()
-	local normal = m:GetNormalTexture()
-	local disabled = m:GetDisabledTexture()
+if C.actionbar.micromenu_mouseover then
+	frame:SetAlpha(0)
+	frame:SetScript("OnEnter", function() frame:SetAlpha(1) end)
+	frame:SetScript("OnLeave", function() frame:SetAlpha(0) end)
+end
 
-	m:SetParent(frame)
-	m.SetParent = T.dummy
-	_G[button.."Flash"]:SetTexture("")
-	m:SetHighlightTexture("")
-	m.SetHighlightTexture = T.dummy
+local MICRO_BUTTONS = T.Classic and MICRO_BUTTONS or {
+	"CharacterMicroButton",
+	"SpellbookMicroButton",
+	"TalentMicroButton",
+	"AchievementMicroButton",
+	"QuestLogMicroButton",
+	"GuildMicroButton",
+	"LFDMicroButton",
+	"EJMicroButton",
+	"CollectionsMicroButton",
+	"StoreMicroButton",
+	"MainMenuMicroButton",
+	"HelpMicroButton",
+}
 
-	local f = CreateFrame("Frame", nil, m)
+for i, button in pairs(MICRO_BUTTONS) do
+	local bu = _G[button]
+	local normal = bu:GetNormalTexture()
+	local pushed = bu:GetPushedTexture()
+	local disabled = bu:GetDisabledTexture()
+	if T.Mainline then
+		bu:SetSize(22, 29)
+	end
+
+	local point = bu:GetPoint()
+	if point then
+		bu:ClearAllPoints()
+		if T.Classic then
+			if i == 1 then
+				bu:SetPoint("TOPLEFT", frame, "TOPLEFT", -1, 28)
+			else
+				local n = (not T.Vanilla or i <= 7) and i or i - 1
+				bu:SetPoint("TOPLEFT", frame, "TOPLEFT", ((n - 1) * 26) - 1, 28)
+			end
+		else
+			if i == 1 then
+				bu:SetPoint("TOPLEFT", frame, "TOPLEFT", -1, 2)
+			else
+				bu:SetPoint("TOPLEFT", frame, "TOPLEFT", ((i - 1) * 23) - 1, 2)
+			end
+		end
+	end
+
+	bu:SetParent(frame)
+	bu.SetParent = T.dummy
+
+	bu:SetHighlightTexture(0)
+	bu.SetHighlightTexture = T.dummy
+
+	local f = CreateFrame("Frame", nil, bu)
 	f:SetFrameLevel(1)
 	f:SetFrameStrata("BACKGROUND")
-	f:SetPoint("BOTTOMLEFT", m, "BOTTOMLEFT", 2, 0)
-	f:SetPoint("TOPRIGHT", m, "TOPRIGHT", -2, T.classic and -28 or -6)
-	if not T.classic then
-		f:SetPoint("TOPRIGHT", m, "TOPRIGHT", -2, -6)
+	if T.Classic then
+		f:SetPoint("BOTTOMLEFT", bu, "BOTTOMLEFT", 2, 0)
+		f:SetPoint("TOPRIGHT", bu, "TOPRIGHT", -2, -28)
 	else
-		f:SetPoint("TOPRIGHT", m, "TOPRIGHT", -2, -28)
+		f:SetPoint("BOTTOMLEFT", bu, "BOTTOMLEFT", 1, 2)
+		f:SetPoint("TOPRIGHT", bu, "TOPRIGHT", -1, -2)
 	end
 	f:SetTemplate("Default")
-	m.frame = f
+	bu.frame = f
 
-	if not T.classic then
-		pushed:SetTexCoord(0.22, 0.81, 0.26, 0.82)
+	if T.Classic then
+		_G[button.."Flash"]:SetTexture(0)
 	else
-		pushed:SetTexCoord(0.17, 0.87, 0.5, 0.908)
-	end
-	pushed:ClearAllPoints()
-	pushed:SetPoint("TOPLEFT", m.frame, "TOPLEFT", 2, -2)
-	pushed:SetPoint("BOTTOMRIGHT", m.frame, "BOTTOMRIGHT", -2, 2)
+		local flash = bu.FlashBorder
+		if flash then
+			flash:SetInside(f)
+			flash:SetTexture(C.media.blank)
+			flash:SetVertexColor(0.6, 0.6, 0.6)
+		end
+		if bu.FlashContent then bu.FlashContent:SetTexture(nil) end
 
-	if not T.classic then
-		normal:SetTexCoord(0.22, 0.81, 0.26, 0.82)
-	else
-		normal:SetTexCoord(0.17, 0.87, 0.5, 0.908)
+		local highlight = bu:GetHighlightTexture()
+		if highlight then
+			highlight:SetAlpha(0)
+			highlight:SetTexCoord(0.1, 0.9, 0.12, 0.9)
+		end
 	end
-	normal:ClearAllPoints()
-	normal:SetPoint("TOPLEFT", m.frame, "TOPLEFT", 2, -2)
-	normal:SetPoint("BOTTOMRIGHT", m.frame, "BOTTOMRIGHT", -2, 2)
+
+	if normal then
+		if T.Classic then
+			normal:SetTexCoord(0.17, 0.87, 0.5, 0.908)
+		else
+			normal:SetTexCoord(0.1, 0.85, 0.12, 0.78)
+		end
+		normal:ClearAllPoints()
+		normal:SetPoint("TOPLEFT", f, "TOPLEFT", 2, -2)
+		normal:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -2, 2)
+	end
+
+	if pushed then
+		if T.Classic then
+			pushed:SetTexCoord(0.17, 0.87, 0.5, 0.908)
+		else
+			pushed:SetTexCoord(0.1, 0.85, 0.12, 0.78)
+		end
+		pushed:ClearAllPoints()
+		pushed:SetPoint("TOPLEFT", f, "TOPLEFT", 2, -2)
+		pushed:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -2, 2)
+	end
 
 	if disabled then
-		if not T.classic then
-			disabled:SetTexCoord(0.22, 0.81, 0.26, 0.82)
-		else
+		if T.Classic then
 			disabled:SetTexCoord(0.17, 0.87, 0.5, 0.908)
+		else
+			disabled:SetTexCoord(0.2, 0.80, 0.22, 0.8)
 		end
 		disabled:ClearAllPoints()
-		disabled:SetPoint("TOPLEFT", m.frame, "TOPLEFT", 2, -2)
-		disabled:SetPoint("BOTTOMRIGHT", m.frame, "BOTTOMRIGHT", -2, 2)
+		disabled:SetPoint("TOPLEFT", f, "TOPLEFT", 2, -2)
+		disabled:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -2, 2)
 	end
 
-	m.mouseover = false
-	m:HookScript("OnEnter", function(self)
-		self.frame:SetBackdropBorderColor(T.color.r, T.color.g, T.color.b)
-		self.mouseover = true
+	bu:HookScript("OnEnter", function(self)
+		self.frame:SetBackdropBorderColor(unpack(C.media.classborder_color))
+		if C.actionbar.micromenu_mouseover then
+			frame:SetAlpha(1)
+		end
 	end)
-	m:HookScript("OnLeave", function(self)
+	bu:HookScript("OnLeave", function(self)
 		self.frame:SetBackdropBorderColor(unpack(C.media.border_color))
-		self.mouseover = false
+		if C.actionbar.micromenu_mouseover then
+			frame:SetAlpha(0)
+		end
 	end)
+
+	if bu.Background then bu.Background:SetAlpha(0) end
+	if bu.PushedShadow then bu.PushedShadow:SetTexture() end
+	if bu.Shadow then bu.Shadow:SetTexture() end
+	if bu.PushedBackground then bu.PushedBackground:SetAlpha(0) end
+	if bu.PortraitMask then bu.PortraitMask:Hide() end
 end
 
 -- Fix textures for buttons
-hooksecurefunc("UpdateMicroButtons", function()
-	MicroButtonPortrait:ClearAllPoints()
-	MicroButtonPortrait:SetPoint("TOPLEFT", CharacterMicroButton.frame, "TOPLEFT", 2, -2)
-	MicroButtonPortrait:SetPoint("BOTTOMRIGHT", CharacterMicroButton.frame, "BOTTOMRIGHT", -2, 2)
+if T.Classic then
+	hooksecurefunc("UpdateMicroButtons", function()
+		MicroButtonPortrait:ClearAllPoints()
+		MicroButtonPortrait:SetPoint("TOPLEFT", CharacterMicroButton.frame, "TOPLEFT", 2, -2)
+		MicroButtonPortrait:SetPoint("BOTTOMRIGHT", CharacterMicroButton.frame, "BOTTOMRIGHT", -2, 2)
 
-	CharacterMicroButton:ClearAllPoints()
-	CharacterMicroButton:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", -2, 0)
+		MainMenuBarPerformanceBar:SetTexture(C.media.texture)
+		MainMenuBarPerformanceBar:SetSize(20, 2)
+		MainMenuBarPerformanceBar:ClearAllPoints()
+		MainMenuBarPerformanceBar:SetPoint("BOTTOM", MainMenuMicroButton, "BOTTOM", 0, 2)
+	end)
+else
+	MainMenuMicroButton.MainMenuBarPerformanceBar:SetTexture(C.media.texture)
+	MainMenuMicroButton.MainMenuBarPerformanceBar:SetSize(16, 2)
+	MainMenuMicroButton.MainMenuBarPerformanceBar:SetPoint("BOTTOM", MainMenuMicroButton, "BOTTOM", 0, 4)
 
-	if not T.classic then
-		GuildMicroButtonTabard:ClearAllPoints()
-		GuildMicroButtonTabard:SetPoint("TOP", GuildMicroButton.frame, "TOP", 0, 25)
+	if CharacterMicroButton then
+		local function SkinCharacterPortrait(self)
+			self.Portrait:SetInside(self, 4, 4)
+		end
+
+		hooksecurefunc(CharacterMicroButton, "SetPushed", SkinCharacterPortrait)
+		hooksecurefunc(CharacterMicroButton, "SetNormal", SkinCharacterPortrait)
 	end
-
-	MainMenuBarPerformanceBar:SetPoint("BOTTOM", MainMenuMicroButton, "BOTTOM", 0, 0)
-end)
+end

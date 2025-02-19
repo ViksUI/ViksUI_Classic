@@ -1,18 +1,10 @@
 if IsAddOnLoaded("Fizzle") then return end
 
 local _E
-local slots = {}
-if not oGlow:IsClassic() then
-	slots = {
-		"Head", "Neck", "Shoulder", "Shirt", "Chest", "Waist", "Legs", "Feet", "Wrist", "Hands",
-		"Finger0", "Finger1", "Trinket0", "Trinket1", "Back", "MainHand", "SecondaryHand", [19] = "Tabard"
-	}
-else
-	slots = {
-		"Head", "Neck", "Shoulder", "Shirt", "Chest", "Waist", "Legs", "Feet", "Wrist", "Hands",
-		"Finger0", "Finger1", "Trinket0", "Trinket1", "Back", "MainHand", "SecondaryHand", "Ranged", "Tabard"
-	}
-end
+local slots = {
+	"Head", "Neck", "Shoulder", "Shirt", "Chest", "Waist", "Legs", "Feet", "Wrist", "Hands",
+	"Finger0", "Finger1", "Trinket0", "Trinket1", "Back", "MainHand", "SecondaryHand", [19] = "Tabard"
+}
 
 local _MISSING = {}
 local pollFrame = CreateFrame("Frame")

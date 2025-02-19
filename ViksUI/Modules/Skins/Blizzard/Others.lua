@@ -1,12 +1,11 @@
-local T, C, L, _ = unpack(select(2, ...))
-if T.classic then return end
+local T, C, L = unpack(ViksUI)
 
 ----------------------------------------------------------------------------------------
 --	Reskin Blizzard windows(by Tukz and Co)
 ----------------------------------------------------------------------------------------
 local SkinBlizzUI = CreateFrame("Frame")
 SkinBlizzUI:RegisterEvent("ADDON_LOADED")
-SkinBlizzUI:SetScript("OnEvent", function(self, event, addon)
+SkinBlizzUI:SetScript("OnEvent", function(_, _, addon)
 	if IsAddOnLoaded("Skinner") or IsAddOnLoaded("Aurora") then return end
 
 	-- Stuff not in Blizzard load-on-demand
@@ -19,15 +18,16 @@ SkinBlizzUI:SetScript("OnEvent", function(self, event, addon)
 		}
 
 		for _, object in pairs(checkButtons) do
-			T.SkinCheckBox(_G[object].checkButton)
+			local checkButton = _G[object] and _G[object].checkButton
+			if checkButton then
+				T.SkinCheckBox(_G[object].checkButton)
+			end
 		end
 
 		-- Blizzard Frame reskin
 		local bgskins = {
 			"GameMenuFrame",
 			"BNToastFrame",
-			"TicketStatusFrameButton",
-			"AutoCompleteBox",
 			"ReadyCheckFrame",
 			"ColorPickerFrame",
 			"LFDRoleCheckPopup",
@@ -41,10 +41,24 @@ SkinBlizzUI:SetScript("OnEvent", function(self, event, addon)
 			"BasicScriptErrors"
 		}
 
-		QueueStatusFrame:StripTextures()
 		GameMenuFrame:StripTextures()
-		LFDRoleCheckPopup:StripTextures()
-		RolePollPopup:StripTextures()
+		OpacityFrame:StripTextures()
+
+		if T.Wrath or T.Cata then
+			RolePollPopup:StripTextures()
+		end
+
+		if T.Wrath or T.Cata or T.Mainline then
+			QueueStatusFrame:StripTextures()
+			LFDRoleCheckPopup:StripTextures()
+		end
+
+		if T.Mainline then
+			ColorPickerFrame.Border:Hide()
+		end
+
+		AutoCompleteBox.NineSlice:SetTemplate("Transparent")
+		TicketStatusFrameButton.NineSlice:SetTemplate("Transparent")
 
 		for i = 1, getn(bgskins) do
 			local frame = _G[bgskins[i]]
@@ -71,7 +85,6 @@ SkinBlizzUI:SetScript("OnEvent", function(self, event, addon)
 				_G["StaticPopup"..i.."Button"..j]:SkinButton()
 			end
 			_G["StaticPopup"..i]:StripTextures()
-			_G["StaticPopup"..i].Border:StripTextures()
 			_G["StaticPopup"..i]:CreateBackdrop("Transparent")
 			_G["StaticPopup"..i].backdrop:SetPoint("TOPLEFT", 2, -2)
 			_G["StaticPopup"..i].backdrop:SetPoint("BOTTOMRIGHT", -2, 2)
@@ -93,13 +106,21 @@ SkinBlizzUI:SetScript("OnEvent", function(self, event, addon)
 			_G["StaticPopup"..i.."ItemFrameIconTexture"]:ClearAllPoints()
 			_G["StaticPopup"..i.."ItemFrameIconTexture"]:SetPoint("TOPLEFT", 2, -2)
 			_G["StaticPopup"..i.."ItemFrameIconTexture"]:SetPoint("BOTTOMRIGHT", -2, 2)
-			_G["StaticPopup"..i.."CloseButton"]:SetNormalTexture("")
+			_G["StaticPopup"..i.."CloseButton"]:SetNormalTexture(0)
 			_G["StaticPopup"..i.."CloseButton"].SetNormalTexture = T.dummy
-			_G["StaticPopup"..i.."CloseButton"]:SetPushedTexture("")
+			_G["StaticPopup"..i.."CloseButton"]:SetPushedTexture(0)
 			_G["StaticPopup"..i.."CloseButton"].SetPushedTexture = T.dummy
 			T.SkinCloseButton(_G["StaticPopup"..i.."CloseButton"])
+
+			if T.Mainline then
+				_G["StaticPopup"..i].Border:StripTextures()
+			end
 		end
 		_G["StaticPopup1ExtraButton"]:SkinButton()
+
+		if T.Mainline then
+			T.SkinCloseButton(_G["RolePollPopupCloseButton"])
+		end
 
 		-- Cinematic popup
 		_G["CinematicFrameCloseDialog"]:SetScale(C.general.uiscale)
@@ -122,43 +143,138 @@ SkinBlizzUI:SetScript("OnEvent", function(self, event, addon)
 		_G["PetBattleQueueReadyFrame"].AcceptButton:SkinButton()
 		_G["PetBattleQueueReadyFrame"].DeclineButton:SkinButton()
 
-		-- Wardrobe Outfit
-		WardrobeOutfitEditFrame:SetTemplate("Transparent")
-		WardrobeOutfitEditFrame.AcceptButton:SkinButton()
-		WardrobeOutfitEditFrame.CancelButton:SkinButton()
-		WardrobeOutfitEditFrame.DeleteButton:SkinButton()
-		T.SkinEditBox(WardrobeOutfitEditFrame.EditBox, 250, 25)
-
 		-- Reskin Dropdown menu
+		local dropdowns = {"DropDownList", "L_DropDownList", "Lib_DropDownList"}
 		hooksecurefunc("UIDropDownMenu_InitializeHelper", function()
-			for i = 1, UIDROPDOWNMENU_MAXLEVELS do
-				_G["DropDownList"..i]["Border"]:StripTextures()
-				_G["DropDownList"..i.."Backdrop"]:SetTemplate("Transparent")
-				_G["DropDownList"..i.."MenuBackdrop"]:SetTemplate("Transparent")
+			for _, name in next, dropdowns do
+				for i = 1, UIDROPDOWNMENU_MAXLEVELS do
+					local backdrop = _G[name..i.."Backdrop"]
+					if backdrop then
+						backdrop:SetTemplate("Transparent")
+						local menu = _G[name..i.."MenuBackdrop"].NineSlice or _G[name..i.."MenuBackdrop"]
+						if menu then
+							menu:SetTemplate("Transparent")
+						end
+						if backdrop.Bg then
+							backdrop.Bg:SetAlpha(0)
+						end
+					end
+				end
 			end
 		end)
 
-		-- Reskin menu
-		local ChatMenus = {
-			"ChatMenu",
-			"EmoteMenu",
-			"LanguageMenu",
-			"VoiceMacroMenu"
-		}
-
-		for i = 1, getn(ChatMenus) do
-			if _G[ChatMenus[i]] == _G["ChatMenu"] then
-				_G[ChatMenus[i]]:HookScript("OnShow", function(self)
-					self:SetTemplate("Transparent")
-					self:ClearAllPoints()
-					self:SetPoint("BOTTOMRIGHT", ChatFrame1, "BOTTOMRIGHT", 0, 30)
-				end)
-			else
-				_G[ChatMenus[i]]:HookScript("OnShow", function(self)
-					self:SetTemplate("Transparent")
-				end)
+		hooksecurefunc("ToggleDropDownMenu", function(level)
+			if not level then
+				level = 1
 			end
+
+			for i = 1, _G.UIDROPDOWNMENU_MAXBUTTONS do
+				local button = _G["DropDownList"..level.."Button"..i]
+				local check = _G["DropDownList"..level.."Button"..i.."Check"]
+				local uncheck = _G["DropDownList"..level.."Button"..i.."UnCheck"]
+
+				if not button.backdrop then
+					button:CreateBackdrop("Transparent")
+					button.backdrop:SetBackdropColor(C.media.backdrop_color[1], C.media.backdrop_color[2], C.media.backdrop_color[3], 0.3)
+				end
+
+				button.backdrop:Hide()
+
+				local texture = check:GetTexture()
+				if not button.notCheckable and (T.Classic or texture == 375502) then
+					uncheck:SetTexture()
+					local _, co = check:GetTexCoord()
+					if co == 0 then
+						check:SetTexture([[Interface\Buttons\UI-CheckBox-Check]])
+						check:SetVertexColor(1, 0.9, 0, 1)
+						check:SetSize(18, 18)
+						check:SetDesaturated(true)
+						button.backdrop:SetInside(check, 4, 4)
+					else
+						check:SetTexture(C.media.blank)
+						check:SetVertexColor(1, 0.82, 0, 0.8)
+						check:SetSize(6, 6)
+						check:SetDesaturated(false)
+						button.backdrop:SetOutside(check)
+					end
+
+					button.backdrop:Show()
+					check:SetTexCoord(0, 1, 0, 1)
+				else
+					check:SetSize(16, 16)
+				end
+			end
+		end)
+
+		if RaiderIO_CustomDropDownListMenuBackdrop then
+			RaiderIO_CustomDropDownListMenuBackdrop:StripTextures()
 		end
+
+		if MyFrameDropDownBackdrop then
+			MyFrameDropDownBackdrop:SetTemplate("Transparent")
+		end
+
+		--	Blizzard_Menu skin
+		do
+			local backdrops = {}
+			local function SkinFrame(frame)
+				frame:StripTextures()
+
+				if backdrops[frame] then
+					frame.backdrop = backdrops[frame] -- relink it back
+				else
+					frame:CreateBackdrop("Transparent") -- :SetTemplate errors out
+					frame.backdrop:SetInside(frame, 0, 0)
+					backdrops[frame] = frame.backdrop
+
+					if frame.ScrollBar then
+						T.SkinScrollBar(frame.ScrollBar)
+					end
+				end
+			end
+
+			local function OpenMenu(manager, _, menuDescription)
+				local menu = manager:GetOpenMenu()
+				if menu then
+					SkinFrame(menu)
+					menuDescription:AddMenuAcquiredCallback(SkinFrame)
+				end
+			end
+
+			local manager = _G.Menu.GetManager()
+			hooksecurefunc(manager, "OpenMenu", OpenMenu)
+			hooksecurefunc(manager, "OpenContextMenu", OpenMenu)
+		end
+
+		-- Reskin menu
+		-- local ChatMenus = {
+			-- "ChatMenu",
+			-- "EmoteMenu",
+			-- "LanguageMenu",
+			-- "VoiceMacroMenu"
+		-- }
+
+		-- for i = 1, getn(ChatMenus) do
+			-- if _G[ChatMenus[i]] == _G["ChatMenu"] then
+				-- _G[ChatMenus[i]]:HookScript("OnShow", function(self)
+					-- if self.NineSlice then
+						-- self.NineSlice:SetTemplate("Transparent")
+					-- else
+						-- self:SetTemplate("Transparent")
+					-- end
+					-- self:ClearAllPoints()
+					-- self:SetPoint("BOTTOMRIGHT", ChatFrame1, "BOTTOMRIGHT", 0, 30)
+				-- end)
+			-- else
+				-- _G[ChatMenus[i]]:HookScript("OnShow", function(self)
+					-- if self.NineSlice then
+						-- self.NineSlice:SetTemplate("Transparent")
+					-- else
+						-- self:SetTemplate("Transparent")
+					-- end
+				-- end)
+			-- end
+		-- end
 
 		-- Hide header textures and move text/buttons
 		local BlizzardHeader = {
@@ -166,12 +282,12 @@ SkinBlizzUI:SetScript("OnEvent", function(self, event, addon)
 			"ColorPickerFrame"
 		}
 
-		for i = 1, getn(BlizzardHeader) do
-			local title = _G[BlizzardHeader[i].."Header"]
+		for _, frame in pairs(BlizzardHeader) do
+			local title = T.Classic and _G[frame.."Header"] or _G[frame] and _G[frame].Header
 			if title then
-				title:SetTexture(nil)
+				title:StripTextures()
 				title:ClearAllPoints()
-				title:SetPoint("TOP", BlizzardHeader[i], 0, 7)
+				title:SetPoint("TOP", frame, 0, 7)
 			end
 		end
 
@@ -181,24 +297,24 @@ SkinBlizzUI:SetScript("OnEvent", function(self, event, addon)
 			"GameMenuButtonHelp",
 			"GameMenuButtonStore",
 			"GameMenuButtonUIOptions",
+			"GameMenuButtonSettings",
+			"GameMenuButtonEditMode",
 			"GameMenuButtonKeybindings",
 			"GameMenuButtonMacros",
 			"GameMenuButtonRatings",
 			"GameMenuButtonAddOns",
+			"GameMenuButtonAddons",
 			"GameMenuButtonLogout",
 			"GameMenuButtonQuit",
 			"GameMenuButtonContinue",
 			"GameMenuButtonMacOptions",
 			"GameMenuButtonOptionHouse",
 			"GameMenuButtonSettingsUI",
-			"GameMenuButtonAddons",
 			"GameMenuButtonWhatsNew",
 			"ReadyCheckFrameYesButton",
 			"ReadyCheckFrameNoButton",
 			"ColorPickerOkayButton",
 			"ColorPickerCancelButton",
-			"BaudErrorFrameClearButton",
-			"BaudErrorFrameCloseButton",
 			"GuildInviteFrameJoinButton",
 			"GuildInviteFrameDeclineButton",
 			"RolePollPopupAcceptButton",
@@ -227,20 +343,9 @@ SkinBlizzUI:SetScript("OnEvent", function(self, event, addon)
 				buttons:SkinButton()
 			end
 		end
-		LFDReadyCheckPopup.YesButton:SkinButton(true)
-		LFDReadyCheckPopup.NoButton:SkinButton(true)
-
-		-- Reskin scrollbars
-		local scrollbars = {
-			"BaudErrorFrameListScrollBoxScrollBarScrollBar",
-			"BaudErrorFrameDetailScrollFrameScrollBar"
-		}
-
-		for _, scrollbar in pairs(scrollbars) do
-			local bars = _G[scrollbar]
-			if bars then
-				T.SkinScrollBar(bars)
-			end
+		if T.Mainline then
+			LFDReadyCheckPopup.YesButton:SkinButton(true)
+			LFDReadyCheckPopup.NoButton:SkinButton(true)
 		end
 
 		-- Button position or text
@@ -259,8 +364,10 @@ SkinBlizzUI:SetScript("OnEvent", function(self, event, addon)
 		_G["ReadyCheckFrameText"]:SetPoint("TOP", 0, -12)
 
 		-- Others
-		for i = 1, 10 do
-			select(i, GuildInviteFrame:GetRegions()):Hide()
+		if T.Mainline then
+			for i = 1, 10 do
+				select(i, GuildInviteFrame:GetRegions()):Hide()
+			end
 		end
 		_G["GeneralDockManagerOverflowButtonList"]:SetFrameStrata("HIGH")
 		_G["ReadyCheckListenerFrame"]:SetAlpha(0)
@@ -272,51 +379,62 @@ SkinBlizzUI:SetScript("OnEvent", function(self, event, addon)
 		StackSplitFrame:CreateBackdrop("Transparent")
 		StackSplitFrame.backdrop:SetPoint("TOPLEFT", 5, -5)
 		StackSplitFrame.backdrop:SetPoint("BOTTOMRIGHT", -5, 10)
-		StackSplitFrame.OkayButton:SkinButton()
-		StackSplitFrame.CancelButton:SkinButton()
+		if T.Classic then
+			StackSplitOkayButton:SkinButton()
+			StackSplitCancelButton:SkinButton()
+		else
+			StackSplitFrame.OkayButton:SkinButton()
+			StackSplitFrame.CancelButton:SkinButton()
+		end
 
-		_G["StaticPopup1CloseButton"]:HookScript("OnShow", function(self)
-			self:StripTextures(true)
-			T.SkinCloseButton(self, nil, "-")
-		end)
-		T.SkinCloseButton(_G["RolePollPopupCloseButton"])
-		T.SkinCloseButton(_G["ItemRefCloseButton"])
+		if T.Classic then
+			_G["StaticPopup1CloseButton"]:HookScript("OnShow", function(self)
+				self:StripTextures(true)
+				T.SkinCloseButton(self, nil, "-")
+			end)
+			T.SkinCloseButton(_G["ItemRefCloseButton"])
+		end
+
 		if C.skins.blizzard_frames == true then
-			-- Social Browser frame
-			SocialBrowserFrame:StripTextures()
-			SocialBrowserFrame:SetTemplate("Transparent")
-			T.SkinCloseButton(SocialBrowserFrame.CloseButton)
-			SocialBrowserFrame.CloseButton:SetSize(16, 16)
-
 			-- What's new frame
-			SplashFrame:CreateBackdrop("Transparent")
-			SplashFrame.BottomCloseButton:SkinButton()
-			T.SkinCloseButton(SplashFrame.TopCloseButton)
+			if T.Mainline then
+				SplashFrame:CreateBackdrop("Transparent")
+				SplashFrame.BottomCloseButton:SkinButton()
+				T.SkinCloseButton(SplashFrame.TopCloseButton)
+			end
 
 			-- NavBar Buttons (Used in EncounterJournal and HelpFrame)
+			local function NavButtonXOffset(button, point, anchor, point2, _, yoffset, skip)
+				if not skip then
+					button:SetPoint(point, anchor, point2, 1, yoffset, true)
+				end
+			end
+
 			local function SkinNavBarButtons(self)
 				if self:GetParent():GetName() == "WorldMapFrame" then return end
-				local navButton = self.navList[#self.navList]
-				if navButton and not navButton.isSkinned then
-					navButton:SkinButton(true)
-					if navButton.MenuArrowButton then
-						navButton.MenuArrowButton:SetNormalTexture(nil)
-						navButton.MenuArrowButton:SetPushedTexture(nil)
-						navButton.MenuArrowButton:SetHighlightTexture(nil)
+				local total = #self.navList
+				local navButton = self.navList[total]
+				if navButton then
+					if total == 2 then
+						-- EJ.navBar.home.xoffset = 1 (this causes a taint, use the hook below instead)
+						NavButtonXOffset(navButton, navButton:GetPoint())
+						hooksecurefunc(navButton, "SetPoint", NavButtonXOffset)
 					end
-					navButton.xoffset = 1
-					navButton.isSkinned = true
+
+					if not navButton.isSkinned then
+						navButton:SkinButton(true)
+						if navButton.MenuArrowButton then
+							navButton.MenuArrowButton:SetNormalTexture(0)
+							navButton.MenuArrowButton:SetPushedTexture(0)
+							navButton.MenuArrowButton:SetHighlightTexture(0)
+						end
+
+						navButton.xoffset = 1
+						navButton.isSkinned = true
+					end
 				end
 			end
 			hooksecurefunc("NavBar_AddButton", SkinNavBarButtons)
-
-			local function SetHomeButtonOffsetX(self)
-				if self:GetParent():GetName() == "WorldMapFrame" then return end
-				if self.homeButton then
-					self.homeButton.xoffset = 1
-				end
-			end
-			hooksecurefunc("NavBar_Initialize", SetHomeButtonOffsetX)
 
 			if T.client == "ruRU" then
 				_G["DeclensionFrame"]:SetTemplate("Transparent")
@@ -362,11 +480,12 @@ SkinBlizzUI:SetScript("OnEvent", function(self, event, addon)
 				local numIcons = rowSize * numRows
 				SkinIconArray(baseName, numIcons)
 			end)
-		end
-	end
 
-	if addon == "Blizzard_GuildUI" and T.client == "ruRU" then
-		_G["GuildFrameTab1"]:ClearAllPoints()
-		_G["GuildFrameTab1"]:SetPoint("TOPLEFT", _G["GuildFrame"], "BOTTOMLEFT", -4, 2)
+			if T.Mainline then
+				hooksecurefunc(HelpTipTemplateMixin, "ApplyText", function(self)
+					T.SkinHelpBox(self)
+				end)
+			end
+		end
 	end
 end)

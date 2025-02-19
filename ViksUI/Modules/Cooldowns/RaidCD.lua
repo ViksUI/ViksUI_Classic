@@ -1,4 +1,4 @@
-local T, C, L, _ = unpack(select(2, ...))
+local T, C, L = unpack(ViksUI)
 if C.raidcooldown.enable ~= true then return end
 
 ----------------------------------------------------------------------------------------
@@ -17,18 +17,16 @@ local floor = math.floor
 local currentNumResses = 0
 local charges = nil
 local inBossCombat = nil
-local timer = 0
-local inEncounter
 local Ressesbars = {}
 local bars = {}
 
-AnchorRaidCD = CreateFrame("Frame","Move_RaidCD",UIParent)
-AnchorRaidCD:SetPoint("TOPLEFT", 5, -230)
-CreateAnchor(AnchorRaidCD, "Move RaidCD", 186 + 32, 192)
-
 local RaidCDAnchor = CreateFrame("Frame", "RaidCDAnchor", UIParent)
-RaidCDAnchor:SetPoint("BOTTOM", AnchorRaidCD)
-RaidCDAnchor:SetSize(186 + 32, 20)
+RaidCDAnchor:SetPoint(unpack(C.position.raid_cooldown))
+if C.raidcooldown.show_icon == true then
+	RaidCDAnchor:SetSize(C.raidcooldown.width + 32, C.raidcooldown.height + 10)
+else
+	RaidCDAnchor:SetSize(C.raidcooldown.width + 32, C.raidcooldown.height + 4)
+end
 
 local FormatTime = function(time)
 	if time >= 60 then
@@ -42,7 +40,7 @@ local function sortByExpiration(a, b)
 	return a.endTime > b.endTime
 end
 
-local CreateFS = function(frame, fsize, fstyle)
+local CreateFS = function(frame)
 	local fstring = frame:CreateFontString(nil, "OVERLAY")
 	fstring:SetFont(C.font.raid_cooldowns_font, C.font.raid_cooldowns_font_size, C.font.raid_cooldowns_font_style)
 	fstring:SetShadowOffset(C.font.raid_cooldowns_font_shadow and 1 or 0, C.font.raid_cooldowns_font_shadow and -1 or 0)
@@ -51,7 +49,7 @@ end
 
 local UpdatePositions = function()
 	if charges and Ressesbars[1] then
-		Ressesbars[1]:SetPoint("BOTTOMRIGHT", RaidCDAnchor, "BOTTOMRIGHT", 0, 0)
+		Ressesbars[1]:SetPoint("BOTTOMRIGHT", RaidCDAnchor, "BOTTOMRIGHT", 0, C.raidcooldown.show_icon and -8 or -2)
 		Ressesbars[1].id = 1
 		for i = 1, #bars do
 			bars[i]:ClearAllPoints()
@@ -74,7 +72,7 @@ local UpdatePositions = function()
 		for i = 1, #bars do
 			bars[i]:ClearAllPoints()
 			if i == 1 then
-				bars[i]:SetPoint("TOPRIGHT", RaidCDAnchor, "TOPRIGHT", 0, 0)
+				bars[i]:SetPoint("TOPRIGHT", RaidCDAnchor, "TOPRIGHT", -2, C.raidcooldown.show_icon and -8 or -2)
 			else
 				if C.raidcooldown.upwards == true then
 					bars[i]:SetPoint("BOTTOMRIGHT", bars[i-1], "TOPRIGHT", 0, 13)
@@ -113,7 +111,7 @@ local UpdateCharges = function(bar)
 	end
 end
 
-local BarUpdate = function(self, elapsed)
+local BarUpdate = function(self)
 	local curTime = GetTime()
 	if self.endTime < curTime then
 		if self.isResses then
@@ -136,7 +134,7 @@ local OnEnter = function(self)
 	GameTooltip:Show()
 end
 
-local OnLeave = function(self)
+local OnLeave = function()
 	GameTooltip:Hide()
 end
 
@@ -152,14 +150,11 @@ local OnMouseDown = function(self, button)
 	end
 end
 
+local barWidth = C.raidcooldown.width + (C.raidcooldown.show_icon and 0 or 28)
 local CreateBar = function()
 	local bar = CreateFrame("Statusbar", nil, UIParent)
 	bar:SetFrameStrata("MEDIUM")
-	if C.raidcooldown.show_icon == true then
-		bar:SetSize(C.raidcooldown.width, C.raidcooldown.height)
-	else
-		bar:SetSize(C.raidcooldown.width + 28, C.raidcooldown.height)
-	end
+	bar:SetSize(barWidth, C.raidcooldown.height)
 	bar:SetStatusBarTexture(C.media.texture)
 	bar:SetMinMaxValues(0, 100)
 	bar:CreateBackdrop("Default")
@@ -171,7 +166,7 @@ local CreateBar = function()
 	bar.left = CreateFS(bar)
 	bar.left:SetPoint("LEFT", 2, 0)
 	bar.left:SetJustifyH("LEFT")
-	bar.left:SetSize(C.raidcooldown.width - 30, C.font.raid_cooldowns_font_size)
+	bar.left:SetSize(barWidth - 30 - ((C.font.raid_cooldowns_font_size - 8) * 2), C.font.raid_cooldowns_font_size)
 
 	bar.right = CreateFS(bar)
 	bar.right:SetPoint("RIGHT", 1, 0)
@@ -222,8 +217,13 @@ local StartTimer = function(name, spellId)
 			bar:SetStatusBarColor(color.r, color.g, color.b)
 			bar.bg:SetVertexColor(color.r, color.g, color.b, 0.2)
 		else
-			bar:SetStatusBarColor(0.3, 0.7, 0.3)
-			bar.bg:SetVertexColor(0.3, 0.7, 0.3, 0.2)
+			if curCharges and curCharges > 0 then
+				bar:SetStatusBarColor(0.3, 0.7, 0.3)
+				bar.bg:SetVertexColor(0.3, 0.7, 0.3, 0.2)
+			else
+				bar:SetStatusBarColor(0.8, 0.3, 0.3)
+				bar.bg:SetVertexColor(0.8, 0.3, 0.3, 0.2)
+			end
 		end
 
 		bar:SetScript("OnUpdate", BarUpdate)
@@ -237,9 +237,10 @@ local StartTimer = function(name, spellId)
 		end
 	else
 		bar.startTime = GetTime()
-		bar.endTime = GetTime() + T.raid_spells[spellId]
+		bar.endTime = GetTime() + T.RaidSpells[spellId]
+		bar.duration = T.RaidSpells[spellId]
 		bar.left:SetText(format("%s - %s", name:gsub("%-[^|]+", ""), spell))
-		bar.right:SetText(FormatTime(T.raid_spells[spellId]))
+		bar.right:SetText(FormatTime(T.RaidSpells[spellId]))
 		bar.isResses = false
 		bar.name = name
 		bar.spell = spell
@@ -249,6 +250,7 @@ local StartTimer = function(name, spellId)
 			bar.icon:GetNormalTexture():SetTexCoord(0.1, 0.9, 0.1, 0.9)
 		end
 		bar:Show()
+		if spellId == 264667 then color = (CUSTOM_CLASS_COLORS or RAID_CLASS_COLORS)["HUNTER"] end -- Change color for Hunter's pet
 		if color then
 			bar:SetStatusBarColor(color.r, color.g, color.b)
 			bar.bg:SetVertexColor(color.r, color.g, color.b, 0.2)
@@ -272,7 +274,7 @@ end
 
 local OnEvent = function(self, event)
 	if event == "PLAYER_ENTERING_WORLD" or event == "ZONE_CHANGED_NEW_AREA" then
-		if select(2, IsInInstance()) == "raid" and IsInGroup() then
+		if (select(2, IsInInstance()) == "raid" or select(2, IsInInstance()) == "party") and IsInGroup() then
 			self:RegisterEvent("SPELL_UPDATE_CHARGES")
 		else
 			self:UnregisterEvent("SPELL_UPDATE_CHARGES")
@@ -298,16 +300,16 @@ local OnEvent = function(self, event)
 		end
 	end
 	if event == "COMBAT_LOG_EVENT_UNFILTERED" then
-		local _, eventType, _, _, sourceName, sourceFlags = CombatLogGetCurrentEventInfo()
+		local _, eventType, _, _, sourceName, sourceFlags, _, _, _, _, _, spellId = CombatLogGetCurrentEventInfo()
 		if band(sourceFlags, filter) == 0 then return end
 		if eventType == "SPELL_RESURRECT" or eventType == "SPELL_CAST_SUCCESS" or eventType == "SPELL_AURA_APPLIED" then
-			local spellId = select(12, CombatLogGetCurrentEventInfo())
 			if sourceName then
 				sourceName = sourceName:gsub("-.+", "")
 			else
 				return
 			end
-			if T.raid_spells[spellId] and show[select(2, IsInInstance())] and IsInGroup() then
+
+			if T.RaidSpells[spellId] and show[select(2, IsInInstance())] and IsInGroup() then
 				if (sourceName == T.name and C.raidcooldown.show_self == true) or sourceName ~= T.name then
 					StartTimer(sourceName, spellId)
 				end
@@ -320,17 +322,19 @@ local OnEvent = function(self, event)
 		for _, v in pairs(bars) do
 			v.endTime = 0
 		end
-	elseif event == "ENCOUNTER_END" and select(2, IsInInstance()) == "raid" then
+	elseif event == "ENCOUNTER_END" and select(2, IsInInstance()) == "raid" and (T.Wrath or T.Cata or T.Mainline) then
 		for _, v in pairs(bars) do
-			v.endTime = 0
+			if T.Mainline or not v.duration or ((T.Wrath or T.Cata) and v.duration >= 120 and v.duration < 600) then
+				v.endTime = 0
+			end
 		end
 	end
 end
 
-for spell in pairs(T.raid_spells) do
+for spell in pairs(T.RaidSpells) do
 	local name = GetSpellInfo(spell)
 	if not name then
-		print("|cffff0000WARNING: spell ID ["..tostring(spell).."] no longer exists in RaidCD! Report this to Viks.|r")
+		print("|cffff0000ViksUI: RaidCD spell ID ["..tostring(spell).."] no longer exists!|r")
 	end
 end
 
@@ -342,14 +346,14 @@ f:RegisterEvent("ZONE_CHANGED_NEW_AREA")
 f:RegisterEvent("ENCOUNTER_END")
 
 SlashCmdList.RaidCD = function()
-	if not T.classic then
-		StartTimer(UnitName("player"), 20484)	-- Rebirth
-		StartTimer(UnitName("player"), 20707)	-- Soulstone
-		StartTimer(UnitName("player"), 108280)	-- Healing Tide Totem
-	else
+	if T.Classic then
 		StartTimer(UnitName("player"), 20484)	-- Rebirth
 		StartTimer(UnitName("player"), 871)		-- Shield Wall
 		StartTimer(UnitName("player"), 29166)	-- Innervate
+	else
+		StartTimer(UnitName("player"), 20484)	-- Rebirth
+		StartTimer(UnitName("player"), 20707)	-- Soulstone
+		StartTimer(UnitName("player"), 108280)	-- Healing Tide Totem
 	end
 end
 SLASH_RaidCD1 = "/raidcd"

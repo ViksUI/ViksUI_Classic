@@ -1,5 +1,5 @@
-local T, C, L, _ = unpack(select(2, ...))
-if T.classic or C.skins.blizzard_frames ~= true then return end
+local T, C, L = unpack(ViksUI)
+if C.skins.blizzard_frames ~= true then return end
 
 ----------------------------------------------------------------------------------------
 --	VoidStorageUI skin
@@ -28,11 +28,6 @@ local function LoadSkin()
 
 	VoidStoragePurchaseButton:SkinButton()
 	VoidStorageTransferButton:SkinButton()
-
-	VoidStorageHelpBox:StripTextures()
-	VoidStorageHelpBox:SetTemplate("Transparent")
-	VoidStorageHelpBoxArrow:Hide()
-	VoidStorageHelpBoxButton:SkinButton()
 
 	T.SkinCloseButton(VoidStorageBorderFrame.CloseButton)
 	VoidItemSearchBox:CreateBackdrop("Overlay")

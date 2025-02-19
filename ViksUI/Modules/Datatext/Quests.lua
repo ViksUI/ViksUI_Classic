@@ -1,5 +1,4 @@
-local T, C, L, _ = unpack(select(2, ...))
-
+local T, C, L = unpack(ViksUI)
 --------------------------------------------------------------------
  -- QUEST DATATEXT
 --------------------------------------------------------------------
@@ -15,8 +14,12 @@ if C.datatext.Quests and C.datatext.Quests > 0 then
 	
 	if C.datatext.location >= 9 then
 		Text:SetTextColor(unpack(C.media.pxcolor1))
-		Text:SetFont(C.media.pxfontHeader, C.media.pxfontHsize, C.media.pxfontHFlag)
-	else
+		if C.datatext.location ~= 14 or C.datatext.location ~= 15 then
+			Text:SetFont(C.media.pxfontHeader, C.media.pxfontHsize-2, C.media.pxfontHFlag)
+		else
+			Text:SetFont(C.media.pxfontHeader, C.media.pxfontHsize, C.media.pxfontHFlag)
+		end
+	else	
 		Text:SetTextColor(unpack(C.media.pxcolor1))
 		Text:SetFont(C.media.pixel_font, C.media.pixel_font_size, C.media.pixel_font_style)
 	end
@@ -25,7 +28,11 @@ if C.datatext.Quests and C.datatext.Quests > 0 then
 
 	local function OnEvent(self, event, ...)
 		local numEntries, numQuests = GetNumQuestLogEntries()
-		Text:SetText("Q |r: "..qColor.. numQuests.. "/25")
+		if T.Classic then
+			Text:SetText("Q |r: "..qColor.. numQuests.. "/20")
+		else
+			Text:SetText("Q |r: "..qColor.. numQuests.. "/25")
+		end
 		self:SetAllPoints(Text)
 		self:SetScript("OnEnter", function()
 			if not InCombatLockdown() then
@@ -51,8 +58,14 @@ if C.datatext.Quests and C.datatext.Quests > 0 then
 			f:HookScript("OnEnter", function() f:SetAlpha(1) end)
 			f:HookScript("OnLeave", function() f:SetAlpha(0) end)
 		end
+		if T.Vanilla then
 		QuestWatchFrame:Hide()
 		QuestWatchFrameHeader:Hide()
+		end
+		if T.Cata then
+		_G.WatchFrame:Hide()
+		_G.WatchFrame:Hide()
+		end
 	end
 
 	local function QuestWatchExpand()
@@ -63,8 +76,14 @@ if C.datatext.Quests and C.datatext.Quests > 0 then
 			f:HookScript("OnEnter", function() f:SetAlpha(1) end)
 			f:HookScript("OnLeave", function() f:SetAlpha(1) end)
 		end
+		if T.Vanilla then
 		QuestWatchFrame:Show()
 		QuestWatchFrameHeader:Show()
+		end
+		if T.Cata then
+		_G.WatchFrame:Show()
+		_G.WatchFrame:Show()
+		end
 	end
 
 	Stat:SetScript("OnMouseUp", function(self)
@@ -82,7 +101,7 @@ if C.datatext.Quests and C.datatext.Quests > 0 then
 	Stat:SetScript("OnEvent", OnEvent)
 	Stat:SetScript("OnMouseDown", OnMouseDown)
 	
-	if not T.classic then	
+	if T.Mainline then	
 		local collapse = CreateFrame("Frame")
 		collapse:RegisterEvent("PLAYER_ENTERING_WORLD")
 		collapse:SetScript("OnEvent", function(self, event)

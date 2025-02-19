@@ -1,4 +1,4 @@
-﻿local T, C, L, _ = unpack(select(2, ...))
+local T, C, L = unpack(ViksUI)
 if C.chat.enable ~= true then return end
 
 ----------------------------------------------------------------------------------------
@@ -25,11 +25,11 @@ local function CreatCopyFrame()
 	frame:SetFrameStrata("DIALOG")
 	tinsert(UISpecialFrames, "CopyFrame")
 	frame:Hide()
+	frame:EnableMouse(true)
 
 	editBox = CreateFrame("EditBox", "CopyBox", frame)
 	editBox:SetMultiLine(true)
-	editBox:SetMaxLetters(99999)
-	editBox:EnableMouse(true)
+	editBox:SetMaxLetters(0)
 	editBox:SetAutoFocus(false)
 	editBox:SetFontObject(ChatFontNormal)
 	editBox:SetWidth(500)
@@ -46,11 +46,11 @@ local function CreatCopyFrame()
 		end
 	end)
 
-	local scrollArea = CreateFrame("ScrollFrame", "CopyScroll", frame, "UIPanelScrollFrameTemplate")
+	local scrollArea = CreateFrame("ScrollFrame", "CopyScroll", frame, "ScrollFrameTemplate")
 	scrollArea:SetPoint("TOPLEFT", frame, "TOPLEFT", 8, -30)
 	scrollArea:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -27, 8)
 	scrollArea:SetScrollChild(editBox)
-	T.SkinScrollBar(CopyScrollScrollBar)
+	T.SkinScrollBar(CopyScroll.ScrollBar)
 
 	local close = CreateFrame("Button", "CopyCloseButton", frame, "UIPanelCloseButton")
 	T.SkinCloseButton(close)
@@ -61,8 +61,16 @@ local function CreatCopyFrame()
 	isf = true
 end
 
+local canChangeMessage = function(arg1, id)
+	if id and arg1 == "" then return id end
+end
+
 local function MessageIsProtected(message)
-	return strmatch(message, '[^|]-|K[vq]%d-[^|]-|k')
+	return message and (message ~= gsub(message, "(:?|?)|K(.-)|k", canChangeMessage))
+end
+
+local scrollDown = function()
+	CopyScroll:SetVerticalScroll(CopyScroll:GetVerticalScrollRange() or 0)
 end
 
 local function Copy(cf)
@@ -70,8 +78,8 @@ local function Copy(cf)
 	local text = ""
 	for i = 1, cf:GetNumMessages() do
 		local line = cf:GetMessageInfo(i)
-		if not MessageIsProtected(line) then
-			font:SetFormattedText("%s\n", line)
+		if line and not MessageIsProtected(line) then
+			font:SetFormattedText("%s \n", line)
 			local cleanLine = font:GetText() or ""
 			text = text..cleanLine
 		end
@@ -79,17 +87,13 @@ local function Copy(cf)
 	text = text:gsub("|T[^\\]+\\[^\\]+\\[Uu][Ii]%-[Rr][Aa][Ii][Dd][Tt][Aa][Rr][Gg][Ee][Tt][Ii][Nn][Gg][Ii][Cc][Oo][Nn]_(%d)[^|]+|t", "{rt%1}")
 	text = text:gsub("|T13700([1-8])[^|]+|t", "{rt%1}")
 	text = text:gsub("|T[^|]+|t", "")
+	text = text:gsub("|A[^|]+|a", "")
 	if frame:IsShown() then frame:Hide() return end
-	frame:Show()
-	editBox:SetText(text)
 
-	editBox:SetScript("OnTextChanged", function(_, userInput)
-		if userInput then return end
-		local _, max = CopyScrollScrollBar:GetMinMaxValues()
-		for _ = 1, max do
-			ScrollFrameTemplate_OnMouseWheel(CopyScroll, -1)
-		end
-	end)
+	editBox:SetText(text)
+	frame:Show()
+
+	C_Timer.After(0, scrollDown)
 end
 
 for i = 1, NUM_CHAT_WINDOWS do
@@ -106,7 +110,7 @@ for i = 1, NUM_CHAT_WINDOWS do
 	icon:SetTexture("Interface\\BUTTONS\\UI-GuildButton-PublicNote-Up")
 	icon:SetSize(16, 16)
 
-	button:SetScript("OnMouseUp", function(self, btn)
+	button:SetScript("OnMouseUp", function(_, btn)
 		if btn == "RightButton" then
 			ToggleFrame(ChatMenu)
 		elseif btn == "MiddleButton" then
@@ -117,8 +121,8 @@ for i = 1, NUM_CHAT_WINDOWS do
 	end)
 	button:SetScript("OnEnter", function() button:FadeIn() end)
 	button:SetScript("OnLeave", function() button:FadeOut() end)
+end
 
-	SlashCmdList.COPY_CHAT = function()
-		Copy(_G["ChatFrame1"])
-	end
+SlashCmdList.COPY_CHAT = function()
+	Copy(_G["ChatFrame1"])
 end

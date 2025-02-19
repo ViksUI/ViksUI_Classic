@@ -1,4 +1,4 @@
-local T, C, L = unpack(select(2, ...))
+local T, C, L = unpack(ViksUI)
 if C.unitframe.enable ~= true or C.unitframe.plugins_aura_watch ~= true then return end
 
 ----------------------------------------------------------------------------------------
@@ -6,8 +6,6 @@ if C.unitframe.enable ~= true or C.unitframe.plugins_aura_watch ~= true then ret
 ----------------------------------------------------------------------------------------
 local _, ns = ...
 local oUF = ns.oUF
-
-local LibClassicDurations = oUF:IsClassic() and LibStub("LibClassicDurations")
 
 local bossDebuffPrio = 9999999
 local invalidPrio = -1
@@ -42,8 +40,15 @@ do
 			["Curse"] = true,
 			["Poison"] = true,
 		},
+		["EVOKER"] = {
+			["Magic"] = false,
+			["Curse"] = true,
+			["Poison"] = true,
+			["Disease"] = true,
+		},
 		["MAGE"] = {
 			["Curse"] = true,
+			["Magic"] = false, -- for Season of Discovery
 		},
 		["MONK"] = {
 			["Magic"] = false,
@@ -61,16 +66,36 @@ do
 		},
 		["SHAMAN"] = {
 			["Magic"] = false,
-			["Disease"] = false, -- for Classic
 			["Curse"] = true,
+			["Poison"] = false, -- for Classic
+			["Disease"] = false, -- for Classic
 		},
+		["WARLOCK"] = {
+			["Magic"] = false, -- for Classic
+		}
 	}
 
 	DispellFilter = dispellClasses[T.class] or {}
 end
 
 local function CheckSpec()
-	if not oUF:IsClassic() then
+	if T.Classic then
+		if T.class == "MAGE" and T.SoD then
+			if IsSpellKnown(412113) then
+				DispellFilter.Magic = true
+			end
+		elseif T.class == "PALADIN" then
+			DispellFilter.Magic = true
+		elseif T.class == "PRIEST" then
+			DispellFilter.Magic = true
+		elseif T.class == "SHAMAN" then
+			DispellFilter.Curse = false
+			DispellFilter.Poison = true
+			DispellFilter.Disease = true
+		elseif T.class == "WARLOCK" then
+			DispellFilter.Magic = true
+		end
+	else
 		local spec = GetSpecialization()
 		if T.class == "DRUID" then
 			if spec == 4 then
@@ -102,14 +127,6 @@ local function CheckSpec()
 			else
 				DispellFilter.Magic = false
 			end
-		end
-	else
-		if T.class == "PALADIN" then
-			DispellFilter.Magic = true
-		elseif T.class == "PRIEST" then
-			DispellFilter.Magic = true
-		elseif T.class == "SHAMAN" then
-			DispellFilter.Disease = true
 		end
 	end
 end
@@ -198,7 +215,7 @@ local UpdateDebuffFrame = function(rd, icon, count, debuffType, duration, expira
 	end
 end
 
-local Update = function(self, event, unit)
+local Update = function(self, _, unit)
 	if unit ~= self.unit then return end
 	local rd = self.RaidDebuffs
 	rd.priority = invalidPrio
@@ -210,15 +227,6 @@ local Update = function(self, event, unit)
 			i = i + 1
 			local name, icon, count, debuffType, duration, expirationTime, unitCaster, _, _, spellId, _, isBossDebuff = UnitAura(unit, i, filter)
 			if not name then break end
-
-			if LibClassicDurations then
-				local durationNew, expirationTimeNew = LibClassicDurations:GetAuraDurationByUnit(unit, spellId, unitCaster, name)
-
-				if duration == 0 and durationNew then
-					duration = durationNew
-					expirationTime = expirationTimeNew
-				end
-			end
 
 			if rd.ShowBossDebuff and isBossDebuff then
 				local prio = rd.BossDebuffPriority or bossDebuffPrio
@@ -251,17 +259,9 @@ local Update = function(self, event, unit)
 				end
 			end
 
-			local prio = rd.Debuffs and rd.Debuffs[rd.MatchBySpellName and name or spellId]
-			local prioPvP
-			if C.unitframe.plugins_pvp_debuffs == true then
-				prioPvP = rd.Debuffs and T.PvPDebuffs[rd.MatchBySpellName and name or spellId]
-			end
-			if not T.RaidDebuffsIgnore[spellId] and (prio and (prio > rd.priority) or prioPvP and (prioPvP > rd.priority)) then
-				if (prio and not prioPvP) or ((prio and prioPvP) and prio > prioPvP) then
-					rd.priority = prio
-				else
-					rd.priority = prioPvP
-				end
+			local prio = T.RaidDebuffs[rd.MatchBySpellName and name or spellId]
+			if not T.RaidDebuffsIgnore[spellId] and prio and (prio > rd.priority) then
+				rd.priority = prio
 				rd.index = i
 				rd.type = "Custom"
 				rd.filter = filter
@@ -295,10 +295,10 @@ local Enable = function(self)
 		rd.__owner = self
 		return true
 	end
-	if not oUF:IsClassic() then
-		self:RegisterEvent("PLAYER_TALENT_UPDATE", CheckSpec, true)
-	else
+	if oUF:IsClassic() then
 		self:RegisterEvent("CHARACTER_POINTS_CHANGED", CheckSpec, true)
+	else
+		self:RegisterEvent("PLAYER_TALENT_UPDATE", CheckSpec, true)
 	end
 	CheckSpec()
 end
@@ -309,10 +309,10 @@ local Disable = function(self)
 		self.RaidDebuffs:Hide()
 		self.RaidDebuffs.__owner = nil
 	end
-	if not oUF:IsClassic() then
-		self:UnregisterEvent("PLAYER_TALENT_UPDATE", CheckSpec)
-	else
+	if oUF:IsVanilla() or oUF:IsTBC() then
 		self:UnregisterEvent("CHARACTER_POINTS_CHANGED", CheckSpec)
+	else
+		self:UnregisterEvent("PLAYER_TALENT_UPDATE", CheckSpec)
 	end
 end
 

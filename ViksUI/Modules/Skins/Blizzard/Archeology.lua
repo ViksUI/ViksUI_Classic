@@ -1,5 +1,5 @@
-local T, C, L, _ = unpack(select(2, ...))
-if T.classic or C.skins.blizzard_frames ~= true then return end
+local T, C, L = unpack(ViksUI)
+if C.skins.blizzard_frames ~= true then return end
 
 ----------------------------------------------------------------------------------------
 --	ArchaeologyUI skin
@@ -7,6 +7,7 @@ if T.classic or C.skins.blizzard_frames ~= true then return end
 local function LoadSkin()
 	ArchaeologyFrame:StripTextures(true)
 	ArchaeologyFrame:SetTemplate("Transparent")
+	ArchaeologyFramePortrait:SetAlpha(0)
 
 	ArchaeologyFrameArtifactPageSolveFrameSolveButton:SkinButton(true)
 	ArchaeologyFrameArtifactPageBackButton:SkinButton(true)
@@ -87,8 +88,7 @@ local function LoadSkin()
 	T.SkinNextPrevButton(ArchaeologyFrameCompletedPagePrevPageButton, nil, "Any")
 	T.SkinNextPrevButton(ArchaeologyFrameSummaryPageNextPageButton, nil, "Any")
 	T.SkinNextPrevButton(ArchaeologyFrameSummaryPagePrevPageButton, nil, "Any")
-
-	T.SkinScrollBar(ArchaeologyFrameArtifactPageHistoryScrollScrollBar)
+	T.SkinScrollBar(ArchaeologyFrameArtifactPageHistoryScroll.ScrollBar)
 
 	ArchaeologyFrameInfoButton:SetPoint("TOPLEFT", ArchaeologyFrame, 4, -4)
 
@@ -107,7 +107,7 @@ local function LoadSkin()
 	frame.Flash:SetWidth(172)
 
 	bar:SetStatusBarTexture(C.media.texture)
-	bar:SetStatusBarColor(T.color.r, T.color.g, T.color.b)
+	bar:SetStatusBarColor(unpack(C.media.classborder_color))
 
 	bar:CreateBackdrop("Overlay")
 end

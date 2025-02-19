@@ -1,7 +1,7 @@
 local _, ns = ...
 local oUF = ns.oUF
 
-if(oUF:IsClassic()) then return end
+if(oUF:IsVanilla() or oUF:IsTBC()) then return end
 
 local function Update(self, event)
 	local element = self.GroupRoleIndicator
@@ -16,8 +16,14 @@ local function Update(self, event)
 	end
 
 	local role = UnitGroupRolesAssigned(self.unit)
-	if(role == 'TANK' or role == 'HEALER' or role == 'DAMAGER') then
-		element:SetTexCoord(GetTexCoordsForRoleSmallCircle(role))
+	if role == 'TANK' then
+		element:SetTexture([[Interface\AddOns\ViksUI\Media\Textures\Tank.tga]])
+		element:Show()
+	elseif role == 'HEALER' then
+		element:SetTexture([[Interface\AddOns\ViksUI\Media\Textures\Healer.tga]])
+		element:Show()
+	elseif role == 'DAMAGER' then
+		element:SetTexture([[Interface\AddOns\ViksUI\Media\Textures\Damager.tga]])
 		element:Show()
 	else
 		element:Hide()
@@ -59,10 +65,6 @@ local function Enable(self)
 			self:RegisterEvent('PLAYER_ROLES_ASSIGNED', Path, true)
 		else
 			self:RegisterEvent('GROUP_ROSTER_UPDATE', Path, true)
-		end
-
-		if(element:IsObjectType('Texture') and not element:GetTexture()) then
-			element:SetTexture([[Interface\LFGFrame\UI-LFG-ICON-PORTRAITROLES]])
 		end
 
 		return true

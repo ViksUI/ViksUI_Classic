@@ -1,4 +1,4 @@
-local T, C, L = unpack(select(2, ...))
+local T, C, L = unpack(ViksUI)
 if C.unitframe.enable ~= true or C.unitframe.show_arena ~= true then return end
 
 ----------------------------------------------------------------------------------------
@@ -8,11 +8,21 @@ local _, ns = ...
 local oUF = ns.oUF or oUF
 assert(oUF, 'oUF not loaded')
 
+local GetTrinketIcon = function(unit)
+	if UnitFactionGroup(unit) == "Horde" then
+		return "Interface\\Icons\\INV_Jewelry_TrinketPVP_02"
+	else
+		return "Interface\\Icons\\INV_Jewelry_TrinketPVP_01"
+	end
+end
+
 local Update = function(self, event, ...)
 	local _, instanceType = IsInInstance()
 
 	if instanceType ~= 'arena' then
-		self.Trinket.Icon:SetTexture("Interface\\Icons\\Ability_pvp_gladiatormedallion")
+		if(oUF:IsMainline()) then
+			self.Trinket.Icon:SetTexture("Interface\\Icons\\Ability_pvp_gladiatormedallion")
+		end
 		self.Trinket:Hide()
 
 		return
@@ -66,7 +76,7 @@ local Enable = function(self)
 			self.Trinket.Icon:SetPoint("TOPLEFT", self.Trinket, 2, -2)
 			self.Trinket.Icon:SetPoint("BOTTOMRIGHT", self.Trinket, -2, 2)
 			self.Trinket.Icon:SetTexCoord(0.1, 0.9, 0.1, 0.9)
-			self.Trinket.Icon:SetTexture("Interface\\Icons\\Ability_pvp_gladiatormedallion")
+			self.Trinket.Icon:SetTexture(oUF:IsClassic() and GetTrinketIcon("player") or  "Interface\\Icons\\Ability_pvp_gladiatormedallion")
 		end
 
 		return true

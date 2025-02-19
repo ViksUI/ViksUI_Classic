@@ -1,17 +1,15 @@
-local T, C, L, _ = unpack(select(2, ...))
-if T.classic or C.skins.blizzard_frames ~= true then return end
+local T, C, L = unpack(ViksUI)
+if C.skins.blizzard_frames ~= true then return end
 
 ----------------------------------------------------------------------------------------
 --	Taxi skin
 ----------------------------------------------------------------------------------------
 local function LoadSkin()
 	TaxiFrame:StripTextures()
-	TaxiFrame:CreateBackdrop("Transparent")
-	TaxiFrame.backdrop:SetPoint("TOPLEFT", -5, 3)
-	TaxiFrame.backdrop:SetPoint("BOTTOMRIGHT", 5, -7)
+	TaxiFrame.TitleText:SetPoint("TOP", TaxiFrame, "TOP", -4, -25)
 	TaxiRouteMap:CreateBackdrop("Default")
 	T.SkinCloseButton(TaxiFrame.CloseButton)
-	TaxiFrame.CloseButton:SetPoint("TOPRIGHT", -4, -1)
+	TaxiFrame.CloseButton:SetPoint("TOPRIGHT", -9, -26)
 end
 
 tinsert(T.SkinFuncs["ViksUI"], LoadSkin)

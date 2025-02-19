@@ -1,11 +1,11 @@
-﻿local T, C, L, _ = unpack(select(2, ...))
+local T, C, L = unpack(ViksUI)
 if C.bag.enable ~= true then return end
 
 ----------------------------------------------------------------------------------------
 --	Based on Stuffing(by Hungtar, editor Tukz)
 ----------------------------------------------------------------------------------------
-local BAGS_BACKPACK = {0, 1, 2, 3, 4}
-local BAGS_BANK = T.classic and {-1, 5, 6, 7, 8, 9, 10} or {-1, 5, 6, 7, 8, 9, 10, 11}
+local BAGS_BACKPACK = T.Classic and {0, 1, 2, 3, 4} or {0, 1, 2, 3, 4, 5}
+local BAGS_BANK = T.Vanilla and {-1, 5, 6, 7, 8, 9, 10} or T.Classic and {-1, 5, 6, 7, 8, 9, 10, 11} or {-1, 6, 7, 8, 9, 10, 11, 12}
 local ST_NORMAL = 1
 local ST_FISHBAG = 2
 local ST_SPECIAL = 3
@@ -14,76 +14,81 @@ local ST_SOULBAG = 5
 local bag_bars = 0
 local unusable
 
-StuffingDB = {}
 if T.class == "DEATHKNIGHT" then
 	unusable = { -- weapon, armor, dual-wield
-		{LE_ITEM_WEAPON_BOWS, LE_ITEM_WEAPON_GUNS, LE_ITEM_WEAPON_WARGLAIVE, LE_ITEM_WEAPON_STAFF,LE_ITEM_WEAPON_UNARMED, LE_ITEM_WEAPON_DAGGER, LE_ITEM_WEAPON_THROWN, LE_ITEM_WEAPON_CROSSBOW, LE_ITEM_WEAPON_WAND},
-		{LE_ITEM_ARMOR_SHIELD}
+		{Enum.ItemWeaponSubclass.Bows, Enum.ItemWeaponSubclass.Guns, Enum.ItemWeaponSubclass.Warglaive, Enum.ItemWeaponSubclass.Staff, Enum.ItemWeaponSubclass.Unarmed, Enum.ItemWeaponSubclass.Dagger, Enum.ItemWeaponSubclass.Thrown, Enum.ItemWeaponSubclass.Crossbow, Enum.ItemWeaponSubclass.Wand},
+		{Enum.ItemArmorSubclass.Shield}
 	}
 elseif T.class == "DEMONHUNTER" then
 	unusable = {
-		{LE_ITEM_WEAPON_AXE2H, LE_ITEM_WEAPON_BOWS, LE_ITEM_WEAPON_GUNS, LE_ITEM_WEAPON_MACE1H, LE_ITEM_WEAPON_MACE2H, LE_ITEM_WEAPON_POLEARM, LE_ITEM_WEAPON_SWORD2H, LE_ITEM_WEAPON_STAFF, LE_ITEM_WEAPON_THROWN, LE_ITEM_WEAPON_CROSSBOW, LE_ITEM_WEAPON_WAND},
-		{LE_ITEM_ARMOR_MAIL, LE_ITEM_ARMOR_PLATE, LE_ITEM_ARMOR_SHIELD}
+		{Enum.ItemWeaponSubclass.Axe2H, Enum.ItemWeaponSubclass.Bows, Enum.ItemWeaponSubclass.Guns, Enum.ItemWeaponSubclass.Mace1H, Enum.ItemWeaponSubclass.Mace2H, Enum.ItemWeaponSubclass.Polearm, Enum.ItemWeaponSubclass.Sword2H, Enum.ItemWeaponSubclass.Staff, Enum.ItemWeaponSubclass.Thrown, Enum.ItemWeaponSubclass.Crossbow, Enum.ItemWeaponSubclass.Wand},
+		{Enum.ItemArmorSubclass.Mail, Enum.ItemArmorSubclass.Plate, Enum.ItemArmorSubclass.Shield}
 	}
 elseif T.class == "DRUID" then
 	unusable = {
-		{LE_ITEM_WEAPON_AXE1H, LE_ITEM_WEAPON_AXE2H, LE_ITEM_WEAPON_BOWS, LE_ITEM_WEAPON_GUNS, LE_ITEM_WEAPON_SWORD1H, LE_ITEM_WEAPON_SWORD2H, LE_ITEM_WEAPON_WARGLAIVE, LE_ITEM_WEAPON_THROWN, LE_ITEM_WEAPON_CROSSBOW, LE_ITEM_WEAPON_WAND},
-		{LE_ITEM_ARMOR_MAIL, LE_ITEM_ARMOR_PLATE, LE_ITEM_ARMOR_SHIELD},
+		{Enum.ItemWeaponSubclass.Axe1H, Enum.ItemWeaponSubclass.Axe2H, Enum.ItemWeaponSubclass.Bows, Enum.ItemWeaponSubclass.Guns, Enum.ItemWeaponSubclass.Sword1H, Enum.ItemWeaponSubclass.Sword2H, Enum.ItemWeaponSubclass.Warglaive, Enum.ItemWeaponSubclass.Thrown, Enum.ItemWeaponSubclass.Crossbow, Enum.ItemWeaponSubclass.Wand},
+		{Enum.ItemArmorSubclass.Mail, Enum.ItemArmorSubclass.Plate, Enum.ItemArmorSubclass.Shield},
+		true
+	}
+elseif T.class == "EVOKER" then
+	unusable = {
+		{Enum.ItemWeaponSubclass.Bows, Enum.ItemWeaponSubclass.Guns, Enum.ItemWeaponSubclass.Polearm, Enum.ItemWeaponSubclass.Warglaive, Enum.ItemWeaponSubclass.Thrown, Enum.ItemWeaponSubclass.Crossbow, Enum.ItemWeaponSubclass.Wand},
+		{Enum.ItemArmorSubclass.Plate, Enum.ItemArmorSubclass.Shield},
 		true
 	}
 elseif T.class == "HUNTER" then
 	unusable = {
-		{LE_ITEM_WEAPON_MACE1H, LE_ITEM_WEAPON_MACE2H, LE_ITEM_WEAPON_WARGLAIVE, LE_ITEM_WEAPON_THROWN, LE_ITEM_WEAPON_WAND},
-		{LE_ITEM_ARMOR_PLATE, LE_ITEM_ARMOR_SHIELD}
+		{Enum.ItemWeaponSubclass.Mace1H, Enum.ItemWeaponSubclass.Mace2H, Enum.ItemWeaponSubclass.Warglaive, Enum.ItemWeaponSubclass.Thrown, Enum.ItemWeaponSubclass.Wand},
+		{Enum.ItemArmorSubclass.Plate, Enum.ItemArmorSubclass.Shield}
 	}
 elseif T.class == "MAGE" then
 	unusable = {
-		{LE_ITEM_WEAPON_AXE1H, LE_ITEM_WEAPON_AXE2H, LE_ITEM_WEAPON_BOWS, LE_ITEM_WEAPON_GUNS, LE_ITEM_WEAPON_MACE1H, LE_ITEM_WEAPON_MACE2H, LE_ITEM_WEAPON_POLEARM, LE_ITEM_WEAPON_SWORD2H, LE_ITEM_WEAPON_WARGLAIVE, LE_ITEM_WEAPON_UNARMED, LE_ITEM_WEAPON_THROWN, LE_ITEM_WEAPON_CROSSBOW},
-		{LE_ITEM_ARMOR_LEATHER, LE_ITEM_ARMOR_MAIL, LE_ITEM_ARMOR_PLATE, LE_ITEM_ARMOR_SHIELD},
+		{Enum.ItemWeaponSubclass.Axe1H, Enum.ItemWeaponSubclass.Axe2H, Enum.ItemWeaponSubclass.Bows, Enum.ItemWeaponSubclass.Guns, Enum.ItemWeaponSubclass.Mace1H, Enum.ItemWeaponSubclass.Mace2H, Enum.ItemWeaponSubclass.Polearm, Enum.ItemWeaponSubclass.Sword2H, Enum.ItemWeaponSubclass.Warglaive, Enum.ItemWeaponSubclass.Unarmed, Enum.ItemWeaponSubclass.Thrown, Enum.ItemWeaponSubclass.Crossbow},
+		{Enum.ItemArmorSubclass.Leather, Enum.ItemArmorSubclass.Mail, Enum.ItemArmorSubclass.Plate, Enum.ItemArmorSubclass.Shield},
 		true
 	}
 elseif T.class == "MONK" then
 	unusable = {
-		{LE_ITEM_WEAPON_AXE2H, LE_ITEM_WEAPON_BOWS, LE_ITEM_WEAPON_GUNS, LE_ITEM_WEAPON_MACE2H, LE_ITEM_WEAPON_SWORD2H, LE_ITEM_WEAPON_WARGLAIVE, LE_ITEM_WEAPON_DAGGER, LE_ITEM_WEAPON_THROWN, LE_ITEM_WEAPON_CROSSBOW, LE_ITEM_WEAPON_WAND},
-		{LE_ITEM_ARMOR_MAIL, LE_ITEM_ARMOR_PLATE, LE_ITEM_ARMOR_SHIELD}
+		{Enum.ItemWeaponSubclass.Axe2H, Enum.ItemWeaponSubclass.Bows, Enum.ItemWeaponSubclass.Guns, Enum.ItemWeaponSubclass.Mace2H, Enum.ItemWeaponSubclass.Sword2H, Enum.ItemWeaponSubclass.Warglaive, Enum.ItemWeaponSubclass.Dagger, Enum.ItemWeaponSubclass.Thrown, Enum.ItemWeaponSubclass.Crossbow, Enum.ItemWeaponSubclass.Wand},
+		{Enum.ItemArmorSubclass.Mail, Enum.ItemArmorSubclass.Plate, Enum.ItemArmorSubclass.Shield}
 	}
 elseif T.class == "PALADIN" then
 	unusable = {
-		{LE_ITEM_WEAPON_BOWS, LE_ITEM_WEAPON_GUNS, LE_ITEM_WEAPON_WARGLAIVE, LE_ITEM_WEAPON_STAFF, LE_ITEM_WEAPON_UNARMED, LE_ITEM_WEAPON_DAGGER, LE_ITEM_WEAPON_THROWN, LE_ITEM_WEAPON_CROSSBOW, LE_ITEM_WEAPON_WAND},
+		{Enum.ItemWeaponSubclass.Bows, Enum.ItemWeaponSubclass.Guns, Enum.ItemWeaponSubclass.Warglaive, Enum.ItemWeaponSubclass.Staff, Enum.ItemWeaponSubclass.Unarmed, Enum.ItemWeaponSubclass.Dagger, Enum.ItemWeaponSubclass.Thrown, Enum.ItemWeaponSubclass.Crossbow, Enum.ItemWeaponSubclass.Wand},
 		{},
 		true
 	}
 elseif T.class == "PRIEST" then
 	unusable = {
-		{LE_ITEM_WEAPON_AXE1H, LE_ITEM_WEAPON_AXE2H, LE_ITEM_WEAPON_BOWS, LE_ITEM_WEAPON_GUNS, LE_ITEM_WEAPON_MACE2H, LE_ITEM_WEAPON_POLEARM, LE_ITEM_WEAPON_SWORD1H, LE_ITEM_WEAPON_SWORD2H, LE_ITEM_WEAPON_WARGLAIVE, LE_ITEM_WEAPON_UNARMED, LE_ITEM_WEAPON_THROWN, LE_ITEM_WEAPON_CROSSBOW},
-		{LE_ITEM_ARMOR_LEATHER, LE_ITEM_ARMOR_MAIL, LE_ITEM_ARMOR_PLATE, LE_ITEM_ARMOR_SHIELD},
+		{Enum.ItemWeaponSubclass.Axe1H, Enum.ItemWeaponSubclass.Axe2H, Enum.ItemWeaponSubclass.Bows, Enum.ItemWeaponSubclass.Guns, Enum.ItemWeaponSubclass.Mace2H, Enum.ItemWeaponSubclass.Polearm, Enum.ItemWeaponSubclass.Sword1H, Enum.ItemWeaponSubclass.Sword2H, Enum.ItemWeaponSubclass.Warglaive, Enum.ItemWeaponSubclass.Unarmed, Enum.ItemWeaponSubclass.Thrown, Enum.ItemWeaponSubclass.Crossbow},
+		{Enum.ItemArmorSubclass.Leather, Enum.ItemArmorSubclass.Mail, Enum.ItemArmorSubclass.Plate, Enum.ItemArmorSubclass.Shield},
 		true
 	}
 elseif T.class == "ROGUE" then
 	unusable = {
-		{LE_ITEM_WEAPON_AXE2H, LE_ITEM_WEAPON_MACE2H, LE_ITEM_WEAPON_POLEARM, LE_ITEM_WEAPON_SWORD2H, LE_ITEM_WEAPON_WARGLAIVE, LE_ITEM_WEAPON_STAFF, LE_ITEM_WEAPON_WAND},
-		{LE_ITEM_ARMOR_MAIL, LE_ITEM_ARMOR_PLATE, LE_ITEM_ARMOR_SHIELD}
+		{Enum.ItemWeaponSubclass.Axe2H, Enum.ItemWeaponSubclass.Mace2H, Enum.ItemWeaponSubclass.Polearm, Enum.ItemWeaponSubclass.Sword2H, Enum.ItemWeaponSubclass.Warglaive, Enum.ItemWeaponSubclass.Staff, Enum.ItemWeaponSubclass.Wand},
+		{Enum.ItemArmorSubclass.Mail, Enum.ItemArmorSubclass.Plate, Enum.ItemArmorSubclass.Shield}
 	}
 elseif T.class == "SHAMAN" then
 	unusable = {
-		{LE_ITEM_WEAPON_BOWS, LE_ITEM_WEAPON_GUNS, LE_ITEM_WEAPON_POLEARM, LE_ITEM_WEAPON_SWORD1H, LE_ITEM_WEAPON_SWORD2H, LE_ITEM_WEAPON_WARGLAIVE, LE_ITEM_WEAPON_THROWN, LE_ITEM_WEAPON_CROSSBOW, LE_ITEM_WEAPON_WAND},
-		{LE_ITEM_ARMOR_PLATE}
+		{Enum.ItemWeaponSubclass.Bows, Enum.ItemWeaponSubclass.Guns, Enum.ItemWeaponSubclass.Polearm, Enum.ItemWeaponSubclass.Sword1H, Enum.ItemWeaponSubclass.Sword2H, Enum.ItemWeaponSubclass.Warglaive, Enum.ItemWeaponSubclass.Thrown, Enum.ItemWeaponSubclass.Crossbow, Enum.ItemWeaponSubclass.Wand},
+		{Enum.ItemArmorSubclass.Plate}
 	}
 elseif T.class == "WARLOCK" then
 	unusable = {
-		{LE_ITEM_WEAPON_AXE1H, LE_ITEM_WEAPON_AXE2H, LE_ITEM_WEAPON_BOWS, LE_ITEM_WEAPON_GUNS, LE_ITEM_WEAPON_MACE1H, LE_ITEM_WEAPON_MACE2H, LE_ITEM_WEAPON_POLEARM, LE_ITEM_WEAPON_SWORD2H, LE_ITEM_WEAPON_WARGLAIVE, LE_ITEM_WEAPON_UNARMED, LE_ITEM_WEAPON_THROWN, LE_ITEM_WEAPON_CROSSBOW},
-		{LE_ITEM_ARMOR_LEATHER, LE_ITEM_ARMOR_MAIL, LE_ITEM_ARMOR_PLATE, LE_ITEM_ARMOR_SHIELD},
+		{Enum.ItemWeaponSubclass.Axe1H, Enum.ItemWeaponSubclass.Axe2H, Enum.ItemWeaponSubclass.Bows, Enum.ItemWeaponSubclass.Guns, Enum.ItemWeaponSubclass.Mace1H, Enum.ItemWeaponSubclass.Mace2H, Enum.ItemWeaponSubclass.Polearm, Enum.ItemWeaponSubclass.Sword2H, Enum.ItemWeaponSubclass.Warglaive, Enum.ItemWeaponSubclass.Unarmed, Enum.ItemWeaponSubclass.Thrown, Enum.ItemWeaponSubclass.Crossbow},
+		{Enum.ItemArmorSubclass.Leather, Enum.ItemArmorSubclass.Mail, Enum.ItemArmorSubclass.Plate, Enum.ItemArmorSubclass.Shield},
 		true
 	}
 elseif T.class == "WARRIOR" then
-	unusable = {{LE_ITEM_WEAPON_WARGLAIVE, LE_ITEM_WEAPON_WAND}, {}}
+	unusable = {{Enum.ItemWeaponSubclass.Warglaive, Enum.ItemWeaponSubclass.Wand}, {}}
 else
 	unusable = {{}, {}}
 end
 
 local _unusable = {}
 
-for i, class in ipairs({LE_ITEM_CLASS_WEAPON, LE_ITEM_CLASS_ARMOR}) do
+for i, class in ipairs({Enum.ItemClass.Weapon, Enum.ItemClass.Armor}) do
 	local list = {}
 	for _, subclass in ipairs(unusable[i]) do
 		list[subclass] = true
@@ -94,7 +99,7 @@ end
 
 local function IsClassUnusable(class, subclass, slot)
 	if class and subclass and _unusable[class] then
-		return slot ~= '' and _unusable[class][subclass] or slot == 'INVTYPE_WEAPONOFFHAND' and unusable[3]
+		return slot ~= "" and _unusable[class][subclass] or slot == "INVTYPE_WEAPONOFFHAND" and unusable[3]
 	end
 end
 
@@ -105,38 +110,11 @@ local function IsItemUnusable(...)
 	end
 end
 
-StaticPopupDialogs.BUY_BANK_SLOT = {
-	text = CONFIRM_BUY_BANK_SLOT,
-	button1 = YES,
-	button2 = NO,
-	OnAccept = function(self)
-		PurchaseSlot()
-	end,
-	OnShow = function(self)
-		MoneyFrame_Update(self.moneyFrame, GetBankSlotCost())
-	end,
-	hasMoneyFrame = 1,
-	timeout = 0,
-	hideOnEscape = 1,
-	preferredIndex = 5,
-}
-
-StaticPopupDialogs.CANNOT_BUY_BANK_SLOT = {
-	text = L_BAG_NO_SLOTS,
-	button1 = ACCEPT,
-	timeout = 0,
-	whileDead = 1,
-	preferredIndex = 5,
-}
-
--- Hide bags options in default interface
---InterfaceOptionsDisplayPanelShowFreeBagSpace:Hide()
-
 Stuffing = CreateFrame("Frame", nil, UIParent)
 Stuffing:RegisterEvent("ADDON_LOADED")
 Stuffing:RegisterEvent("PLAYER_ENTERING_WORLD")
 Stuffing:SetScript("OnEvent", function(this, event, ...)
-	if IsAddOnLoaded("AdiBags") or IsAddOnLoaded("ArkInventory") or IsAddOnLoaded("cargBags_Nivaya") or IsAddOnLoaded("cargBags") or IsAddOnLoaded("Bagnon") or IsAddOnLoaded("Combuctor") or IsAddOnLoaded("TBag") or IsAddOnLoaded("BaudBag") then return end
+	if IsAddOnLoaded("AdiBags") or IsAddOnLoaded("ArkInventory") or IsAddOnLoaded("cargBags_Nivaya") or IsAddOnLoaded("cargBags") or IsAddOnLoaded("Bagnon") or IsAddOnLoaded("Combuctor") or IsAddOnLoaded("TBag") or IsAddOnLoaded("BaudBag") or IsAddOnLoaded("Baganator") then return end
 	Stuffing[event](this, ...)
 end)
 
@@ -148,10 +126,6 @@ Stuffing_DDMenu.HideMenu = function()
 	if UIDROPDOWNMENU_OPEN_MENU == Stuffing_DDMenu then
 		CloseDropDownMenus()
 	end
-end
-
-local function Print (x)
-	DEFAULT_CHAT_FRAME:AddMessage("|cFFFF6633ViksBags:|r " .. x)
 end
 
 local function Stuffing_OnShow()
@@ -167,6 +141,7 @@ local function Stuffing_OnShow()
 end
 
 local function StuffingBank_OnHide()
+	if _G["StuffingFrameReagent"] and _G["StuffingFrameReagent"]:IsShown() then return end
 	CloseBankFrame()
 	if Stuffing.frame:IsShown() then
 		Stuffing.frame:Hide()
@@ -175,6 +150,9 @@ local function StuffingBank_OnHide()
 end
 
 local function Stuffing_OnHide()
+	if _G["StuffingFrameReagent"] and _G["StuffingFrameReagent"]:IsShown() then
+		CloseBankFrame()
+	end
 	if Stuffing.bankFrame and Stuffing.bankFrame:IsShown() then
 		Stuffing.bankFrame:Hide()
 	end
@@ -188,7 +166,11 @@ local function Stuffing_Open()
 end
 
 local function Stuffing_Close()
-	Stuffing.frame:Hide()
+	C_Timer.After(0.01, function() -- fix showing GameMenu when pressing ESC
+		if Stuffing.frame:IsShown() then
+			Stuffing.frame:Hide()
+		end
+	end)
 end
 
 local function Stuffing_Toggle()
@@ -199,101 +181,50 @@ local function Stuffing_Toggle()
 	end
 end
 
+local old_ToggleBag = ToggleBag
 local function Stuffing_ToggleBag(id)
-	if T.classic and id == -2 then
-		ToggleKeyRing()
+	if T.Classic and id == -2 then
+		old_ToggleBag(KEYRING_CONTAINER)
 		return
 	end
 	Stuffing_Toggle()
-end
-
-
-
-local function StartMoving(self)
-	self:StartMoving()
-	local n = self:GetName()
-end
-
-
-local function StopMoving(self)
-	self:StopMovingOrSizing()
-	self:SetUserPlaced(false)
-
-	local n = self:GetName()
-	local x, y = self:GetCenter()
-	StuffingDB[n .. "PosX"] = x
-	StuffingDB[n .. "PosY"] = y
 end
 
 -- Bag slot stuff
 local trashButton = {}
 local trashBag = {}
 
--- Tooltip and scanning by Phanx @ http://www.wowinterface.com/forums/showthread.php?p=271406
-local S_ITEM_LEVEL = "^" .. gsub(_G.ITEM_LEVEL, "%%d", "(%%d+)")
-
-local scanner = CreateFrame("GameTooltip", "BagScanningTooltip", nil, "GameTooltipTemplate")
-local scannerName = scanner:GetName()
-
 local ItemDB = {}
-
-local function _getRealItemLevel(link, owner, bag, slot)
+local function _getRealItemLevel(link, bag, slot)
 	if ItemDB[link] then return ItemDB[link] end
 
-	local realItemLevel
-
-	scanner.owner = owner
-	scanner:SetOwner(owner, "ANCHOR_NONE")
-	scanner:SetBagItem(bag, slot)
-
-	local line = _G[scannerName.."TextLeft2"]
-	if line then
-		local msg = line:GetText()
-		if msg and string.find(msg, S_ITEM_LEVEL) then
-			local itemLevel = string.match(msg, S_ITEM_LEVEL)
-			if itemLevel and (tonumber(itemLevel) > 0) then
-				realItemLevel = itemLevel
-			end
-		else
-			-- Check line 3, some artifacts have the ilevel there
-			line = _G[scannerName.."TextLeft3"]
-			if line then
-				local msg = line:GetText()
-				if msg and string.find(msg, S_ITEM_LEVEL) then
-					local itemLevel = string.match(msg, S_ITEM_LEVEL)
-					if itemLevel and (tonumber(itemLevel) > 0) then
-						realItemLevel = itemLevel
-					end
-				end
-			end
-		end
-	end
+	local realItemLevel = C_Item.GetCurrentItemLevel(ItemLocation:CreateFromBagAndSlot(bag, slot))
 
 	ItemDB[link] = tonumber(realItemLevel)
 	return realItemLevel
 end
 
 function Stuffing:SlotUpdate(b)
-	local texture, count, locked, quality = GetContainerItemInfo(b.bag, b.slot)
-	local clink = GetContainerItemLink(b.bag, b.slot)
-	local isQuestItem, questId, isActiveQuest
-	if T.classic then
-		-- isQuestItem, questId, isActiveQuest
-		if b.itemClassID == LE_ITEM_CLASS_QUESTITEM then isQuestItem = true end
-	else
-		isQuestItem, questId, isActiveQuest = GetContainerItemQuestInfo(b.bag, b.slot)
+	local info = C_Container.GetContainerItemInfo(b.bag, b.slot)
+	local count, locked, quality, clink
+	if info then
+		count, locked, quality, clink = info.stackCount, info.isLocked, info.quality, info.hyperlink
 	end
+	local texture = info and info.iconFileID or 0
+	local questData = C_Container.GetContainerItemQuestInfo(b.bag, b.slot)
+	local isQuestItem, questId, isActiveQuest = questData.isQuestItem, questData.questID, questData.isActive
+	local itemIsUpgrade
 
-	-- Set all slot color to default ViksUI on update
+	-- Set all slot color to default ShestakUI on update
 	if not b.frame.lock then
 		b.frame:SetBackdropBorderColor(unpack(C.media.border_color))
 	end
 
 	if b.cooldown and StuffingFrameBags and StuffingFrameBags:IsShown() then
-		local start, duration, enable = GetContainerItemCooldown(b.bag, b.slot)
-		if T.classic and HasWandEquipped() then
+		local start, duration, enable = C_Container.GetContainerItemCooldown(b.bag, b.slot)
+		if T.Classic and HasWandEquipped() then
 			local wandID = GetInventoryItemID("player", 18)
-			local wandSpeed = GetItemCooldown(wandID)
+			local wandSpeed = select(2, C_Container.GetItemCooldown(wandID)) or 0
 			if wandSpeed == 0 then
 				CooldownFrame_Set(b.cooldown, start, duration, enable)
 			else
@@ -307,24 +238,26 @@ function Stuffing:SlotUpdate(b)
 		end
 	end
 
-	if C.bag.ilvl == true then
+	if C.bag.ilvl == true and b.frame.text then
 		b.frame.text:SetText("")
 	end
 
-	if not T.classic then
+	if T.Mainline then
 		b.frame.Azerite:Hide()
+		b.frame.Conduit:Hide()
+		b.frame.Conduit2:Hide()
+		b.frame.profQuality:Hide()
+
 		b.frame:UpdateItemContextMatching() -- Update Scrap items
 	end
 
-	if b.frame.UpgradeIcon then
+	if T.Mainline and b.frame.UpgradeIcon then
 		b.frame.UpgradeIcon:SetPoint("TOPLEFT", C.bag.button_size/2.7, -C.bag.button_size/2.7)
 		b.frame.UpgradeIcon:SetSize(C.bag.button_size/1.7, C.bag.button_size/1.7)
-		local itemIsUpgrade = not T.classic and IsContainerItemAnUpgrade(b.frame:GetParent():GetID(), b.frame:GetID())
-		if itemIsUpgrade and itemIsUpgrade == true then
-			b.frame.UpgradeIcon:SetShown(true)
-		else
-			b.frame.UpgradeIcon:SetShown(false)
-		end
+		-- Use Pawn's (third-party addon) function if present; else fallback to Blizzard's.
+		-- 10.0.2 Build 46658 No longer have IsContainerItemAnUpgrade
+		itemIsUpgrade = PawnIsContainerItemAnUpgrade and PawnIsContainerItemAnUpgrade(b.frame:GetParent():GetID(), b.frame:GetID())
+		b.frame.UpgradeIcon:SetShown(itemIsUpgrade or false)
 	end
 
 	if IsAddOnLoaded("CanIMogIt") then
@@ -334,18 +267,49 @@ function Stuffing:SlotUpdate(b)
 
 	if clink then
 		b.name, _, _, b.itemlevel, b.level, _, _, _, _, _, _, b.itemClassID, b.itemSubClassID = GetItemInfo(clink)
-		if not b.name then	-- Keystone bug
-			b.name = clink:match('%[(.-)%]') or ""
+
+		if C.bag.ilvl then
+			if info.itemID == 82800 then -- pet
+				local petID, petLevel, petName = strmatch(clink, "|H%w+:(%d+):(%d+):.-|h%[(.-)%]|h")
+				b.name = petName
+				b.itemlevel = petLevel
+				b.frame.text:SetText(b.itemlevel)
+			elseif info.itemID == 180653 or info.itemID == 187786 then -- keystone
+				b.itemlevel, b.name = strmatch(clink, "|H%w+:%d+:%d+:(%d+):.-|h%[(.-)%]|h")
+				b.itemlevel = tonumber(b.itemlevel) or 0
+				b.frame.text:SetText(b.itemlevel)
+			else
+				if b.itemlevel and quality > 1 and (b.itemClassID == 2 or b.itemClassID == 4 or (b.itemClassID == 3 and b.itemSubClassID == 11)) then
+					b.itemlevel = _getRealItemLevel(clink, b.bag, b.slot) or b.itemlevel
+					b.frame.text:SetText(b.itemlevel)
+				end
+			end
 		end
 
-		if C.bag.ilvl == true and b.itemlevel and quality > 1 and (b.itemClassID == 2 or b.itemClassID == 4 or (b.itemClassID == 3 and b.itemSubClassID == 11)) then
-			b.itemlevel = _getRealItemLevel(clink, self, b.bag, b.slot) or b.itemlevel
-			b.frame.text:SetText(b.itemlevel)
+		if not b.name then	-- Keystone bug (FIXME: maybe not needed as check before)
+			b.name = clink:match("%[(.-)%]") or ""
 		end
 
-		if not T.classic then
-			if b.frame.Azerite and C_AzeriteEmpoweredItem.IsAzeriteEmpoweredItemByID(clink) then
+		if T.Mainline then
+			if C_AzeriteEmpoweredItem.IsAzeriteEmpoweredItemByID(clink) then
+				b.frame.Azerite:SetAtlas("AzeriteIconFrame")
 				b.frame.Azerite:Show()
+			elseif C_Soulbinds.IsItemConduitByItemInfo(clink) then
+				b.frame.Conduit:SetAtlas("ConduitIconFrame")
+				b.frame.Conduit:Show()
+				local color = BAG_ITEM_QUALITY_COLORS[quality]
+				if color then
+					b.frame.Conduit:SetVertexColor(color.r, color.g, color.b)
+				end
+				b.frame.Conduit2:SetAtlas("ConduitIconFrame-Corners")
+				b.frame.Conduit2:Show()
+			end
+
+			local profQual = C_TradeSkillUI.GetItemReagentQualityByItemInfo(clink) or C_TradeSkillUI.GetItemCraftedQualityByItemInfo(clink)
+			if profQual then
+				local atlas = ("Professions-Icon-Quality-Tier%d-Inv"):format(profQual)
+				b.frame.profQuality:SetAtlas(atlas, TextureKitConstants.UseAtlasSize)
+				b.frame.profQuality:Show()
 			end
 		end
 
@@ -357,7 +321,10 @@ function Stuffing:SlotUpdate(b)
 
 		-- Color slot according to item quality
 		if not b.frame.lock and quality and quality > 1 and not (isQuestItem or questId) then
-			b.frame:SetBackdropBorderColor(GetItemQualityColor(quality))
+			local R, G, B = GetItemQualityColor(quality)
+			if b.frame then
+				b.frame:SetBackdropBorderColor(R, G, B)
+			end
 		elseif questId and not isActiveQuest then
 			b.frame:SetBackdropBorderColor(1, 0.3, 0.3)
 		elseif questId or isQuestItem then
@@ -370,6 +337,33 @@ function Stuffing:SlotUpdate(b)
 	SetItemButtonTexture(b.frame, texture)
 	SetItemButtonCount(b.frame, count)
 	SetItemButtonDesaturated(b.frame, locked)
+
+	if C.bag.new_items then
+		local IsNewItem = C_NewItems.IsNewItem(b.bag, b.slot)
+		if IsNewItem then
+			if not b.frame.Animation then
+				b.frame.Animation = b.frame:CreateAnimationGroup()
+				b.frame.Animation:SetLooping("BOUNCE")
+
+				b.frame.Animation.FadeOut = b.frame.Animation:CreateAnimation("Alpha")
+				b.frame.Animation.FadeOut:SetFromAlpha(1)
+				b.frame.Animation.FadeOut:SetToAlpha(0.6)
+				b.frame.Animation.FadeOut:SetDuration(0.4)
+				b.frame.Animation.FadeOut:SetSmoothing("IN_OUT")
+				b.frame:HookScript("OnEnter", function(self)
+					local IsNewItem = C_NewItems.IsNewItem(b.bag, b.slot)
+
+					if not IsNewItem and b.frame.Animation:IsPlaying() then
+						b.frame.Animation:Stop()
+					end
+				end)
+			end
+
+			if not b.frame.Animation:IsPlaying() then
+				b.frame.Animation:Play()
+			end
+		end
+	end
 
 	b.frame:Show()
 end
@@ -388,25 +382,25 @@ end
 
 function Stuffing:UpdateCooldowns(b)
 	if b.cooldown and StuffingFrameBags and StuffingFrameBags:IsShown() then
-		local start, duration, enable = GetContainerItemCooldown(b.bag, b.slot)
-		if T.classic and HasWandEquipped() then
+		local start, duration, enable = C_Container.GetContainerItemCooldown(b.bag, b.slot)
+		if T.Classic and HasWandEquipped() then
 			local wandID = GetInventoryItemID("player", 18)
-			local wandSpeed = GetItemCooldown(wandID)
+			local wandSpeed = select(2, C_Container.GetItemCooldown(wandID)) or 0
 			if wandSpeed == 0 then
-				return CooldownFrame_Set(b.cooldown, start, duration, enable)
+				CooldownFrame_Set(b.cooldown, start, duration, enable)
 			else
 				if wandSpeed < 1.5 then wandSpeed = 1.5 end
 				if duration and duration > wandSpeed then
-					return CooldownFrame_Set(b.cooldown, start, duration, enable)
+					CooldownFrame_Set(b.cooldown, start, duration, enable)
 				end
 			end
 		else
-			return CooldownFrame_Set(b.cooldown, start, duration, enable)
+			CooldownFrame_Set(b.cooldown, start, duration, enable)
 		end
 	end
 end
 
-function CreateReagentContainer()
+function Stuffing:CreateReagentContainer()
 	ReagentBankFrame:StripTextures()
 
 	local Reagent = CreateFrame("Frame", "StuffingFrameReagent", UIParent)
@@ -439,7 +433,6 @@ function CreateReagentContainer()
 	SwitchBankButton:SetScript("OnClick", function()
 		Reagent:Hide()
 		_G["StuffingFrameBank"]:Show()
-		_G["StuffingFrameBank"]:SetAlpha(1)
 		BankFrame_ShowPanel(BANK_PANELS[1].name)
 		PlaySound(SOUNDKIT.IG_BACKPACK_OPEN)
 	end)
@@ -469,6 +462,7 @@ function CreateReagentContainer()
 			ToggleDropDownMenu(nil, nil, Stuffing_DDMenu, self:GetName(), 0, 0)
 			return
 		else
+			Reagent:Hide()
 			StuffingBank_OnHide()
 		end
 	end)
@@ -487,8 +481,8 @@ function CreateReagentContainer()
 	Close:HookScript("OnLeave", tooltip_hide)
 
 	for i = 1, 98 do
-		local button = _G["ReagentBankFrameItem" .. i]
-		local icon = _G[button:GetName() .. "IconTexture"]
+		local button = _G["ReagentBankFrameItem"..i]
+		local icon = _G[button:GetName().."IconTexture"]
 		local count = _G[button:GetName().."Count"]
 
 		ReagentBankFrame:SetParent(Reagent)
@@ -497,17 +491,18 @@ function CreateReagentContainer()
 
 		button:StyleButton()
 		button:SetTemplate("Default")
-		button:SetNormalTexture(nil)
+		button:SetNormalTexture(0)
 		button.IconBorder:SetAlpha(0)
 
 		button:ClearAllPoints()
 		button:SetSize(C.bag.button_size, C.bag.button_size)
 
 		local _, _, _, quality = GetContainerItemInfo(-3, i)
-		local clink = GetContainerItemLink(-3, i)
+		local clink = C_Container.GetContainerItemLink(-3, i)
 		if clink then
 			if quality and quality > 1 then
-				button:SetBackdropBorderColor(GetItemQualityColor(quality))
+				local r, g, b = GetItemQualityColor(quality)
+				button:SetBackdropBorderColor(r, g, b)
 			end
 		end
 
@@ -527,9 +522,7 @@ function CreateReagentContainer()
 			NumButtons = NumButtons + 1
 		end
 
-		icon:SetTexCoord(0.1, 0.9, 0.1, 0.9)
-		icon:SetPoint("TOPLEFT", 2, -2)
-		icon:SetPoint("BOTTOMRIGHT", -2, 2)
+		icon:CropIcon()
 
 		count:SetFont(C.font.bags_font, C.font.bags_font_size, C.font.bags_font_style)
 		count:SetShadowOffset(C.font.bags_font_shadow and 1 or 0, C.font.bags_font_shadow and -1 or 0)
@@ -556,17 +549,18 @@ function Stuffing:BagFrameSlotNew(p, slot)
 
 	local ret = {}
 
-	if slot > 3 then
+	if slot > (T.Classic and 3 or 5) then
 		ret.slot = slot
-		slot = slot - 4
-		ret.frame = CreateFrame(T.classic and "CheckButton" or "ItemButton", "StuffingBBag"..slot.."Slot", p, "BankItemButtonBagTemplate")
+		slot = slot - (T.Classic and 4 or 5)
+		ret.frame = CreateFrame(T.Classic and "CheckButton" or "ItemButton", "StuffingBBag"..slot.."Slot", p, "BankItemButtonBagTemplate")
+		Mixin(ret.frame, BackdropTemplateMixin)
 		ret.frame:StripTextures()
 		ret.frame:SetID(slot)
 		hooksecurefunc(ret.frame.IconBorder, "SetVertexColor", function(self, r, g, b)
 			if r ~= 0.65882 and g ~= 0.65882 and b ~= 0.65882 then
 				self:GetParent():SetBackdropBorderColor(r, g, b)
 			end
-			self:SetTexture("")
+			self:SetTexture(0)
 		end)
 
 		hooksecurefunc(ret.frame.IconBorder, "Hide", function(self)
@@ -576,10 +570,15 @@ function Stuffing:BagFrameSlotNew(p, slot)
 		table.insert(self.bagframe_buttons, ret)
 
 		BankFrameItemButton_Update(ret.frame)
-		BankFrameItemButton_UpdateLocked(ret.frame)
 
 		if not ret.frame.tooltipText then
 			ret.frame.tooltipText = ""
+		end
+
+		ret.frame.ID = ret.frame:GetInventorySlot()
+		local quality = GetInventoryItemQuality("player", ret.frame.ID)
+		if quality then
+			ret.frame.quality = quality
 		end
 
 		if slot > GetNumBankSlots() then
@@ -588,18 +587,55 @@ function Stuffing:BagFrameSlotNew(p, slot)
 			SetItemButtonTextureVertexColor(ret.frame, 1.0, 1.0, 1.0)
 		end
 	else
-		ret.frame = CreateFrame(T.classic and "CheckButton" or "ItemButton", "StuffingFBag"..slot.."Slot", p, "BagSlotButtonTemplate")
+		if T.Classic then
+			ret.frame = CreateFrame(T.Classic and "CheckButton" or "ItemButton", "StuffingFBag"..slot.."Slot", p, "BagSlotButtonTemplate")
+		else
+			ret.frame = CreateFrame(T.Classic and "CheckButton" or "ItemButton", "StuffingFBag"..(slot + 1).."Slot", p, "")
+		end
+		Mixin(ret.frame, BackdropTemplateMixin)
 
-		hooksecurefunc(ret.frame.IconBorder, "SetVertexColor", function(self, r, g, b)
-			if r ~= 0.65882 and g ~= 0.65882 and b ~= 0.65882 then
-				self:GetParent():SetBackdropBorderColor(r, g, b)
+		ret.frame.ID = C_Container.ContainerIDToInventoryID(slot + 1)
+		local bag_tex = GetInventoryItemTexture("player", ret.frame.ID)
+		_G[ret.frame:GetName().."IconTexture"]:SetTexture(bag_tex)
+		ret.frame:SetID(ret.frame.ID)
+
+		ret.frame:RegisterForDrag("LeftButton")
+		ret.frame:SetScript("OnDragStart", function(self)
+			PickupBagFromSlot(self:GetID())
+		end)
+		ret.frame:SetScript("OnReceiveDrag", function(self)
+			PutItemInBag(self:GetID())
+		end)
+
+		local tooltip_hide = function()
+			GameTooltip:Hide()
+		end
+
+		local tooltip_show = function(self)
+			GameTooltip:SetOwner(self, "ANCHOR_LEFT", 19, 7)
+			GameTooltip:ClearLines()
+			if GetInventoryItemLink("player", ret.frame.ID) then
+				GameTooltip:SetInventoryItem("player", self:GetID())
+			else
+				local text = ret.slot == 4 and EQUIP_CONTAINER_REAGENT or EQUIP_CONTAINER
+				GameTooltip:AddLine(text)
+				GameTooltip:Show()
 			end
-			self:SetTexture("")
-		end)
+		end
 
-		hooksecurefunc(ret.frame.IconBorder, "Hide", function(self)
-			self:GetParent():SetBackdropBorderColor(unpack(C.media.border_color))
-		end)
+		ret.frame:HookScript("OnEnter", tooltip_show)
+		ret.frame:HookScript("OnLeave", tooltip_hide)
+
+		ret.frame:SetTemplate("Default")
+
+		local quality = GetInventoryItemQuality("player", ret.frame.ID)
+		if quality then
+			ret.frame.quality = quality
+			-- else
+			-- C_Timer.After(1, function() -- TODO: Test it if quality not returned after first open
+			-- ret.frame.quality = GetInventoryItemQuality("player", ret.frame.ID)
+			-- end)
+		end
 
 		ret.slot = slot
 		table.insert(self.bagframe_buttons, ret)
@@ -607,15 +643,17 @@ function Stuffing:BagFrameSlotNew(p, slot)
 
 	ret.frame:StyleButton()
 	ret.frame:SetTemplate("Default")
-	ret.frame:SetNormalTexture(nil)
-	if T.classic then
-		ret.frame:SetCheckedTexture(nil)
-	end
+	ret.frame:SetNormalTexture(0)
 
 	ret.icon = _G[ret.frame:GetName().."IconTexture"]
-	ret.icon:SetTexCoord(0.1, 0.9, 0.1, 0.9)
-	ret.icon:SetPoint("TOPLEFT", ret.frame, 2, -2)
-	ret.icon:SetPoint("BOTTOMRIGHT", ret.frame, -2, 2)
+	ret.icon:CropIcon()
+
+	-- C_Timer.After(2, function()
+	if ret.frame.quality and ret.frame.quality > 1 then
+		local r, g, b = GetItemQualityColor(ret.frame.quality)
+		ret.frame:SetBackdropBorderColor(r, g, b)
+	end
+	-- end)
 
 	return ret
 end
@@ -660,15 +698,14 @@ function Stuffing:SlotNew(bag, slot)
 	end
 
 	if not ret.frame then
-		ret.frame = CreateFrame(T.classic and "Button" or "ItemButton", "StuffingBag"..bag.."_"..slot, self.bags[bag], tpl)
+		ret.frame = CreateFrame(T.Classic and "Button" or "ItemButton", "StuffingBag"..bag.."_"..slot, self.bags[bag], tpl)
 		ret.frame:StyleButton()
 		ret.frame:SetTemplate("Default")
-		ret.frame:SetNormalTexture(nil)
+		ret.frame:SetNormalTexture(0)
+		ret.frame:SetFrameStrata("HIGH")
 
 		ret.icon = _G[ret.frame:GetName().."IconTexture"]
-		ret.icon:SetTexCoord(0.1, 0.9, 0.1, 0.9)
-		ret.icon:SetPoint("TOPLEFT", ret.frame, 2, -2)
-		ret.icon:SetPoint("BOTTOMRIGHT", ret.frame, -2, 2)
+		ret.icon:CropIcon()
 
 		ret.count = _G[ret.frame:GetName().."Count"]
 		ret.count:SetFont(C.font.bags_font, C.font.bags_font_size, C.font.bags_font_style)
@@ -676,17 +713,33 @@ function Stuffing:SlotNew(bag, slot)
 		ret.count:SetPoint("BOTTOMRIGHT", 1, 1)
 
 		if C.bag.ilvl == true then
-			ret.frame:FontString("text", C.font.bags_font, C.font.bags_font_size, C.font.bags_font_style)
-			ret.frame.text:SetPoint("TOP", 1, -1)
+			ret.frame.text = ret.frame:CreateFontString(nil, "ARTWORK")
+			ret.frame.text:SetFont(C.font.bags_font, C.font.bags_font_size, C.font.bags_font_style)
+			ret.frame.text:SetPoint("TOPLEFT", 1, -1)
 			ret.frame.text:SetTextColor(1, 1, 0)
 		end
 
-		ret.frame.Azerite = ret.frame:CreateTexture(nil, "OVERLAY")
+		ret.frame.Azerite = ret.frame:CreateTexture(nil, "ARTWORK")
 		ret.frame.Azerite:SetAtlas("AzeriteIconFrame")
-		ret.frame.Azerite:SetTexCoord(0, 1, 0, 1)
 		ret.frame.Azerite:SetPoint("TOPLEFT", ret.frame, 1, -1)
 		ret.frame.Azerite:SetPoint("BOTTOMRIGHT", ret.frame, -1, 1)
 		ret.frame.Azerite:Hide()
+
+		ret.frame.Conduit = ret.frame:CreateTexture(nil, "ARTWORK")
+		ret.frame.Conduit:SetAtlas("ConduitIconFrame")
+		ret.frame.Conduit:SetPoint("TOPLEFT", ret.frame, 2, -2)
+		ret.frame.Conduit:SetPoint("BOTTOMRIGHT", ret.frame, -2, 2)
+		ret.frame.Conduit:Hide()
+
+		ret.frame.Conduit2 = ret.frame:CreateTexture(nil, "ARTWORK")
+		ret.frame.Conduit2:SetAtlas("ConduitIconFrame-Corners")
+		ret.frame.Conduit2:SetPoint("TOPLEFT", ret.frame, 2, -2)
+		ret.frame.Conduit2:SetPoint("BOTTOMRIGHT", ret.frame, -2, 2)
+		ret.frame.Conduit2:Hide()
+
+		ret.frame.profQuality = ret.frame:CreateTexture(nil, "ARTWORK")
+		ret.frame.profQuality:SetPoint("TOPLEFT", ret.frame, 0, 0)
+		ret.frame.profQuality:Hide()
 
 		local Battlepay = _G[ret.frame:GetName()].BattlepayItemTexture
 		if Battlepay then
@@ -713,7 +766,7 @@ local BAGTYPE_SOUL = 0x004
 local BAGTYPE_FISHING = 32768
 
 function Stuffing:BagType(bag)
-	local bagType = select(2, GetContainerNumFreeSlots(bag))
+	local bagType = select(2, C_Container.GetContainerNumFreeSlots(bag))
 
 	if bit.band(bagType, BAGTYPE_QUIVER) > 0 then
 		return ST_QUIVER
@@ -763,35 +816,97 @@ function Stuffing:BagNew(bag, f)
 	return ret
 end
 
+local bind = {
+	[0] = "",
+	[1] = "bop bound"..ITEM_BIND_ON_PICKUP,
+	[2] = "boe"..ITEM_BIND_ON_EQUIP,
+	[3] = ITEM_BIND_ON_USE,
+	[4] = ITEM_BIND_QUEST
+}
+
+local bindAccount = {
+	[ITEM_ACCOUNTBOUND] = true,
+	[ITEM_BIND_TO_ACCOUNT] = true,
+	[ITEM_BNETACCOUNTBOUND] = true,
+}
+
 function Stuffing:SearchUpdate(str)
 	str = string.lower(str)
 
 	for _, b in ipairs(self.buttons) do
 		if b.frame and not b.name then
-			b.frame:SetAlpha(0.2)
+			if str == "" then
+				b.frame.searchOverlay:Hide()
+			else
+				b.frame.searchOverlay:Show()
+			end
 		end
 		if b.name then
-			local _, setName = not T.classic and GetContainerItemEquipmentSetInfo(b.bag, b.slot)
-			setName = setName or ""
-			local ilink = GetContainerItemLink(b.bag, b.slot)
-			local class, subclass, _, equipSlot = select(6, GetItemInfo(ilink))
-			local minLevel = select(5, GetItemInfo(ilink))
-			class = _G[class] or ""
-			subclass = _G[subclass] or ""
-			equipSlot = _G[equipSlot] or ""
-			minLevel = minLevel or 1
-			if not string.find(string.lower(b.name), str) and not string.find(string.lower(setName), str) and not string.find(string.lower(class), str) and not string.find(string.lower(subclass), str) and not string.find(string.lower(equipSlot), str) then
-				if IsItemUnusable(b.name) or minLevel > T.level then
-					_G[b.frame:GetName().."IconTexture"]:SetVertexColor(0.5, 0.5, 0.5)
+			local ilink = C_Container.GetContainerItemLink(b.bag, b.slot)
+			if ilink then
+				local _, setName = T.Mainline and C_Container.GetContainerItemEquipmentSetInfo(b.bag, b.slot)
+				setName = setName or ""
+				local _, _, _, _, minLevel, class, subclass, _, equipSlot, _, _, _, _, bindType = GetItemInfo(ilink)
+				class = class or ""
+				subclass = subclass or ""
+				equipSlot = equipSlot or ""
+				bindType = bind[bindType] or ""
+				minLevel = minLevel or 1
+				local isBoA = false
+				if str and str == "boa" and T.Mainline then
+					local data = C_TooltipInfo.GetBagItem(b.bag, b.slot)
+					if data then
+						for j = 2, 5 do
+							local lineData = data.lines[j]
+							if not lineData then break end
+							local title = lineData.leftText
+							if title and bindAccount[title] then
+								isBoA = true
+								break
+							end
+						end
+					end
 				end
-				SetItemButtonDesaturated(b.frame, true)
-				b.frame:SetAlpha(0.2)
-			else
-				if IsItemUnusable(b.name) or minLevel > T.level then
-					_G[b.frame:GetName().."IconTexture"]:SetVertexColor(1, 0.1, 0.1)
+
+				if not isBoA and not string.find(string.lower(b.name), str) and not string.find(string.lower(setName), str) and not string.find(string.lower(class), str) and not string.find(string.lower(subclass), str) and not string.find(string.lower(equipSlot), str) and not string.find(string.lower(bindType), str) then
+					if IsItemUnusable(b.name) or minLevel > T.level then
+						_G[b.frame:GetName().."IconTexture"]:SetVertexColor(0.5, 0.5, 0.5)
+					end
+					SetItemButtonDesaturated(b.frame, true)
+					b.frame.searchOverlay:Show()
+				else
+					if IsItemUnusable(b.name) or minLevel > T.level then
+						_G[b.frame:GetName().."IconTexture"]:SetVertexColor(1, 0.1, 0.1)
+					end
+					SetItemButtonDesaturated(b.frame, false)
+					b.frame.searchOverlay:Hide()
 				end
-				SetItemButtonDesaturated(b.frame, false)
-				b.frame:SetAlpha(1)
+			end
+		end
+	end
+
+	if ReagentBankFrameItem1 then
+		for slotID = 1, 98 do
+			local _, _, _, _, _, _, ilink = GetContainerItemInfo(-3, slotID)
+			local button = _G["ReagentBankFrameItem"..slotID]
+			if ilink then
+				local name, _, _, _, minLevel, class, subclass = GetItemInfo(ilink)
+				class = class or ""
+				subclass = subclass or ""
+				minLevel = minLevel or 1
+				if not string.find(string.lower(name), str) and not string.find(string.lower(class), str) and not string.find(string.lower(subclass), str) then
+					if IsItemUnusable(name) or minLevel > T.level then
+						_G[button:GetName().."IconTexture"]:SetVertexColor(0.5, 0.5, 0.5)
+					end
+					SetItemButtonDesaturated(button, true)
+					button.searchOverlay:Show()
+				else
+					if IsItemUnusable(name) or minLevel > T.level then
+						_G[button:GetName().."IconTexture"]:SetVertexColor(1, 0.1, 0.1)
+					end
+					SetItemButtonDesaturated(button, false)
+					button.searchOverlay:Hide()
+				end
 			end
 		end
 	end
@@ -802,8 +917,26 @@ function Stuffing:SearchReset()
 		if IsItemUnusable(b.name) or (b.level and b.level > T.level) then
 			_G[b.frame:GetName().."IconTexture"]:SetVertexColor(1, 0.1, 0.1)
 		end
-		b.frame:SetAlpha(1)
+		b.frame.searchOverlay:Hide()
 		SetItemButtonDesaturated(b.frame, false)
+	end
+
+	self.frame.editbox:SetText("")
+	self.frame.editbox:Hide()
+	self.frame.editbox:ClearFocus()
+	self.frame.detail:Show()
+end
+
+local function DragFunction(self, mode)
+	for index = 1, select("#", self:GetChildren()) do
+		local frame = select(index, self:GetChildren())
+		if frame:GetName() and frame:GetName():match("StuffingBag") then
+			if mode then
+				frame:Hide()
+			else
+				frame:Show()
+			end
+		end
 	end
 end
 
@@ -812,28 +945,60 @@ function Stuffing:CreateBagFrame(w)
 	local f = CreateFrame("Frame", n, UIParent)
 	f:EnableMouse(true)
 	f:SetMovable(true)
-	f:SetFrameStrata("DIALOG")
-	f:SetFrameLevel(5)
-	f:SetScript("OnMouseDown", function(self, button)
-		if IsShiftKeyDown() and button == "LeftButton" then
+	f:SetFrameStrata("HIGH")
+	f:SetFrameLevel(10)
+	f:RegisterForDrag("LeftButton")
+	f:SetScript("OnDragStart", function(self)
+		if IsAltKeyDown() or IsShiftKeyDown() then
 			self:StartMoving()
+			DragFunction(self, true)
+			f.moved = true
 		end
 	end)
-	f:SetScript("OnMouseUp", f.StopMovingOrSizing)
 
-	if w == "Bank" then
-		f:SetPoint("BOTTOMLEFT", LChatTab, "BOTTOMLEFT", 20, 20)
-		f:SetScript("OnMouseDown", StartMoving)
-		f:SetScript("OnMouseUp", StopMoving)
+	f:SetScript("OnDragStop", function(self)
+		if f.moved then	-- prevent false register without modifier key
+			self:StopMovingOrSizing()
+			DragFunction(self, false)
+			local ap, p, rp, x, y = f:GetPoint()
+			if not p then p = UIParent end
+			local positionTable = T.CurrentProfile()
+			positionTable[f:GetName()] = {ap, p:GetName(), rp, x, y}
+			f.moved = nil
+		end
+	end)
+
+	f:SetScript("OnMouseDown", function(_, button)
+		if IsControlKeyDown() and button == "RightButton" then
+			f:ClearAllPoints()
+			if w == "Bank" then
+				f:SetPoint(unpack(C.position.bank))
+			else
+				f:SetPoint(unpack(C.position.bag))
+			end
+			f:SetUserPlaced(false)
+			local positionTable = T.CurrentProfile()
+			positionTable[f:GetName()] = nil
+		end
+	end)
+
+	local positionTable = T.CurrentProfile()
+	if positionTable and positionTable[f:GetName()] then
+		f:SetPoint(unpack(positionTable[f:GetName()]))
 	else
-		f:SetPoint("BOTTOMRIGHT", RChatTab, "BOTTOMRIGHT", -40, 20)
-		f:SetScript("OnMouseDown", StartMoving)
-		f:SetScript("OnMouseUp", StopMoving)
+		if w == "Bank" then
+			f:SetPoint(unpack(C.position.bank))
+		else
+			f:SetPoint(unpack(C.position.bag))
+		end
 	end
 
 	if w == "Bank" then
-		if not T.classic then
-			-- Reagent button
+		-- Set frame level to be higher than other bags
+		f:SetFrameLevel(f:GetFrameLevel() + 3)
+
+		-- Reagent button
+		if T.Mainline then
 			f.b_reagent = CreateFrame("Button", "StuffingReagentButton"..w, f)
 			f.b_reagent:SetSize(105, 20)
 			f.b_reagent:SetPoint("TOPLEFT", 10, -4)
@@ -843,12 +1008,12 @@ function Stuffing:CreateBagFrame(w)
 				BankFrame_ShowPanel(BANK_PANELS[2].name)
 				PlaySound(SOUNDKIT.IG_BACKPACK_OPEN)
 				if not ReagentBankFrame.isMade then
-					CreateReagentContainer()
+					self:CreateReagentContainer()
 					ReagentBankFrame.isMade = true
 				else
 					_G["StuffingFrameReagent"]:Show()
 				end
-				_G["StuffingFrameBank"]:SetAlpha(0)
+				_G["StuffingFrameBank"]:Hide()
 			end)
 			f.b_reagent:FontString("text", C.font.bags_font, C.font.bags_font_size, C.font.bags_font_style)
 			f.b_reagent.text:SetPoint("CENTER")
@@ -859,14 +1024,14 @@ function Stuffing:CreateBagFrame(w)
 		-- Buy button
 		f.b_purchase = CreateFrame("Button", "StuffingPurchaseButton"..w, f)
 		f.b_purchase:SetSize(80, 20)
-		if not T.classic then
-			f.b_purchase:SetPoint("TOPLEFT", f.b_reagent, "TOPRIGHT", 3, 0)
-		else
+		if T.Classic then
 			f.b_purchase:SetPoint("TOPLEFT", 10, -4)
+		else
+			f.b_purchase:SetPoint("TOPLEFT", f.b_reagent, "TOPRIGHT", 3, 0)
 		end
 		f.b_purchase:RegisterForClicks("AnyUp")
 		f.b_purchase:SkinButton()
-		f.b_purchase:SetScript("OnClick", function(self) StaticPopup_Show("BUY_BANK_SLOT") end)
+		f.b_purchase:SetScript("OnClick", function() StaticPopup_Show("BUY_BANK_SLOT") end)
 		f.b_purchase:FontString("text", C.font.bags_font, C.font.bags_font_size, C.font.bags_font_style)
 		f.b_purchase.text:SetPoint("CENTER")
 		f.b_purchase.text:SetText(BANKSLOTPURCHASE)
@@ -891,6 +1056,13 @@ function Stuffing:CreateBagFrame(w)
 				Stuffing_DDMenu.initialize = Stuffing.Menu
 			end
 			ToggleDropDownMenu(nil, nil, Stuffing_DDMenu, self:GetName(), 0, 0)
+			return
+		elseif btn == "LeftButton" and IsShiftKeyDown() then
+			if InCombatLockdown() then
+				print("|cffffff00"..ERR_NOT_IN_COMBAT.."|r") return
+			end
+			Stuffing:SetBagsForSorting("d")
+			Stuffing:Restack()
 			return
 		end
 		self:GetParent():Hide()
@@ -928,21 +1100,13 @@ function Stuffing:InitBank()
 	self.bankFrame = f
 end
 
-local parent_startmoving = function(self)
-	StartMoving(self:GetParent())
-end
-
-local parent_stopmovingorsizing = function (self)
-	StopMoving(self:GetParent())
-end
-
 function Stuffing:InitBags()
 	if self.frame then return end
 
 	self.buttons = {}
 	self.bags = {}
 	self.bagframe_buttons = {}
-	self.bags_num = {}				   
+	self.bags_num = {}
 
 	local f = self:CreateBagFrame("Bags")
 	f:SetScript("OnShow", Stuffing_OnShow)
@@ -951,16 +1115,23 @@ function Stuffing:InitBags()
 	-- Search editbox (tekKonfigAboutPanel.lua)
 	local editbox = CreateFrame("EditBox", nil, f)
 	editbox:Hide()
-	editbox:SetAutoFocus(true)
+	editbox:SetAutoFocus(false)
 	editbox:SetHeight(32)
-	editbox:CreateBackdrop("Default")
+	editbox:CreateBackdrop("Overlay")
 	editbox.backdrop:SetPoint("TOPLEFT", -2, 1)
 	editbox.backdrop:SetPoint("BOTTOMRIGHT", 2, -1)
 
-	local resetAndClear = function(self)
-		self:GetParent().detail:Show()
-		self:ClearFocus()
+	local fullReset = function(self)
 		Stuffing:SearchReset()
+	end
+
+	local clearFocus = function(self)
+		self:HighlightText(0, 0)
+		self:ClearFocus()
+	end
+
+	local gainFocus = function(self)
+		self:HighlightText()
 	end
 
 	local updateSearch = function(self, t)
@@ -969,21 +1140,85 @@ function Stuffing:InitBags()
 		end
 	end
 
-	editbox:SetScript("OnEscapePressed", resetAndClear)
-	editbox:SetScript("OnEnterPressed", resetAndClear)
-	editbox:SetScript("OnEditFocusLost", editbox.Hide)
-	editbox:SetScript("OnEditFocusGained", editbox.HighlightText)
+	editbox:SetScript("OnEscapePressed", fullReset)
+	editbox:SetScript("OnEnterPressed", clearFocus)
+	editbox:SetScript("OnEditFocusLost", clearFocus)
+	editbox:SetScript("OnEditFocusGained", gainFocus)
 	editbox:SetScript("OnTextChanged", updateSearch)
-	editbox:SetText(SEARCH)
+	-- editbox:SetText(SEARCH)
 
 	local detail = f:CreateFontString(nil, "ARTWORK", "GameFontHighlightLarge")
-	detail:SetPoint("TOPLEFT", f, 11, -10)
-	detail:SetPoint("RIGHT", f, -140, -10)
+	detail:SetPoint("TOPLEFT", f, 12, -8)
+	detail:SetPoint("RIGHT", f, -150, -8)
 	detail:SetHeight(13)
 	detail:SetShadowColor(0, 0, 0, 0)
 	detail:SetJustifyH("LEFT")
 	detail:SetText("|cff9999ff"..SEARCH.."|r")
 	editbox:SetAllPoints(detail)
+
+	local buttons = {}
+	local filterTable
+	if T.Classic then
+		filterTable = {
+			[1] = {134811, GetItemClassInfo(0)},	-- Consumable
+			[2] = {135280, GetItemClassInfo(2)},	-- Weapon
+			[3] = {132341, GetItemClassInfo(4)},	-- Armor
+			[4] = {132281, GetItemClassInfo(7)},	-- Tradeskill
+			[5] = {134269, ITEM_BIND_QUEST},		-- Quest
+			[6] = {133784, ITEM_BIND_ON_EQUIP},		-- BoE
+		}
+	else
+		filterTable = {
+			[1] = {3566860, GetItemClassInfo(0)},	-- Consumable
+			[2] = {135280, GetItemClassInfo(2)},	-- Weapon
+			[3] = {132341, GetItemClassInfo(4)},	-- Armor
+			[4] = {132281, GetItemClassInfo(7)},	-- Tradeskill
+			[5] = {236667, ITEM_BIND_QUEST},		-- Quest
+			[6] = {133784, ITEM_BIND_ON_EQUIP},		-- BoE
+		}
+	end
+	for i = 1, #filterTable do
+		local button = CreateFrame("Button", "BagsFilterButton"..i, C.bag.filter and f or editbox)
+		button:SetSize(25, 25)
+		button:SetTemplate("Overlay")
+		button:EnableMouse(true)
+		button:RegisterForClicks("AnyUp")
+		if i == 1 then
+			button:SetPoint("TOPRIGHT", f, "TOPLEFT", -1, 0)
+		else
+			button:SetPoint("TOP", buttons[i-1], "BOTTOM", 0, -1)
+		end
+		buttons[i] = button
+		local icon, text = unpack(filterTable[i])
+		button.Icon = button:CreateTexture(nil, "OVERLAY")
+		button.Icon:SetTexture(icon)
+		button.Icon:SetTexCoord(0.1, 0.9, 0.1, 0.9)
+		button.Icon:SetPoint("TOPLEFT", button, 2, -2)
+		button.Icon:SetPoint("BOTTOMRIGHT", button, -2, 2)
+		button:SetScript("OnClick", function(self)
+			if editbox:GetText() == text then
+				Stuffing:SearchReset()
+			else
+				detail:Hide()
+				editbox:Show()
+				editbox:SetText(text)
+				Stuffing:SearchUpdate(text)
+			end
+		end)
+
+		local tooltip_hide = function()
+			GameTooltip:Hide()
+		end
+
+		local tooltip_show = function(self)
+			GameTooltip:SetOwner(self, "ANCHOR_TOPRIGHT", -5, 5)
+			GameTooltip:ClearLines()
+			GameTooltip:SetText(text)
+		end
+
+		button:SetScript("OnEnter", tooltip_show)
+		button:SetScript("OnLeave", tooltip_hide)
+	end
 
 	local button = CreateFrame("Button", nil, f)
 	button:EnableMouse(true)
@@ -995,11 +1230,9 @@ function Stuffing:InitBags()
 			self:GetParent().detail:Hide()
 			self:GetParent().editbox:Show()
 			self:GetParent().editbox:HighlightText()
+			self:GetParent().editbox:SetFocus()
 		else
 			if self:GetParent().editbox:IsShown() then
-				self:GetParent().editbox:Hide()
-				self:GetParent().editbox:ClearFocus()
-				self:GetParent().detail:Show()
 				Stuffing:SearchReset()
 			end
 		end
@@ -1010,53 +1243,14 @@ function Stuffing:InitBags()
 	end
 
 	local tooltip_show = function(self)
-		GameTooltip:SetOwner(self, "ANCHOR_CURSOR")
+		GameTooltip:SetOwner(self, "ANCHOR_TOPLEFT", -12, 11)
 		GameTooltip:ClearLines()
 		GameTooltip:SetText(self.ttText)
 	end
 
 	button:SetScript("OnEnter", tooltip_show)
 	button:SetScript("OnLeave", tooltip_hide)
-if not T.classic then	
-	if C.bag.bag_buttons then
-		-- Deposit Button
-		f.depositButton = CreateFrame("Button", nil, f)
-		f.depositButton:SetSize(18, 18)
-		f.depositButton:SetTemplate()
-		f.depositButton:StyleButton(true)
-		f.depositButton:SetPoint("TOPRIGHT", f, -25, -4)
-		f.depositButton:SetNormalTexture("Interface\\ICONS\\misc_arrowdown")
-		f.depositButton:GetNormalTexture():SetTexCoord(0.1, 0.9, 0.1, 0.9)
-		f.depositButton:GetNormalTexture():SetPoint("TOPLEFT", 2, -2)
-		f.depositButton:GetNormalTexture():SetPoint("BOTTOMRIGHT", -2, 2)
-		f.depositButton.ttText = L_BAG_BUTTONS_DEPOSIT
-		f.depositButton:SetScript("OnEnter", tooltip_show)
-		f.depositButton:SetScript("OnLeave", tooltip_hide)
-		f.depositButton:SetScript('OnClick', function()
-			PlaySound(852) --IG_MAINMENU_OPTION
-			DepositReagentBank()
-		end)
 
-
-		-- Sort Button
-		f.sortButton = CreateFrame("Button", nil, f)
-		f.sortButton:SetSize(18, 18)
-		f.sortButton:SetTemplate()
-		f.sortButton:StyleButton(true)
-		f.sortButton:SetPoint("TOPRIGHT", f.depositButton, -25, 0)
-		f.sortButton:SetNormalTexture("Interface\\ICONS\\INV_Pet_Broom")
-		f.sortButton:GetNormalTexture():SetTexCoord(0.1, 0.9, 0.1, 0.9)
-		f.sortButton:GetNormalTexture():SetPoint("TOPLEFT", 2, -2)
-		f.sortButton:GetNormalTexture():SetPoint("BOTTOMRIGHT", -2, 2)
-		f.sortButton.ttText = "Sort"
-		f.sortButton:SetScript("OnEnter", tooltip_show)
-		f.sortButton:SetScript("OnLeave", tooltip_hide)
-		f.sortButton:SetScript("OnMouseUp", function(self, btn)
-			SetSortBagsRightToLeft(true)
-			SortBags()
-		end)
-	end
-end
 	f.editbox = editbox
 	f.detail = detail
 	f.button = button
@@ -1080,13 +1274,9 @@ function Stuffing:Layout(isBank)
 		cols = C.bag.bag_columns
 		f = self.frame
 
-		f.editbox:SetFont(C.media.normal_font, C.font.bags_font_size + 3)
+		f.editbox:SetFont(C.media.normal_font, C.font.bags_font_size + 3, "")
 		f.detail:SetFont(C.font.bags_font, C.font.bags_font_size, C.font.bags_font_style)
 		f.detail:SetShadowOffset(C.font.bags_font_shadow and 1 or 0, C.font.bags_font_shadow and -1 or 0)
-
-		f.detail:ClearAllPoints()
-		f.detail:SetPoint("TOPLEFT", f, 12, -8)
-		f.detail:SetPoint("RIGHT", f, -140, 0)
 	end
 
 	f:SetClampedToScreen(1)
@@ -1099,7 +1289,7 @@ function Stuffing:Layout(isBank)
 		fb:SetTemplate("Transparent")
 
 		local bsize = C.bag.button_size
-		
+
 		local w = 2 * 10
 		w = w + ((#bs - 1) * bsize)
 		w = w + ((#bs - 2) * 4)
@@ -1113,7 +1303,7 @@ function Stuffing:Layout(isBank)
 
 	local idx = 0
 	for _, v in ipairs(bs) do
-		if (not isBank and v <= 3 ) or (isBank and v ~= -1) then
+		if (not isBank and v <= (T.Classic and 3 or 4)) or (isBank and v ~= -1) then
 			local bsize = C.bag.button_size
 			local b = self:BagFrameSlotNew(fb, v)
 			local xoff = 10
@@ -1126,22 +1316,22 @@ function Stuffing:Layout(isBank)
 			b.frame:SetSize(bsize, bsize)
 
 			local btns = self.buttons
-			b.frame:HookScript("OnEnter", function(self)
+			b.frame:HookScript("OnEnter", function()
 				local bag
 				if isBank then bag = v else bag = v + 1 end
 
 				for _, val in ipairs(btns) do
 					if val.bag == bag then
-						val.frame:SetAlpha(1)
+						val.frame.searchOverlay:Hide()
 					else
-						val.frame:SetAlpha(0.2)
+						val.frame.searchOverlay:Show()
 					end
 				end
 			end)
 
-			b.frame:HookScript("OnLeave", function(self)
+			b.frame:HookScript("OnLeave", function()
 				for _, btn in ipairs(btns) do
-					btn.frame:SetAlpha(1)
+					btn.frame.searchOverlay:Hide()
 				end
 			end)
 
@@ -1152,15 +1342,15 @@ function Stuffing:Layout(isBank)
 	end
 
 	for _, i in ipairs(bs) do
-		local x = GetContainerNumSlots(i)
+		local x = C_Container.GetContainerNumSlots(i)
 		if x > 0 then
 			if not self.bags[i] then
 				self.bags[i] = self:BagNew(i, f)
 			end
 
-			slots = slots + GetContainerNumSlots(i)
+			slots = slots + C_Container.GetContainerNumSlots(i)
 		end
-		self.bags_num[i] = x				  
+		self.bags_num[i] = x
 	end
 
 	rows = floor(slots / cols)
@@ -1173,8 +1363,8 @@ function Stuffing:Layout(isBank)
 
 	local idx = 0
 	for _, i in ipairs(bs) do
-		local bag_cnt = GetContainerNumSlots(i)
-		local specialType = select(2, GetContainerNumFreeSlots(i))
+		local bag_cnt = C_Container.GetContainerNumSlots(i)
+		local specialType = select(2, C_Container.GetContainerNumFreeSlots(i))
 		if bag_cnt > 0 then
 			self.bags[i] = self:BagNew(i, f)
 			local bagType = self.bags[i].bagType
@@ -1229,25 +1419,15 @@ function Stuffing:Layout(isBank)
 						b.frame:SetBackdropBorderColor(0.9, 0, 0.1)
 					end
 					b.frame.lock = true
+				elseif T.Mainline and i == 5 then 		-- Reagent
+					b.frame:SetBackdropBorderColor(0.5, 0.25, 0.1)
+					b.frame.lock = true
 				end
 
 				idx = idx + 1
 			end
 		end
 	end
-end
-
-local function Stuffing_Sort(args)
-	if not args then
-		args = ""
-	end
-	if _G["StuffingFrameReagent"] and _G["StuffingFrameReagent"]:IsShown() then
-		SortReagentBankBags()
-		return
-	end
-	Stuffing.itmax = 0
-	Stuffing:SetBagsForSorting(args)
-	Stuffing:SortBags()
 end
 
 function Stuffing:SetBagsForSorting(c)
@@ -1292,90 +1472,31 @@ function Stuffing:SetBagsForSorting(c)
 			table.insert(self.sortBags, tonumber(s))
 		end
 	end
-
-	local bids = L_BAG_BAGS_BIDS
-	for _, i in ipairs(self.sortBags) do
-		bids = bids..i.." "
-	end
-
-	Print(bids)
 end
-
--- Slash command handler
-local function StuffingSlashCmd(Cmd)
-	local cmd, args = strsplit(" ", Cmd:lower(), 2)
-
-	if cmd == "config" then
-		Stuffing_OpenConfig()
-	elseif cmd == "sort" then
-		Stuffing_Sort(args)
-	elseif cmd == "psort" then
-		Stuffing_Sort("c/p")
-	elseif cmd == "stack" then
-
-		Stuffing:SetBagsForSorting(args)
-		Stuffing:Restack()
-	elseif cmd == "test" then
-		Stuffing:SetBagsForSorting(args)
-	elseif cmd == "purchase" then
-
-		if Stuffing.bankFrame and Stuffing.bankFrame:IsShown() then
-			local cnt, full = GetNumBankSlots()
-			if full then
-
-				Print(L_BAG_NO_SLOTS)
-				return
-			end
-
-			if args == "yes" then
-				PurchaseSlot()
-				return
-			end
-
-			Print(string.format(L_BAG_COSTS, GetBankSlotCost() / 10000))
-
-			Print(L_BAG_BUY_SLOTS)
-		else
-
-			Print(L_BAG_OPEN_BANK)
-		end
-	else
-		Print("/bags sort - "..L_BAG_SORT)
-		Print("/bags stack - "..L_BAG_STACK)
-		Print("/bags purchase - "..L_BAG_BUY_BANKS_SLOT)
-	end
-end
-
 
 function Stuffing:ADDON_LOADED(addon)
-
 	if addon ~= "ViksUI" then return nil end
+
 	self:RegisterEvent("BAG_UPDATE")
 	self:RegisterEvent("ITEM_LOCK_CHANGED")
-
 	self:RegisterEvent("BANKFRAME_OPENED")
 	self:RegisterEvent("BANKFRAME_CLOSED")
 	self:RegisterEvent("PLAYERBANKSLOTS_CHANGED")
-	self:RegisterEvent("BAG_CLOSED")
-	self:RegisterEvent("BAG_UPDATE_COOLDOWN")
-	if not T.classic then
+	self:RegisterEvent("PLAYERBANKBAGSLOTS_CHANGED")
+	if T.TBC or T.Wrath or T.Cata then
 		self:RegisterEvent("GUILDBANKFRAME_OPENED")
 		self:RegisterEvent("GUILDBANKFRAME_CLOSED")
 	end
-	self:RegisterEvent("PLAYERBANKSLOTS_CHANGED")
-	if not T.classic then
-		self:RegisterEvent("PLAYERBANKBAGSLOTS_CHANGED")
+	if T.Mainline then
+		self:RegisterEvent("PLAYER_INTERACTION_MANAGER_FRAME_SHOW")
+		self:RegisterEvent("PLAYER_INTERACTION_MANAGER_FRAME_HIDE")
 		self:RegisterEvent("PLAYERREAGENTBANKSLOTS_CHANGED")
+		self:RegisterEvent("BAG_CONTAINER_UPDATE")
 	end
 	self:RegisterEvent("BAG_CLOSED")
 	self:RegisterEvent("BAG_UPDATE_COOLDOWN")
-	if not T.classic then
-		self:RegisterEvent("SCRAPPING_MACHINE_SHOW")
-	end
+	self:RegisterEvent("BAG_UPDATE_DELAYED")
 
-	SlashCmdList.STUFFING = StuffingSlashCmd
-	SLASH_STUFFING1 = "/bags"
-	SLASH_STUFFING2 = "/ифпы"
 	self:InitBags()
 
 	tinsert(UISpecialFrames, "StuffingFrameBags")
@@ -1388,6 +1509,17 @@ function Stuffing:ADDON_LOADED(addon)
 	OpenBackpack = Stuffing_Open
 	CloseAllBags = Stuffing_Close
 	CloseBackpack = Stuffing_Close
+
+	OpenAllBagsMatchingContext = function()
+		local count = 0
+		for i = 0, NUM_BAG_FRAMES do
+			if ItemButtonUtil.GetItemContextMatchResultForContainer(i) == ItemButtonUtil.ItemContextMatchResult.Match then
+				Stuffing_Open()
+				count = count + 1
+			end
+		end
+		return count
+	end
 
 	BankFrame:UnregisterAllEvents()
 	BankFrame:SetScale(0.00001)
@@ -1402,37 +1534,22 @@ function Stuffing:PLAYER_ENTERING_WORLD()
 end
 
 function Stuffing:PLAYERBANKSLOTS_CHANGED(id)
-	if id > 28 then
-		for _, v in ipairs(self.bagframe_buttons) do
-			if v.frame and v.frame.GetInventorySlot then
-
-				BankFrameItemButton_Update(v.frame)
-				BankFrameItemButton_UpdateLocked(v.frame)
-
-				if not v.frame.tooltipText then
-					v.frame.tooltipText = ""
-				end
-			end
-		end
-	end
-
 	if self.bankFrame and self.bankFrame:IsShown() then
 		self:BagSlotUpdate(-1)
 	end
 end
 
-function Stuffing:PLAYERREAGENTBANKSLOTS_CHANGED()
-	for i = 1, 98 do
-		local button = _G["ReagentBankFrameItem" .. i]
-		if not button then return end
-		local _, _, _, quality = GetContainerItemInfo(-3, i)
-		local clink = GetContainerItemLink(-3, i)
-		button:SetBackdropBorderColor(unpack(C.media.border_color))
+function Stuffing:PLAYERREAGENTBANKSLOTS_CHANGED(id)
+	local button = _G["ReagentBankFrameItem"..id]
+	if not button then return end
+	local clink = C_Container.GetContainerItemLink(-3, id)
+	button:SetBackdropBorderColor(unpack(C.media.border_color))
 
-		if clink then
-			if quality and quality > 1 then
-				button:SetBackdropBorderColor(GetItemQualityColor(quality))
-			end
+	if clink then
+		local _, _, _, quality = GetContainerItemInfo(-3, id)
+		if quality and quality > 1 then
+			local r, g, b = GetItemQualityColor(quality)
+			button:SetBackdropBorderColor(r, g, b)
 		end
 	end
 end
@@ -1441,9 +1558,9 @@ function Stuffing:BAG_UPDATE(id)
 	self:BagSlotUpdate(id)
 end
 
-function Stuffing:BAG_UPDATE_DELAYED(id)
+function Stuffing:BAG_UPDATE_DELAYED()
 	for _, i in ipairs(BAGS_BACKPACK) do
-		local numSlots = GetContainerNumSlots(i)
+		local numSlots = C_Container.GetContainerNumSlots(i)
 		if self.bags_num[i] and self.bags_num[i] ~= numSlots then
 			self:Layout()
 			return
@@ -1465,7 +1582,7 @@ function Stuffing:BANKFRAME_OPENED()
 	if not self.bankFrame then
 		self:InitBank()
 	end
-	
+
 	self:Layout(true)
 	for _, x in ipairs(BAGS_BANK) do
 		self:BagSlotUpdate(x)
@@ -1473,6 +1590,17 @@ function Stuffing:BANKFRAME_OPENED()
 
 	self.bankFrame:Show()
 	Stuffing_Open()
+
+	for _, v in ipairs(self.bagframe_buttons) do
+		if v.frame and v.frame.GetInventorySlot then
+			v.frame:SetBackdropBorderColor(unpack(C.media.border_color))
+			BankFrameItemButton_Update(v.frame)
+
+			if not v.frame.tooltipText then
+				v.frame.tooltipText = ""
+			end
+		end
+	end
 end
 
 function Stuffing:BANKFRAME_CLOSED()
@@ -1492,13 +1620,31 @@ function Stuffing:GUILDBANKFRAME_CLOSED()
 	Stuffing_Close()
 end
 
+function Stuffing:PLAYER_INTERACTION_MANAGER_FRAME_SHOW(...)
+	local type = ...
+	if type == 10 then	-- Guild bank
+		Stuffing_Open()
+	elseif type == 40 then	-- ScrappingMachine
+		for i = 0, #BAGS_BACKPACK - 1 do
+			Stuffing:BAG_UPDATE(i)
+		end
+	end
+end
+
+function Stuffing:PLAYER_INTERACTION_MANAGER_FRAME_HIDE(...)
+	local type = ...
+	if type == 10 then	-- Guild bank
+		Stuffing_Close()
+	end
+end
+
 function Stuffing:BAG_CLOSED(id)
 	local b = self.bags[id]
 	if b then
 		table.remove(self.bags, id)
 		b:Hide()
 		table.insert(trashBag, #trashBag + 1, b)
-		self.bags_num[id] = -1						
+		self.bags_num[id] = -1
 	end
 
 	while true do
@@ -1521,7 +1667,7 @@ function Stuffing:BAG_CLOSED(id)
 			break
 		end
 	end
-	if id > 4 then
+	if id > (T.Classic and 4 or 5) then
 		Stuffing_Close() -- prevent graphical bug with empty slots
 	end
 end
@@ -1532,9 +1678,24 @@ function Stuffing:BAG_UPDATE_COOLDOWN()
 	end
 end
 
-function Stuffing:SCRAPPING_MACHINE_SHOW()
-	for i = 0, #BAGS_BACKPACK - 1 do
-		Stuffing:BAG_UPDATE(i)
+function Stuffing:BAG_CONTAINER_UPDATE()
+	for _, v in ipairs(self.bagframe_buttons) do
+		if v.frame and v.slot < (T.Classic and 4 or 5) then -- exclude bank
+			v.frame.ID = C_Container.ContainerIDToInventoryID(v.slot + 1)
+
+			local slotLink = GetInventoryItemLink("player", v.frame.ID)
+			v.frame:SetBackdropBorderColor(unpack(C.media.border_color))
+			if slotLink then
+				local _, _, quality = GetItemInfo(slotLink)
+				if quality and quality > 1 then
+					local r, g, b = GetItemQualityColor(quality)
+					v.frame:SetBackdropBorderColor(r, g, b)
+				end
+			end
+
+			local bag_tex = GetInventoryItemTexture("player", v.frame.ID)
+			_G[v.frame:GetName().."IconTexture"]:SetTexture(bag_tex)
+		end
 	end
 end
 
@@ -1582,8 +1743,8 @@ function Stuffing:SortOnUpdate(elapsed)
 			if locked1 or locked2 then
 				blocked = true
 			elseif bagIndex ~= destinationBag or slotIndex ~= destinationSlot then
-				PickupContainerItem(bagIndex, slotIndex)
-				PickupContainerItem(destinationBag, destinationSlot)
+				C_Container.PickupContainerItem(bagIndex, slotIndex)
+				C_Container.PickupContainerItem(destinationBag, destinationSlot)
 
 				local tempItem = BS_itemSwapGrid[destinationBag][destinationSlot]
 				BS_itemSwapGrid[destinationBag][destinationSlot] = BS_itemSwapGrid[bagIndex][slotIndex]
@@ -1608,15 +1769,15 @@ function Stuffing:SortBags()
 	if _G["StuffingFrameReagent"] and _G["StuffingFrameReagent"]:IsShown() then
 		bagList = {-3}
 	elseif Stuffing.bankFrame and Stuffing.bankFrame:IsShown() then
-		bagList = T.classic and {10, 9, 8, 7, 6, 5, -1} or {11, 10, 9, 8, 7, 6, 5, -1}
+		bagList = T.Vanilla and {10, 9, 8, 7, 6, 5, -1} or T.Classic and {11, 10, 9, 8, 7, 6, 5, -1} or {12, 11, 10, 9, 8, 7, 6, -1}
 	else
 		bagList = {4, 3, 2, 1, 0}
 	end
 
 	for _, slotNum in pairs(bagList) do
-		if GetContainerNumSlots(slotNum) > 0 then
+		if C_Container.GetContainerNumSlots(slotNum) > 0 then
 			BS_itemSwapGrid[slotNum] = {}
-			local family = select(2, GetContainerNumFreeSlots(slotNum))
+			local family = select(2, C_Container.GetContainerNumFreeSlots(slotNum))
 			if family then
 				if family == 0 then family = "Default" end
 				if not BS_bagGroups[family] then
@@ -1631,17 +1792,20 @@ function Stuffing:SortBags()
 	for _, group in pairs(BS_bagGroups) do
 		group.itemList = {}
 		for _, bagSlot in pairs(group.bagSlotNumbers) do
-			for itemSlot = 1, GetContainerNumSlots(bagSlot) do
-
-				local itemLink = GetContainerItemLink(bagSlot, itemSlot)
+			for itemSlot = 1, C_Container.GetContainerNumSlots(bagSlot) do
+				local itemLink = C_Container.GetContainerItemLink(bagSlot, itemSlot)
 				if itemLink ~= nil then
-
 					local newItem = {}
 
-					local n, _, q, iL, rL, c1, c2, _, Sl = GetItemInfo(itemLink)
+					local n, _, q, iL, rL, c1, c2, _, Sl, _, _, classID = GetItemInfo(itemLink)
+					local p = 1
 					-- Hearthstone
 					if n == GetItemInfo(6948) or n == GetItemInfo(110560) or n == GetItemInfo(140192) then
-						q = 9
+						p = 99
+					elseif n == GetItemInfo(141605) then -- Flight Master's Whistle
+						p = 98
+					elseif n == GetItemInfo(128353) then -- Admiral's Compass
+						p = 97
 					end
 					-- Fix for battle pets
 					if not n then
@@ -1654,7 +1818,19 @@ function Stuffing:SortBags()
 						Sl = ""
 					end
 
-					newItem.sort = q..c1..c2..rL..n..iL..Sl
+					-- Keystone
+					local ks = strmatch(itemLink, "keystone:(%d+)")
+					if ks then
+						p = 10
+					end
+
+					if classID == 0 then	-- Consumable
+						p = 9
+					elseif classID == 2 or classID == 4 then	-- Weapon and Armor
+						p = 8
+					end
+
+					newItem.sort = p..q..c1..c2..rL..n..iL..Sl
 
 					tinsert(group.itemList, newItem)
 
@@ -1672,12 +1848,12 @@ function Stuffing:SortBags()
 		for index, item in pairs(group.itemList) do
 			local gridSlot = index
 			for _, bagSlotNumber in pairs(group.bagSlotNumbers) do
-				if gridSlot <= GetContainerNumSlots(bagSlotNumber) then
+				if gridSlot <= C_Container.GetContainerNumSlots(bagSlotNumber) then
 					BS_itemSwapGrid[item.startBag][item.startSlot].destinationBag = bagSlotNumber
-					BS_itemSwapGrid[item.startBag][item.startSlot].destinationSlot = GetContainerNumSlots(bagSlotNumber) - gridSlot + 1
+					BS_itemSwapGrid[item.startBag][item.startSlot].destinationSlot = C_Container.GetContainerNumSlots(bagSlotNumber) - gridSlot + 1
 					break
 				else
-					gridSlot = gridSlot - GetContainerNumSlots(bagSlotNumber)
+					gridSlot = gridSlot - C_Container.GetContainerNumSlots(bagSlotNumber)
 				end
 			end
 		end
@@ -1701,41 +1877,75 @@ end
 
 function Stuffing:Restack()
 	local st = {}
+	local sr = {}
+	local did_restack = false
 
 	Stuffing_Open()
 
-	for _, v in pairs(self.buttons) do
-		if InBags(v.bag) then
-			local _, cnt, _, _, _, _, clink = GetContainerItemInfo(v.bag, v.slot)
+	if _G["StuffingFrameReagent"] and _G["StuffingFrameReagent"]:IsShown() then
+		for slotID = 1, 98 do
+			local _, cnt, _, _, _, _, clink = GetContainerItemInfo(-3, slotID)
 			if clink then
 				local n, _, _, _, _, _, _, s = GetItemInfo(clink)
 
 				if n and cnt ~= s then
-					if not st[clink] then
-						st[clink] = {{item = v, size = cnt, max = s}}
+					if not sr[clink] then
+						sr[clink] = {{item = slotID, size = cnt, max = s}}
 					else
-						table.insert(st[clink], {item = v, size = cnt, max = s})
+						table.insert(sr[clink], {item = slotID, size = cnt, max = s})
 					end
 				end
 			end
 		end
-	end
 
-	local did_restack = false
+		for _, v in pairs(sr) do
+			if #v > 1 then
+				for j = 2, #v, 2 do
+					local a, b = v[j - 1], v[j]
+					local _, _, l1 = GetContainerItemInfo(-3, a.item)
+					local _, _, l2 = GetContainerItemInfo(-3, b.item)
 
-	for _, v in pairs(st) do
-		if #v > 1 then
-			for j = 2, #v, 2 do
-				local a, b = v[j - 1], v[j]
-				local _, _, l1 = GetContainerItemInfo(a.item.bag, a.item.slot)
-				local _, _, l2 = GetContainerItemInfo(b.item.bag, b.item.slot)
+					if l1 or l2 then
+						did_restack = true
+					else
+						C_Container.PickupContainerItem(-3, a.item)
+						C_Container.PickupContainerItem(-3, b.item)
+						did_restack = true
+					end
+				end
+			end
+		end
+	else
+		for _, v in pairs(self.buttons) do
+			if InBags(v.bag) then
+				local _, cnt, _, _, _, _, clink = GetContainerItemInfo(v.bag, v.slot)
+				if clink then
+					local n, _, _, _, _, _, _, s = GetItemInfo(clink)
 
-				if l1 or l2 then
-					did_restack = true
-				else
-					PickupContainerItem(a.item.bag, a.item.slot)
-					PickupContainerItem(b.item.bag, b.item.slot)
-					did_restack = true
+					if n and cnt ~= s then
+						if not st[clink] then
+							st[clink] = {{item = v, size = cnt, max = s}}
+						else
+							table.insert(st[clink], {item = v, size = cnt, max = s})
+						end
+					end
+				end
+			end
+		end
+		for _, v in pairs(st) do
+			if #v > 1 then
+				for j = 2, #v, 2 do
+					local a, b = v[j - 1], v[j]
+					local _, _, l1 = GetContainerItemInfo(a.item.bag, a.item.slot)
+					local _, _, l2 = GetContainerItemInfo(b.item.bag, b.item.slot)
+
+					if l1 or l2 then
+						did_restack = true
+					else
+						C_Container.PickupContainerItem(a.item.bag, a.item.slot)
+						C_Container.PickupContainerItem(b.item.bag, b.item.slot)
+						did_restack = true
+					end
 				end
 			end
 		end
@@ -1745,7 +1955,6 @@ function Stuffing:Restack()
 		self:SetScript("OnUpdate", Stuffing.RestackOnUpdate)
 	else
 		self:SetScript("OnUpdate", nil)
-		Print(L_BAG_STACK_END)
 	end
 end
 
@@ -1780,21 +1989,21 @@ function Stuffing.Menu(self, level)
 
 	if level ~= 1 then return end
 
-	if not T.classic then
+	if T.Mainline then
 		wipe(info)
 		info.text = BAG_FILTER_CLEANUP.." Blizzard"
 		info.notCheckable = 1
 		info.func = function()
 			if _G["StuffingFrameReagent"] and _G["StuffingFrameReagent"]:IsShown() then
-				SortReagentBankBags()
+				C_Container.SortReagentBankBags()
 			elseif Stuffing.bankFrame and Stuffing.bankFrame:IsShown() then
-				SortBankBags()
+				C_Container.SortBankBags()
 			else
-				SortBags()
+				C_Container.SortBags()
 			end
 		end
+		UIDropDownMenu_AddButton(info, level)
 	end
-	UIDropDownMenu_AddButton(info, level)
 
 	wipe(info)
 	info.text = BAG_FILTER_CLEANUP
@@ -1838,11 +2047,16 @@ function Stuffing.Menu(self, level)
 	end
 	UIDropDownMenu_AddButton(info, level)
 
-	if ToggleKeyRing then -- since KeyRing isn't in phase 1, but it will be in phase 2
+	if T.Classic then
 		wipe(info)
-		info.text = "Show Keyring" --TODO: L_BAG_SHOW_KEYRING
+		info.text = BINDING_NAME_TOGGLEKEYRING
 		info.notCheckable = 1
-		info.func = ToggleKeyRing
+		info.func = function()
+			if InCombatLockdown() then
+				print("|cffffff00"..ERR_NOT_IN_COMBAT.."|r") return
+			end
+			Stuffing_ToggleBag(-2)
+		end
 		UIDropDownMenu_AddButton(info, level)
 	end
 
@@ -1866,10 +2080,10 @@ StaticPopupDialogs.BUY_BANK_SLOT = {
 	hasMoneyFrame = 1,
 	timeout = 0,
 	hideOnEscape = 1,
+	preferredIndex = 5,
 }
 
 -- Kill Blizzard functions
 LootWonAlertFrame_OnClick = T.dummy
 LootUpgradeFrame_OnClick = T.dummy
-StorePurchaseAlertFrame_OnClick = T.dummy
 LegendaryItemAlertFrame_OnClick = T.dummy

@@ -1,27 +1,17 @@
-local T, C, L, _ = unpack(select(2, ...))
-if T.classic or C.skins.blizzard_frames ~= true then return end
+local T, C, L = unpack(ViksUI)
+if C.skins.blizzard_frames ~= true then return end
 
 ----------------------------------------------------------------------------------------
 --	PetStable skin
 ----------------------------------------------------------------------------------------
 local function LoadSkin()
-	PetStableFrame:StripTextures(true)
-	PetStableLeftInset:StripTextures(true)
-	PetStableFrameInset:StripTextures(true)
-	PetStableBottomInset:StripTextures(true)
-	PetStableModelShadow:StripTextures(true)
+	local frame = PetStableFrame
+	T.SkinFrame(frame)
 
-	PetStableFrame:CreateBackdrop("Transparent")
-
-	T.SkinRotateButton(PetStableModelRotateLeftButton)
-	T.SkinRotateButton(PetStableModelRotateRightButton)
-	PetStableModelRotateRightButton:ClearAllPoints()
-	PetStableModelRotateRightButton:SetPoint("LEFT", PetStableModelRotateLeftButton, "RIGHT", 3, 0)
+	PetStableFrameInset:SetTemplate("Overlay")
 
 	T.SkinNextPrevButton(PetStablePrevPageButton, nil, "Any")
 	T.SkinNextPrevButton(PetStableNextPageButton, nil, "Any")
-
-	T.SkinCloseButton(PetStableFrameCloseButton)
 
 	for i = 1, NUM_PET_ACTIVE_SLOTS do
 		local button = _G["PetStableActivePet"..i]
@@ -57,7 +47,7 @@ local function LoadSkin()
 	PetStableDiet:SetSize(20, 20)
 	PetStableDiet:SetPoint("TOPRIGHT", -9, -2)
 
-	PetStableDietTexture:SetTexture("Interface\\Icons\\ability_hunter_beasttraining")
+	PetStableDietTexture:SetTexture(132165)
 	PetStableDietTexture:SkinIcon()
 end
 

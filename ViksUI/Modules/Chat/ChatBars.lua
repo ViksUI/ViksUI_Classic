@@ -1,4 +1,4 @@
-﻿local T, C, L, _ = unpack(select(2, ...))
+local T, C, L = unpack(ViksUI)
 if C.chat.enable ~= true or C.chat.chat_bar ~= true then return end
 
 ----------------------------------------------------------------------------------------
@@ -22,7 +22,7 @@ local function CreateButton(b, l, r, m)
 	b:SetTemplate("Default")
 
 	b:RegisterForClicks("AnyUp")
-	b:SetScript("OnClick", function(self, b)
+	b:SetScript("OnClick", function(_, b)
 		if b == "LeftButton" then
 			ChatFrame_OpenChat(l, SELECTED_DOCK_FRAME)
 		elseif b == "RightButton" then
@@ -42,7 +42,7 @@ local function CreateButton(b, l, r, m)
 	end
 
 	b.t = b:CreateTexture(nil, "ARTWORK")
-	b.t:SetTexture(C.media.blank_border)
+	b.t:SetTexture(C.media.blank)
 	b.t:SetPoint("TOPLEFT", b, "TOPLEFT", 2, -2)
 	b.t:SetPoint("BOTTOMRIGHT", b, "BOTTOMRIGHT", -2, 2)
 end
@@ -82,3 +82,11 @@ CreateButton(b6, "/3", "/4")
 b6:SetPoint("TOP", b5, "BOTTOM", 0, C.chat.background and -4 or -3)
 b6:SetBackdropBorderColor(0.5, 1, 0.83, 1)
 b6.t:SetVertexColor(1, 0.75, 0.75, 1)
+
+if C.chat.height > 131 then
+	local b7 = CreateFrame("Button", "$parentButton7", frame)
+	CreateButton(b7, "/5", GetChannelName(6) ~= 0 and "/6" or "")
+	b7:SetPoint("TOP", b6, "BOTTOM", 0, C.chat.background and -4 or -3)
+	b7:SetBackdropBorderColor(0.5, 0.7, 0.1, 1)
+	b7.t:SetVertexColor(0.93, 0.8, 0.8, 1)
+end

@@ -1,4 +1,4 @@
-local T, C, L, _ = unpack(select(2, ...))
+local T, C, L = unpack(ViksUI)
 if C.misc.chars_currency ~= true then return end
 
 ----------------------------------------------------------------------------------------
@@ -15,17 +15,18 @@ local function UpdateData()
 	if TokenFrame:IsVisible() then
 		return
 	end
-	local i, limit = 1, GetCurrencyListSize()
+	local i, limit = 1, C_CurrencyInfo.GetCurrencyListSize()
 	while i <= limit do
-		local name, isHeader, isExpanded, _, _, count = GetCurrencyListInfo(i)
+		local info = C_CurrencyInfo.GetCurrencyListInfo(i)
+		local name, isHeader, isExpanded, count = info.name, info.isHeader, info.isHeaderExpanded, info.quantity
 		if isHeader then
 			if not isExpanded then
 				collapsed[name] = true
-				ExpandCurrencyList(i, 1)
-				limit = GetCurrencyListSize()
+				C_CurrencyInfo.ExpandCurrencyList(i, 1)
+				limit = C_CurrencyInfo.GetCurrencyListSize()
 			end
 		else
-			local link = GetCurrencyListLink(i)
+			local link = C_CurrencyInfo.GetCurrencyListLink(i)
 			local id = tonumber(strmatch(link, "currency:(%d+)"))
 			nameToID[name] = id
 			if count > 0 then
@@ -37,15 +38,22 @@ local function UpdateData()
 		i = i + 1
 	end
 	while i > 0 do
-		local name, isHeader, isExpanded = GetCurrencyListInfo(i)
-		if isHeader and isExpanded and collapsed[name] then
-			ExpandCurrencyList(i, 0)
+		local info = C_CurrencyInfo.GetCurrencyListInfo(i)
+		if info then
+			local name, isHeader, isExpanded = info.name, info.isHeader, info.isHeaderExpanded
+			if isHeader and isExpanded and collapsed[name] then
+				C_CurrencyInfo.ExpandCurrencyList(i, 0)
+			end
 		end
 		i = i - 1
 	end
 	wipe(collapsed)
 end
-hooksecurefunc("BackpackTokenFrame_Update", UpdateData)
+if T.Classic then
+	hooksecurefunc("BackpackTokenFrame_Update", UpdateData)
+else
+	hooksecurefunc(BackpackTokenFrame, "Update", UpdateData)
+end
 hooksecurefunc("TokenFrame_Update", UpdateData)
 
 local function AddTooltipInfo(tooltip, currency, includePlayer)
@@ -78,9 +86,9 @@ hooksecurefunc(GameTooltip, "SetCurrencyByID", function(tooltip, id)
 end)
 
 hooksecurefunc(GameTooltip, "SetCurrencyToken", function(_, i)
-	local name = GetCurrencyListInfo(i)
-	if name then
-		AddTooltipInfo(GameTooltip, nameToID[name], not TokenFrame:IsMouseOver())
+	local info = C_CurrencyInfo.GetCurrencyListInfo(i)
+	if info.name then
+		AddTooltipInfo(GameTooltip, nameToID[info.name], not TokenFrame:IsMouseOver())
 	end
 end)
 
@@ -126,8 +134,8 @@ hooksecurefunc(GameTooltip, "SetQuestCurrency", function(tooltip, type, id)
 	end
 end)
 
-hooksecurefunc(GameTooltip, "SetQuestLogCurrency", function(tooltip, _, id)
-	local name = GetQuestLogRewardCurrencyInfo(id)
+hooksecurefunc(GameTooltip, "SetQuestLogCurrency", function(tooltip, type, id)
+	local name = GetQuestCurrencyInfo(type, id)
 	if name then
 		AddTooltipInfo(tooltip, nameToID[name], true)
 	end
@@ -160,23 +168,19 @@ frame:SetScript("OnEvent", function(self, event, addon)
 	if event == "ADDON_LOADED" then
 		if addon ~= "ViksUI" then return end
 
-		if not SavedCurrency then SavedCurrency = {} end
-		if not SavedCurrency[T.realm] then SavedCurrency[T.realm] = {} end
-		if not SavedCurrency[T.realm][faction] then SavedCurrency[T.realm][faction] = {} end
-		if not SavedCurrency[T.realm][faction][T.name] then SavedCurrency[T.realm][faction][T.name] = {} end
+		if faction ~= "Alliance" and faction ~= "Horde" then return end
 
-		for k in pairs(SavedCurrency[T.realm]) do
-			if k ~= "Alliance" and k ~= "Horde" then
-				SavedCurrency[T.realm][k] = nil
-			end
-		end
+		ViksUICurrency = ViksUICurrency or {}
+		ViksUICurrency[T.realm] = ViksUICurrency[T.realm] or {}
+		ViksUICurrency[T.realm][faction] = ViksUICurrency[T.realm][faction] or {}
+		ViksUICurrency[T.realm][faction][T.name] = ViksUICurrency[T.realm][faction][T.name] or {}
 
-		local now = time()
-
-		realmDB = SavedCurrency[T.realm][faction]
+		realmDB = ViksUICurrency[T.realm][faction]
 		if not realmDB then return end
+
 		charDB = realmDB[T.name]
 
+		local now = time()
 		charDB.class = select(2, UnitClass("player"))
 		charDB.lastSeen = now
 

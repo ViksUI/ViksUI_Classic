@@ -1,5 +1,5 @@
-local T, C, L, _ = unpack(select(2, ...))
-if T.classic or C.skins.blizzard_frames ~= true then return end
+local T, C, L = unpack(ViksUI)
+if C.skins.blizzard_frames ~= true then return end
 
 ----------------------------------------------------------------------------------------
 --	GuildBankUI skin
@@ -7,8 +7,10 @@ if T.classic or C.skins.blizzard_frames ~= true then return end
 local function LoadSkin()
 	GuildBankFrame:StripTextures()
 	GuildBankFrame:SetTemplate("Transparent")
-	GuildBankEmblemFrame:StripTextures(true)
-	GuildBankMoneyFrameBackground:StripTextures()
+	GuildBankFrame.Emblem:StripTextures(true)
+	if T.Mainline then
+		GuildBankFrame.MoneyFrameBG:StripTextures()
+	end
 
 	for i = 1, GuildBankFrame:GetNumChildren() do
 		local child = select(i, GuildBankFrame:GetChildren())
@@ -17,41 +19,48 @@ local function LoadSkin()
 		end
 	end
 
-	GuildBankFrameDepositButton:SkinButton(true)
-	GuildBankFrameWithdrawButton:SkinButton(true)
+	GuildBankFrame.DepositButton:SkinButton(true)
+	GuildBankFrame.WithdrawButton:SkinButton(true)
 	GuildBankInfoSaveButton:SkinButton(true)
-	GuildBankFramePurchaseButton:SkinButton(true)
+	GuildBankFrame.BuyInfo.PurchaseButton:SkinButton(true)
 
-	GuildBankFrameWithdrawButton:SetPoint("RIGHT", GuildBankFrameDepositButton, "LEFT", -2, 0)
+	GuildBankFrame.WithdrawButton:SetPoint("RIGHT", GuildBankFrame.DepositButton, "LEFT", -2, 0)
 
-	GuildBankInfoScrollFrame:StripTextures()
-	GuildBankTransactionsScrollFrame:StripTextures()
-	T.SkinScrollBar(GuildBankPopupScrollFrameScrollBar)
-	T.SkinScrollBar(GuildBankInfoScrollFrameScrollBar)
-	T.SkinScrollBar(GuildBankTransactionsScrollFrameScrollBar)
-	GuildBankInfoScrollFrame:SetHeight(GuildBankInfoScrollFrame:GetHeight() - 5)
-	GuildBankTransactionsScrollFrame:SetHeight(GuildBankTransactionsScrollFrame:GetHeight() - 5)
+	if T.Classic then
+		GuildBankInfoScrollFrame:StripTextures()
+		GuildBankTransactionsScrollFrame:StripTextures()
+		T.SkinScrollBar(GuildBankPopupFrameScrollBar)
+		T.SkinScrollBar(GuildBankInfoScrollFrameScrollBar)
+		T.SkinScrollBar(GuildBankTransactionsScrollFrameScrollBar)
+		GuildBankInfoScrollFrame:SetHeight(GuildBankInfoScrollFrame:GetHeight() - 5)
+		GuildBankTransactionsScrollFrame:SetHeight(GuildBankTransactionsScrollFrame:GetHeight() - 5)
+	else
+		T.SkinScrollBar(GuildBankInfoScrollFrame.ScrollBar)
+		T.SkinScrollBar(GuildBankFrame.Log.ScrollBar)
+	end
 
 	GuildBankFrame.inset = CreateFrame("Frame", nil, GuildBankFrame)
 	GuildBankFrame.inset:SetTemplate("Overlay")
 	GuildBankFrame.inset:SetPoint("TOPLEFT", 21, -58)
 	GuildBankFrame.inset:SetPoint("BOTTOMRIGHT", -17, 61)
 
-	GuildItemSearchBox:StripTextures(true)
-	GuildItemSearchBox:CreateBackdrop("Overlay")
-	GuildItemSearchBox.backdrop:SetPoint("TOPLEFT", 13, 0)
-	GuildItemSearchBox.backdrop:SetPoint("BOTTOMRIGHT", -5, 0)
+	if T.Mainline then
+		GuildItemSearchBox:StripTextures(true)
+		GuildItemSearchBox:CreateBackdrop("Overlay")
+		GuildItemSearchBox.backdrop:SetPoint("TOPLEFT", 13, 0)
+		GuildItemSearchBox.backdrop:SetPoint("BOTTOMRIGHT", -2, 0)
+	end
 
-	for i = 1, NUM_GUILDBANK_COLUMNS do
-		_G["GuildBankColumn"..i]:StripTextures()
+	for i = 1, 7 do
+		local column = _G.GuildBankFrame["Column"..i]
+		column:StripTextures()
 
-		for j = 1, NUM_SLOTS_PER_GUILDBANK_GROUP do
-			local button = _G["GuildBankColumn"..i.."Button"..j]
-			local icon = _G["GuildBankColumn"..i.."Button"..j.."IconTexture"]
-			local border = _G["GuildBankColumn"..i.."Button"..j].IconBorder
+		for j = 1, 14 do
+			local button = column["Button"..j]
+			local icon = button.icon
 
-			border:Kill()
-			button:SetNormalTexture(nil)
+			button.IconBorder:SetAlpha(0)
+			button:SetNormalTexture(0)
 			button:StyleButton()
 			button:SetTemplate("Default")
 
@@ -63,27 +72,29 @@ local function LoadSkin()
 	end
 
 	for i = 1, 8 do
-		local button = _G["GuildBankTab"..i.."Button"]
-		local texture = _G["GuildBankTab"..i.."ButtonIconTexture"]
-		_G["GuildBankTab"..i]:StripTextures(true)
+		local tab = _G["GuildBankTab"..i]
+		if tab then
+			local button = tab.Button
+			local texture = button.IconTexture
+			tab:StripTextures(true)
 
-		button:StripTextures()
-		button:StyleButton()
-		button:SetTemplate("Default")
+			button:StripTextures()
+			button:StyleButton()
+			button:SetTemplate("Default")
 
-		-- Reposition tabs
-		button:ClearAllPoints()
-		if i == 1 then
-			button:SetPoint("TOPLEFT", GuildBankFrame, "TOPRIGHT", 1, 0)
-		else
-			local fixpos = i-1
-			button:SetPoint("TOP", _G["GuildBankTab"..fixpos.."Button"], "BOTTOM", 0, -20)
+			-- Reposition tabs
+			button:ClearAllPoints()
+			if i == 1 then
+				button:SetPoint("TOPLEFT", GuildBankFrame, "TOPRIGHT", 1, 0)
+			else
+				button:SetPoint("TOP", _G["GuildBankTab"..i-1].Button, "BOTTOM", 0, -20)
+			end
+
+			texture:ClearAllPoints()
+			texture:SetPoint("TOPLEFT", 2, -2)
+			texture:SetPoint("BOTTOMRIGHT", -2, 2)
+			texture:SetTexCoord(0.1, 0.9, 0.1, 0.9)
 		end
-
-		texture:ClearAllPoints()
-		texture:SetPoint("TOPLEFT", 2, -2)
-		texture:SetPoint("BOTTOMRIGHT", -2, 2)
-		texture:SetTexCoord(0.1, 0.9, 0.1, 0.9)
 	end
 
 	for i = 1, 4 do
@@ -95,7 +106,14 @@ local function LoadSkin()
 	GuildBankFrameTab1:SetPoint("TOPLEFT", GuildBankFrame, "BOTTOMLEFT", 0, 2)
 
 	-- Popup
-	T.SkinIconSelectionFrame(GuildBankPopupFrame, NUM_GUILDBANK_ICONS_SHOWN, nil, "GuildBankPopup")
+	if T.Mainline then
+		GuildBankPopupFrame:HookScript("OnShow", function(frame)
+			if not frame.isSkinned then
+				T.SkinIconSelectionFrame(frame, nil, nil, "GuildBankPopup")
+				frame.isSkinned = true
+			end
+		end)
+	end
 end
 
 T.SkinFuncs["Blizzard_GuildBankUI"] = LoadSkin

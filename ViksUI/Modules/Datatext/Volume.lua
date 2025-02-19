@@ -1,4 +1,4 @@
-local T, C, L, _ = unpack(select(2, ...))
+local T, C, L = unpack(ViksUI)
 
 --Lua functions
 local select = select
@@ -160,7 +160,7 @@ Stat:SetScript("OnMouseDown", function(self)
 	OnEvent(self, nil, nil)
 end)
 
-Stat:RegisterEvent("CVAR_UPDATE")
+--Stat:RegisterEvent("CVAR_UPDATE")
 Stat:RegisterEvent("PLAYER_ENTERING_WORLD")
 Stat:SetScript("OnEvent", OnEvent)
 

@@ -1,5 +1,5 @@
-﻿local T, C, L, _ = unpack(select(2, ...))
-if T.classic or C.loot.auto_greed ~= true then return end
+local T, C, L = unpack(ViksUI)
+if C.loot.auto_greed ~= true then return end
 
 ----------------------------------------------------------------------------------------
 --	The best way to add or delete item is to go at www.wowhead.com, search for a item.

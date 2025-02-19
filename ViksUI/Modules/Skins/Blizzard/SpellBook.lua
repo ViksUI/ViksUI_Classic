@@ -1,5 +1,5 @@
-local T, C, L, _ = unpack(select(2, ...))
-if T.classic or C.skins.blizzard_frames ~= true then return end
+local T, C, L = unpack(ViksUI)
+if C.skins.blizzard_frames ~= true then return end
 
 ----------------------------------------------------------------------------------------
 --	SpellBook skin
@@ -36,58 +36,67 @@ local function LoadSkin()
 	SpellBookNextPageButton:SetPoint("BOTTOMRIGHT", pagebackdrop, "BOTTOMRIGHT", -15, 10)
 	SpellBookPrevPageButton:SetPoint("BOTTOMRIGHT", SpellBookNextPageButton, "BOTTOMLEFT", -6, 0)
 
+	SpellBookFramePortrait:SetAlpha(0)
 	SpellBookFrameTutorialButton.Ring:Hide()
 	SpellBookFrameTutorialButton:SetPoint("TOPLEFT", SpellBookFrame, "TOPLEFT", -5, 10)
 
-	SpellLockedTooltip:StripTextures()
-	SpellLockedTooltip:SetTemplate("Transparent")
-	T.SkinCloseButton(SpellLockedTooltip.CloseButton)
-
 	-- Skin SpellButtons
-	local function SpellButtons(_, first)
-		for i = 1, SPELLS_PER_PAGE do
+	local function SpellButtons()
+		if _G.SpellBookFrame.bookType == BOOKTYPE_PROFESSION then return end
+
+		for i = 1, _G.SPELLS_PER_PAGE do
 			local button = _G["SpellButton"..i]
-			local icon = _G["SpellButton"..i.."IconTexture"]
 
-			if first then
-				_G["SpellButton"..i.."SlotFrame"]:SetAlpha(0)
+			button.SpellSubName:SetTextColor(0.6, 0.6, 0.6)
+			button.RequiredLevelString:SetTextColor(0.6, 0.6, 0.6)
 
-				button.EmptySlot:SetAlpha(0)
-				button.TextBackground:Hide()
-				button.TextBackground2:Hide()
-				button.UnlearnedFrame:SetAlpha(0)
-				button:SetCheckedTexture("")
-				button:SetPushedTexture("")
-			end
-
-			if _G["SpellButton"..i.."Highlight"] then
-				_G["SpellButton"..i.."Highlight"]:SetColorTexture(1, 1, 1, 0.3)
-				_G["SpellButton"..i.."Highlight"]:ClearAllPoints()
-				_G["SpellButton"..i.."Highlight"]:SetAllPoints(icon)
-			end
-
-			if icon then
-				icon:SetTexCoord(0.1, 0.9, 0.1, 0.9)
-				icon:ClearAllPoints()
-				icon:SetAllPoints()
-
-				if not button.backdrop then
-					button:SetFrameLevel(button:GetFrameLevel() + 1)
-					button:CreateBackdrop("Default")
-				end
-			end
-
-			local r = _G["SpellButton"..i.."SpellName"]:GetTextColor()
-
+			local r = button.SpellName:GetTextColor()
 			if r < 0.8 then
-				_G["SpellButton"..i.."SpellName"]:SetTextColor(0.6, 0.6, 0.6)
+				button.SpellName:SetTextColor(0.6, 0.6, 0.6)
+			elseif r ~= 1 then
+				button.SpellName:SetTextColor(1, 1, 1)
 			end
-			_G["SpellButton"..i.."SubSpellName"]:SetTextColor(0.6, 0.6, 0.6)
-			_G["SpellButton"..i.."RequiredLevelString"]:SetTextColor(0.6, 0.6, 0.6)
 		end
 	end
-	SpellButtons(nil, true)
-	hooksecurefunc("SpellButton_UpdateButton", SpellButtons)
+
+	for i = 1, SPELLS_PER_PAGE do
+		local button = _G["SpellButton"..i]
+		local icon = _G["SpellButton"..i.."IconTexture"]
+		local highlight = _G["SpellButton"..i.."Highlight"]
+
+		_G["SpellButton"..i.."SlotFrame"]:SetAlpha(0)
+
+		button.EmptySlot:SetAlpha(0)
+		button.TextBackground:Hide()
+		button.TextBackground2:Hide()
+		button.UnlearnedFrame:SetAlpha(0)
+		button:SetCheckedTexture(0)
+		button:SetPushedTexture(0)
+
+		if highlight then
+			highlight:ClearAllPoints()
+			highlight:SetAllPoints(icon)
+
+			hooksecurefunc(highlight, "SetTexture", function(button, texture)
+				if texture == [[Interface\Buttons\ButtonHilight-Square]] then
+					button:SetColorTexture(1, 1, 1, 0.3)
+				end
+			end)
+		end
+
+		if icon then
+			icon:SetTexCoord(0.1, 0.9, 0.1, 0.9)
+			icon:ClearAllPoints()
+			icon:SetAllPoints()
+
+			if not button.backdrop then
+				button:SetFrameLevel(button:GetFrameLevel() + 1)
+				button:CreateBackdrop("Default")
+			end
+		end
+
+		hooksecurefunc(button, "UpdateButton", SpellButtons)
+	end
 
 	SpellBookPageText:SetTextColor(0.6, 0.6, 0.6)
 
@@ -102,8 +111,7 @@ local function LoadSkin()
 			tab:GetNormalTexture():SetPoint("BOTTOMRIGHT", -2, 2)
 			tab:GetNormalTexture():SetTexCoord(0.1, 0.9, 0.1, 0.9)
 
-			tab:CreateBackdrop("Default")
-			tab.backdrop:SetAllPoints()
+			tab:SetTemplate("Default")
 			tab:StyleButton(true)
 
 			local point, relatedTo, point2 = tab:GetPoint()
@@ -111,19 +119,17 @@ local function LoadSkin()
 		end
 	end
 
-	local function SkinSkillLine()
+	hooksecurefunc("SpellBookFrame_UpdateSkillLineTabs", function()
 		for i = 1, MAX_SKILLLINE_TABS do
 			local tab = _G["SpellBookSkillLineTab"..i]
-			local _, _, _, _, isGuild = GetSpellTabInfo(i)
-			if isGuild then
+			if tab:GetNormalTexture() then
 				tab:GetNormalTexture():ClearAllPoints()
 				tab:GetNormalTexture():SetPoint("TOPLEFT", 2, -2)
 				tab:GetNormalTexture():SetPoint("BOTTOMRIGHT", -2, 2)
 				tab:GetNormalTexture():SetTexCoord(0.1, 0.9, 0.1, 0.9)
 			end
 		end
-	end
-	hooksecurefunc("SpellBookFrame_UpdateSkillLineTabs", SkinSkillLine)
+	end)
 
 	SpellBookFrame:CreateBackdrop("Transparent")
 	SpellBookFrame.backdrop:SetPoint("TOPLEFT", 5, -1)
@@ -225,7 +231,7 @@ local function LoadSkin()
 		T.SkinTab(_G["SpellBookFrameTabButton"..i])
 	end
 	_G["SpellBookFrameTabButton1"]:ClearAllPoints()
-	_G["SpellBookFrameTabButton1"]:SetPoint("TOPLEFT", _G["SpellBookFrame"], "BOTTOMLEFT", -5, 1)
+	_G["SpellBookFrameTabButton1"]:SetPoint("TOPLEFT", _G["SpellBookFrame"], "BOTTOMLEFT", 5, 1)
 end
 
 tinsert(T.SkinFuncs["ViksUI"], LoadSkin)

@@ -1,35 +1,35 @@
-local T, C, L, _ = unpack(select(2, ...))
-if T.classic or C.skins.blizzard_frames ~= true then return end
+local T, C, L = unpack(ViksUI)
+if C.skins.blizzard_frames ~= true then return end
 
 ----------------------------------------------------------------------------------------
 --	Calendar skin
 ----------------------------------------------------------------------------------------
 local function LoadSkin()
 	local frames = {
-		"CalendarFrame",
-		"CalendarCreateEventFrame",
-		"CalendarCreateEventTitleFrame",
-		"CalendarCreateEventInviteList",
-		"CalendarCreateEventDescriptionContainer",
-		"CalendarCreateEventInviteListSection",
-		"CalendarTexturePickerFrame",
-		"CalendarTexturePickerTitleFrame",
-		"CalendarMassInviteFrame",
-		"CalendarMassInviteTitleFrame",
-		"CalendarViewRaidFrame",
-		"CalendarViewRaidTitleFrame",
-		"CalendarViewHolidayTitleFrame",
-		"CalendarViewEventFrame",
-		"CalendarViewEventTitleFrame",
-		"CalendarViewEventDescriptionContainer",
-		"CalendarViewEventInviteList",
-		"CalendarViewEventInviteListSection",
-		"CalendarEventPickerFrame",
-		"CalendarEventPickerTitleFrame"
+		CalendarFrame,
+		CalendarCreateEventFrame,
+		CalendarCreateEventFrame.Header,
+		CalendarCreateEventInviteList,
+		CalendarCreateEventDescriptionContainer,
+		CalendarCreateEventInviteListSection,
+		CalendarTexturePickerFrame,
+		CalendarTexturePickerFrame.Header,
+		CalendarMassInviteFrame,
+		CalendarMassInviteFrame.Header,
+		CalendarViewRaidFrame,
+		CalendarViewRaidFrame.Header,
+		CalendarViewHolidayFrame.Header,
+		CalendarViewEventFrame,
+		CalendarViewEventFrame.Header,
+		CalendarViewEventDescriptionContainer,
+		CalendarViewEventInviteList,
+		CalendarViewEventInviteListSection,
+		CalendarEventPickerFrame,
+		CalendarEventPickerFrame.Header
 	}
 
 	for _, frame in pairs(frames) do
-		_G[frame]:StripTextures()
+		frame:StripTextures()
 	end
 
 	CalendarFrame:CreateBackdrop("Transparent")
@@ -42,26 +42,7 @@ local function LoadSkin()
 	T.SkinNextPrevButton(CalendarNextMonthButton)
 
 	-- Dropdown button
-	do
-		local frame = CalendarFilterFrame
-		local button = CalendarFilterButton
-
-		frame:StripTextures()
-		frame:SetWidth(155)
-
-		_G[frame:GetName().."Text"]:ClearAllPoints()
-		_G[frame:GetName().."Text"]:SetPoint("RIGHT", button, "LEFT", -2, 0)
-
-		button:ClearAllPoints()
-		button:SetPoint("RIGHT", frame, "RIGHT", -10, 3)
-		button.SetPoint = T.dummy
-
-		T.SkinNextPrevButton(button)
-
-		frame:CreateBackdrop("Default")
-		frame.backdrop:SetPoint("TOPLEFT", 20, 2)
-		frame.backdrop:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT", 2, -2)
-	end
+	T.SkinFilter(CalendarFrame.FilterButton, true)
 
 	-- Backdrop
 	local bg = CreateFrame("Frame", "CalendarFrameBackdrop", CalendarFrame)
@@ -69,10 +50,8 @@ local function LoadSkin()
 	bg:SetPoint("TOPLEFT", 10, -72)
 	bg:SetPoint("BOTTOMRIGHT", -8, 3)
 
-	CalendarContextMenu:SetTemplate("Transparent")
-	CalendarContextMenu.SetBackdropColor = T.dummy
-	CalendarContextMenu.SetBackdropBorderColor = T.dummy
-	CalendarInviteStatusContextMenu:SetTemplate("Transparent")
+	-- CalendarContextMenu.NineSlice:SetTemplate("Transparent")
+	-- CalendarInviteStatusContextMenu.NineSlice:SetTemplate("Transparent")
 
 	-- Boost frame levels
 	for i = 1, 42 do
@@ -95,7 +74,7 @@ local function LoadSkin()
 	T.SkinEditBox(CalendarCreateEventTitleEdit)
 	CalendarCreateEventTitleEdit.backdrop:SetPoint("TOPLEFT", -3, 1)
 	CalendarCreateEventTitleEdit.backdrop:SetPoint("BOTTOMRIGHT", -3, -1)
-	T.SkinDropDownBox(CalendarCreateEventTypeDropDown, 120)
+	T.SkinDropDownBox(CalendarCreateEventFrame.EventTypeDropdown, 120)
 
 	CalendarCreateEventDescriptionContainer:SetTemplate("Overlay")
 
@@ -103,10 +82,10 @@ local function LoadSkin()
 
 	T.SkinCheckBox(CalendarCreateEventLockEventCheck)
 
-	T.SkinDropDownBox(CalendarCreateEventHourDropDown, 68)
-	T.SkinDropDownBox(CalendarCreateEventMinuteDropDown, 68)
-	T.SkinDropDownBox(CalendarCreateEventAMPMDropDown, 68)
-	T.SkinDropDownBox(CalendarCreateEventDifficultyOptionDropDown)
+	T.SkinDropDownBox(CalendarCreateEventFrame.HourDropdown, 68)
+	T.SkinDropDownBox(CalendarCreateEventFrame.MinuteDropdown, 68)
+	T.SkinDropDownBox(CalendarCreateEventFrame.AMPMDropdown, 68)
+	T.SkinDropDownBox(CalendarCreateEventFrame.DifficultyOptionDropdown)
 	CalendarCreateEventIcon:SetTexCoord(0.1, 0.9, 0.1, 0.9)
 	CalendarCreateEventIcon.SetTexCoord = T.dummy
 
@@ -131,17 +110,15 @@ local function LoadSkin()
 	-- Texture Picker Frame
 	CalendarTexturePickerFrame:SetTemplate("Transparent")
 
-	T.SkinScrollBar(CalendarTexturePickerScrollBar)
-	T.SkinScrollBar(CalendarViewEventInviteListScrollFrameScrollBar)
-	T.SkinScrollBar(CalendarCreateEventDescriptionScrollFrameScrollBar)
+	T.SkinScrollBar(CalendarTexturePickerFrame.ScrollBar)
 	CalendarTexturePickerAcceptButton:SkinButton(true)
 	CalendarTexturePickerCancelButton:SkinButton(true)
 	CalendarCreateEventRaidInviteButton:SkinButton(true)
 
 	-- Mass Invite Frame
 	CalendarMassInviteFrame:CreateBackdrop("Overlay")
-	T.SkinDropDownBox(CalendarMassInviteCommunityDropDown, 190)
-	T.SkinDropDownBox(CalendarMassInviteRankMenu)
+	T.SkinDropDownBox(CalendarMassInviteFrame.CommunityDropdown, 190)
+	T.SkinDropDownBox(CalendarMassInviteFrame.RankDropdown)
 	T.SkinEditBox(CalendarMassInviteMinLevelEdit)
 	T.SkinEditBox(CalendarMassInviteMaxLevelEdit)
 	CalendarMassInviteAcceptButton:SkinButton()
@@ -166,7 +143,7 @@ local function LoadSkin()
 	T.SkinCloseButton(CalendarViewEventCloseButton)
 
 	CalendarEventPickerFrame:SetTemplate("Transparent")
-	T.SkinScrollBar(CalendarEventPickerScrollBar)
+
 	CalendarEventPickerCloseButton:SkinButton(true)
 
 	local buttons = {

@@ -1,5 +1,5 @@
-local T, C, L, _ = unpack(select(2, ...))
-if T.classic or C.skins.blizzard_frames ~= true then return end
+local T, C, L = unpack(ViksUI)
+if C.skins.blizzard_frames ~= true then return end
 
 ----------------------------------------------------------------------------------------
 --	TalkingHeadUI skin
@@ -31,4 +31,4 @@ local function LoadSkin()
 	end)
 end
 
-T.SkinFuncs["Blizzard_TalkingHeadUI"] = LoadSkin
+tinsert(T.SkinFuncs["ViksUI"], LoadSkin)

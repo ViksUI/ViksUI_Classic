@@ -1,10 +1,19 @@
+local T, C, L = unpack(ViksUI)
+
 ----------------------------------------------------------------------------------------
 --	Durability value on slot buttons in CharacterFrame(tekability by Tekkub)
 ----------------------------------------------------------------------------------------
 local SLOTIDS = {}
-for _, slot in pairs({"Head", "Shoulder", "Chest", "Waist", "Legs", "Feet", "Wrist", "Hands", "MainHand", "SecondaryHand"}) do
-	SLOTIDS[slot] = GetInventorySlotInfo(slot.."Slot")
+if T.Classic then
+	for _, slot in pairs({"Head", "Shoulder", "Chest", "Waist", "Legs", "Feet", "Wrist", "Hands", "MainHand", "SecondaryHand", "Ranged"}) do
+		SLOTIDS[slot] = GetInventorySlotInfo(slot.."Slot")
+	end
+else
+	for _, slot in pairs({"Head", "Shoulder", "Chest", "Waist", "Legs", "Feet", "Wrist", "Hands", "MainHand", "SecondaryHand"}) do
+		SLOTIDS[slot] = GetInventorySlotInfo(slot.."Slot")
+	end
 end
+
 local frame = CreateFrame("Frame", nil, CharacterFrame)
 
 local function RYGColorGradient(perc)
@@ -32,7 +41,7 @@ local fontstrings = setmetatable({}, {
 	end,
 })
 
-function frame:OnEvent(event)
+function frame:OnEvent()
 	local min = 1
 	for slot, id in pairs(SLOTIDS) do
 		local v1, v2 = GetInventoryItemDurability(id)
@@ -51,8 +60,6 @@ function frame:OnEvent(event)
 			if str then str:SetText(nil) end
 		end
 	end
-
-	local r, g, b = RYGColorGradient(min)
 end
 
 frame:SetScript("OnEvent", frame.OnEvent)

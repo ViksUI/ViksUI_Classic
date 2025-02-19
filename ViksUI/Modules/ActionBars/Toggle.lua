@@ -1,4 +1,4 @@
-local T, C, L, _ = unpack(select(2, ...))
+local T, C, L = unpack(ViksUI)
 if C.actionbar.enable ~= true or C.actionbar.toggle_mode ~= true then return end
 
 ----------------------------------------------------------------------------------------
@@ -18,34 +18,34 @@ end
 
 local MainBars = function()
 	if C.actionbar.rightbars > 2 then
-		if SavedOptionsPerChar.BottomBars == 1 then
+		if ViksUISettingsPerChar.BottomBars == 1 then
 			ActionBarAnchor:SetHeight(C.actionbar.button_size)
 			ToggleBarText(1, "+ + +", true)
 			Bar2Holder:Hide()
-		elseif SavedOptionsPerChar.BottomBars == 2 then
+		elseif ViksUISettingsPerChar.BottomBars == 2 then
 			ActionBarAnchor:SetHeight(C.actionbar.button_size * 2 + C.actionbar.button_space)
 			ToggleBarText(1, "- - -", false, true)
 			Bar2Holder:Show()
 		end
-	elseif C.actionbar.rightbars < 3 and C.actionbar.split_bars ~= true then
-		if SavedOptionsPerChar.BottomBars == 1 then
+	elseif ((T.Classic and C.actionbar.rightbars < 3) or T.Mainline) and C.actionbar.split_bars ~= true then
+		if ViksUISettingsPerChar.BottomBars == 1 then
 			ActionBarAnchor:SetHeight(C.actionbar.button_size)
 			ToggleBarText(1, "+ + +", true)
 			Bar2Holder:Hide()
 			Bar5Holder:Hide()
-		elseif SavedOptionsPerChar.BottomBars == 2 then
+		elseif ViksUISettingsPerChar.BottomBars == 2 then
 			ActionBarAnchor:SetHeight(C.actionbar.button_size * 2 + C.actionbar.button_space)
 			ToggleBarText(1, "+ + +", true)
 			Bar2Holder:Show()
 			Bar5Holder:Hide()
-		elseif SavedOptionsPerChar.BottomBars == 3 then
+		elseif ViksUISettingsPerChar.BottomBars == 3 then
 			ActionBarAnchor:SetHeight((C.actionbar.button_size * 3) + (C.actionbar.button_space * 2))
 			ToggleBarText(1, "- - -", false, true)
 			Bar2Holder:Show()
 			Bar5Holder:Show()
 		end
-	elseif C.actionbar.rightbars < 3 and C.actionbar.split_bars == true then
-		if SavedOptionsPerChar.BottomBars == 1 then
+	elseif ((T.Classic and C.actionbar.rightbars < 3) or T.Mainline) and C.actionbar.split_bars == true then
+		if ViksUISettingsPerChar.BottomBars == 1 then
 			ActionBarAnchor:SetHeight(C.actionbar.button_size)
 			ToggleBarText(1, "+ + +", true)
 			Bar2Holder:Hide()
@@ -61,7 +61,7 @@ local MainBars = function()
 				b:SetAlpha(0)
 				b:SetScale(0.000001)
 			end
-		elseif SavedOptionsPerChar.BottomBars == 2 then
+		elseif ViksUISettingsPerChar.BottomBars == 2 then
 			ActionBarAnchor:SetHeight(C.actionbar.button_size * 2 + C.actionbar.button_space)
 			ToggleBarText(1, "- - -", false, true)
 			Bar2Holder:Show()
@@ -69,12 +69,16 @@ local MainBars = function()
 			ToggleBar[4]:SetHeight(C.actionbar.button_size * 2 + C.actionbar.button_space)
 			for i = 1, 3 do
 				local b = _G["MultiBarBottomRightButton"..i]
-				b:SetAlpha(1)
+				if not C.actionbar.bottombars_mouseover then
+					b:SetAlpha(1)
+				end
 				b:SetScale(1)
 			end
 			for i = 7, 9 do
 				local b = _G["MultiBarBottomRightButton"..i]
-				b:SetAlpha(1)
+				if not C.actionbar.bottombars_mouseover then
+					b:SetAlpha(1)
+				end
 				b:SetScale(1)
 			end
 		end
@@ -83,7 +87,7 @@ end
 
 local RightBars = function()
 	if C.actionbar.rightbars > 2 then
-		if SavedOptionsPerChar.RightBars == 1 then
+		if ViksUISettingsPerChar.RightBars == 1 then
 			RightActionBarAnchor:SetWidth(C.actionbar.button_size)
 			if not C.actionbar.petbar_horizontal == true then
 				PetActionBarAnchor:ClearAllPoints()
@@ -93,7 +97,7 @@ local RightBars = function()
 			ToggleBarText(2, "> > >", false, true)
 			Bar3Holder:Hide()
 			Bar4Holder:Hide()
-		elseif SavedOptionsPerChar.RightBars == 2 then
+		elseif ViksUISettingsPerChar.RightBars == 2 then
 			RightActionBarAnchor:SetWidth(C.actionbar.button_size * 2 + C.actionbar.button_space)
 			if not C.actionbar.petbar_horizontal == true then
 				PetActionBarAnchor:ClearAllPoints()
@@ -103,7 +107,7 @@ local RightBars = function()
 			ToggleBarText(2, "> > >", false, true)
 			Bar3Holder:Hide()
 			Bar4Holder:Show()
-		elseif SavedOptionsPerChar.RightBars == 3 then
+		elseif ViksUISettingsPerChar.RightBars == 3 then
 			RightActionBarAnchor:SetWidth((C.actionbar.button_size * 3) + (C.actionbar.button_space * 2))
 			if not C.actionbar.petbar_horizontal == true then
 				PetActionBarAnchor:ClearAllPoints()
@@ -114,10 +118,14 @@ local RightBars = function()
 			RightActionBarAnchor:Show()
 			Bar3Holder:Show()
 			Bar4Holder:Show()
-			if C.actionbar.rightbars > 2 then
-				Bar5Holder:Show()
+			if T.Classic then
+				if C.actionbar.rightbars > 2 then
+					Bar5Holder:Show()
+				end
+			else
+				Bar6Holder:Show()
 			end
-		elseif SavedOptionsPerChar.RightBars == 0 then
+		elseif ViksUISettingsPerChar.RightBars == 0 then
 			if not C.actionbar.petbar_horizontal == true then
 				PetActionBarAnchor:ClearAllPoints()
 				PetActionBarAnchor:SetPoint("BOTTOMRIGHT", ToggleBar[2], "TOPRIGHT", 3, 3)
@@ -127,12 +135,16 @@ local RightBars = function()
 			RightActionBarAnchor:Hide()
 			Bar3Holder:Hide()
 			Bar4Holder:Hide()
-			if C.actionbar.rightbars > 2 then
-				Bar5Holder:Hide()
+			if T.Classic then
+				if C.actionbar.rightbars > 2 then
+					Bar5Holder:Hide()
+				end
+			else
+				Bar6Holder:Hide()
 			end
 		end
 	elseif C.actionbar.rightbars < 3 then
-		if SavedOptionsPerChar.RightBars == 1 then
+		if ViksUISettingsPerChar.RightBars == 1 then
 			RightActionBarAnchor:SetWidth(C.actionbar.button_size)
 			if not C.actionbar.petbar_horizontal == true then
 				PetActionBarAnchor:ClearAllPoints()
@@ -142,7 +154,7 @@ local RightBars = function()
 			ToggleBarText(2, "> > >", false, true)
 			Bar3Holder:Show()
 			Bar4Holder:Hide()
-		elseif SavedOptionsPerChar.RightBars == 2 then
+		elseif ViksUISettingsPerChar.RightBars == 2 then
 			RightActionBarAnchor:SetWidth(C.actionbar.button_size * 2 + C.actionbar.button_space)
 			if not C.actionbar.petbar_horizontal == true then
 				PetActionBarAnchor:ClearAllPoints()
@@ -153,7 +165,7 @@ local RightBars = function()
 			RightActionBarAnchor:Show()
 			Bar3Holder:Show()
 			Bar4Holder:Show()
-		elseif SavedOptionsPerChar.RightBars == 0 then
+		elseif ViksUISettingsPerChar.RightBars == 0 then
 			if not C.actionbar.petbar_horizontal == true then
 				PetActionBarAnchor:ClearAllPoints()
 				PetActionBarAnchor:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMRIGHT", -18, 320)
@@ -163,25 +175,29 @@ local RightBars = function()
 			RightActionBarAnchor:Hide()
 			Bar3Holder:Hide()
 			Bar4Holder:Hide()
-			if C.actionbar.rightbars > 2 then
-				Bar5Holder:Hide()
+			if T.Classic then
+				if C.actionbar.rightbars > 2 then
+					Bar5Holder:Hide()
+				end
+			else
+				Bar6Holder:Hide()
 			end
 		end
 	end
 end
 
 local SplitBars = function()
-	if C.actionbar.split_bars == true and C.actionbar.rightbars ~= 3 then
-		if SavedOptionsPerChar.SplitBars == true then
+	if C.actionbar.split_bars == true and ((T.Classic and C.actionbar.rightbars ~= 3) or T.Mainline) then
+		if ViksUISettingsPerChar.SplitBars == true then
 			ToggleBar[3]:ClearAllPoints()
 			ToggleBar[3]:SetPoint("BOTTOMLEFT", SplitBarRight, "BOTTOMRIGHT", C.actionbar.button_space, 0)
 			ToggleBar[4]:ClearAllPoints()
 			ToggleBar[4]:SetPoint("BOTTOMRIGHT", SplitBarLeft, "BOTTOMLEFT", -C.actionbar.button_space, 0)
-			if not T.classic then
+			if T.Wrath or T.Cata or T.Mainline then
 				VehicleButtonAnchor:ClearAllPoints()
 				VehicleButtonAnchor:SetPoint("BOTTOMRIGHT", SplitBarLeft, "BOTTOMLEFT", -C.actionbar.button_space, 0)
 			end
-			if SavedOptionsPerChar.BottomBars == 2 then
+			if ViksUISettingsPerChar.BottomBars == 2 then
 				ToggleBarText(3, "<\n<\n<", false, true)
 				ToggleBarText(4, ">\n>\n>", false, true)
 			else
@@ -189,16 +205,18 @@ local SplitBars = function()
 				ToggleBarText(4, ">\n>", false, true)
 			end
 			Bar5Holder:Show()
-		elseif SavedOptionsPerChar.SplitBars == false then
+			SplitBarLeft:Show()
+			SplitBarRight:Show()
+		elseif ViksUISettingsPerChar.SplitBars == false then
 			ToggleBar[3]:ClearAllPoints()
 			ToggleBar[3]:SetPoint("BOTTOMLEFT", ActionBarAnchor, "BOTTOMRIGHT", C.actionbar.button_space, 0)
 			ToggleBar[4]:ClearAllPoints()
 			ToggleBar[4]:SetPoint("BOTTOMRIGHT", ActionBarAnchor, "BOTTOMLEFT", -C.actionbar.button_space, 0)
-			if not T.classic then
+			if T.Wrath or T.Cata or T.Mainline then
 				VehicleButtonAnchor:ClearAllPoints()
 				VehicleButtonAnchor:SetPoint("BOTTOMRIGHT", ActionBarAnchor, "BOTTOMLEFT", -C.actionbar.button_space, 0)
 			end
-			if SavedOptionsPerChar.BottomBars == 2 then
+			if ViksUISettingsPerChar.BottomBars == 2 then
 				ToggleBarText(3, ">\n>\n>", true)
 				ToggleBarText(4, "<\n<\n<", true)
 			else
@@ -213,10 +231,10 @@ local SplitBars = function()
 end
 
 local LockCheck = function(i)
-	if SavedOptionsPerChar.BarsLocked == true then
+	if ViksUISettingsPerChar.BarsLocked == true then
 		ToggleBar[i].Text:SetText("U")
 		ToggleBar[i].Text:SetTextColor(0.3, 0.3, 0.9)
-	elseif SavedOptionsPerChar.BarsLocked == false then
+	elseif ViksUISettingsPerChar.BarsLocked == false then
 		ToggleBar[i].Text:SetText("L")
 		ToggleBar[i].Text:SetTextColor(0.9, 0.3, 0.3)
 	else
@@ -240,23 +258,23 @@ for i = 1, 5 do
 
 		ToggleBar[i]:SetScript("OnMouseDown", function()
 			if InCombatLockdown() then print("|cffffff00"..ERR_NOT_IN_COMBAT.."|r") return end
-			SavedOptionsPerChar.BottomBars = SavedOptionsPerChar.BottomBars + 1
+			ViksUISettingsPerChar.BottomBars = ViksUISettingsPerChar.BottomBars + 1
 
 			if C.actionbar.rightbars > 2 then
-				if SavedOptionsPerChar.BottomBars > 2 then
-					SavedOptionsPerChar.BottomBars = 1
+				if ViksUISettingsPerChar.BottomBars > 2 then
+					ViksUISettingsPerChar.BottomBars = 1
 				end
-			elseif C.actionbar.rightbars < 3 and C.actionbar.split_bars ~= true then
-				if SavedOptionsPerChar.BottomBars > 3 then
-					SavedOptionsPerChar.BottomBars = 1
-				elseif SavedOptionsPerChar.BottomBars > 2 then
-					SavedOptionsPerChar.BottomBars = 3
-				elseif SavedOptionsPerChar.BottomBars < 1 then
-					SavedOptionsPerChar.BottomBars = 3
+			elseif ((T.Classic and C.actionbar.rightbars < 3) or T.Mainline) and C.actionbar.split_bars ~= true then
+				if ViksUISettingsPerChar.BottomBars > 3 then
+					ViksUISettingsPerChar.BottomBars = 1
+				elseif ViksUISettingsPerChar.BottomBars > 2 then
+					ViksUISettingsPerChar.BottomBars = 3
+				elseif ViksUISettingsPerChar.BottomBars < 1 then
+					ViksUISettingsPerChar.BottomBars = 3
 				end
-			elseif C.actionbar.rightbars < 3 and C.actionbar.split_bars == true then
-				if SavedOptionsPerChar.BottomBars > 2 then
-					SavedOptionsPerChar.BottomBars = 1
+			elseif ((T.Classic and C.actionbar.rightbars < 3) or T.Mainline) and C.actionbar.split_bars == true then
+				if ViksUISettingsPerChar.BottomBars > 2 then
+					ViksUISettingsPerChar.BottomBars = 1
 				end
 			end
 
@@ -270,21 +288,21 @@ for i = 1, 5 do
 
 		ToggleBar[i]:SetScript("OnMouseDown", function()
 			if InCombatLockdown() then print("|cffffff00"..ERR_NOT_IN_COMBAT.."|r") return end
-			SavedOptionsPerChar.RightBars = SavedOptionsPerChar.RightBars - 1
+			ViksUISettingsPerChar.RightBars = ViksUISettingsPerChar.RightBars - 1
 
 			if C.actionbar.rightbars > 2 then
-				if SavedOptionsPerChar.RightBars > 3 then
-					SavedOptionsPerChar.RightBars = 2
-				elseif SavedOptionsPerChar.RightBars > 2 then
-					SavedOptionsPerChar.RightBars = 1
-				elseif SavedOptionsPerChar.RightBars < 0 then
-					SavedOptionsPerChar.RightBars = 3
+				if ViksUISettingsPerChar.RightBars > 3 then
+					ViksUISettingsPerChar.RightBars = 2
+				elseif ViksUISettingsPerChar.RightBars > 2 then
+					ViksUISettingsPerChar.RightBars = 1
+				elseif ViksUISettingsPerChar.RightBars < 0 then
+					ViksUISettingsPerChar.RightBars = 3
 				end
 			elseif C.actionbar.rightbars < 3 then
-				if SavedOptionsPerChar.RightBars > 2 then
-					SavedOptionsPerChar.RightBars = 1
-				elseif SavedOptionsPerChar.RightBars < 0 then
-					SavedOptionsPerChar.RightBars = 2
+				if ViksUISettingsPerChar.RightBars > 2 then
+					ViksUISettingsPerChar.RightBars = 1
+				elseif ViksUISettingsPerChar.RightBars < 0 then
+					ViksUISettingsPerChar.RightBars = 2
 				end
 			end
 
@@ -292,13 +310,13 @@ for i = 1, 5 do
 		end)
 		ToggleBar[i]:SetScript("OnEvent", RightBars)
 	elseif i == 3 then
-		if C.actionbar.split_bars == true and C.actionbar.rightbars ~= 3 then
+		if C.actionbar.split_bars == true and ((T.Classic and C.actionbar.rightbars ~= 3) or T.Mainline) then
 			ToggleBar[i]:CreatePanel("Transparent", C.actionbar.button_size / 1.5, ActionBarAnchor:GetHeight(), "BOTTOMLEFT", SplitBarRight, "BOTTOMRIGHT", C.actionbar.button_space, 0)
 			ToggleBarText(i, "<\n<", false, true)
 			ToggleBar[i]:SetFrameLevel(SplitBarRight:GetFrameLevel() + 1)
 		end
 	elseif i == 4 then
-		if C.actionbar.split_bars == true and C.actionbar.rightbars ~= 3 then
+		if C.actionbar.split_bars == true and ((T.Classic and C.actionbar.rightbars ~= 3) or T.Mainline) then
 			ToggleBar[i]:CreatePanel("Transparent", C.actionbar.button_size / 1.5, ActionBarAnchor:GetHeight(), "BOTTOMRIGHT", SplitBarLeft, "BOTTOMLEFT", -C.actionbar.button_space, 0)
 			ToggleBarText(i, ">\n>", false, true)
 			ToggleBar[i]:SetFrameLevel(SplitBarLeft:GetFrameLevel() + 1)
@@ -311,13 +329,14 @@ for i = 1, 5 do
 		ToggleBar[i]:SetScript("OnMouseDown", function()
 			if InCombatLockdown() then return end
 
-			if SavedOptionsPerChar.BarsLocked == true then
-				SavedOptionsPerChar.BarsLocked = false
-			elseif SavedOptionsPerChar.BarsLocked == false then
-				SavedOptionsPerChar.BarsLocked = true
+			if ViksUISettingsPerChar.BarsLocked == true then
+				ViksUISettingsPerChar.BarsLocked = false
+			elseif ViksUISettingsPerChar.BarsLocked == false then
+				ViksUISettingsPerChar.BarsLocked = true
 			end
 
 			LockCheck(i)
+			ToggleBar[i]:GetScript("OnEnter")(ToggleBar[i])
 		end)
 		ToggleBar[i]:SetScript("OnEvent", function() LockCheck(i) end)
 	end
@@ -326,10 +345,10 @@ for i = 1, 5 do
 		ToggleBar[i]:SetScript("OnMouseDown", function()
 			if InCombatLockdown() then print("|cffffff00"..ERR_NOT_IN_COMBAT.."|r") return end
 
-			if SavedOptionsPerChar.SplitBars == false then
-				SavedOptionsPerChar.SplitBars = true
-			elseif SavedOptionsPerChar.SplitBars == true then
-				SavedOptionsPerChar.SplitBars = false
+			if ViksUISettingsPerChar.SplitBars == false then
+				ViksUISettingsPerChar.SplitBars = true
+			elseif ViksUISettingsPerChar.SplitBars == true then
+				ViksUISettingsPerChar.SplitBars = false
 			end
 			SplitBars()
 		end)
@@ -350,14 +369,30 @@ for i = 1, 5 do
 				ToggleBar[i]:FadeIn()
 			end
 		elseif i == 3 or i == 4 then
-			ToggleBar[3]:FadeIn()
-			ToggleBar[4]:FadeIn()
-			if not T.classic then
+			if C.actionbar.bottombars_mouseover then
+				ToggleBar[i]:SetAlpha(1)
+				BottomBarMouseOver(1)
+			else
+				ToggleBar[3]:FadeIn()
+				ToggleBar[4]:FadeIn()
+			end
+			if T.Wrath or T.Cata or T.Mainline then
 				VehicleButtonAnchor:ClearAllPoints()
 				VehicleButtonAnchor:SetPoint("BOTTOMRIGHT", ToggleBar[4], "BOTTOMLEFT", -C.actionbar.button_space, 0)
 			end
 		else
+			if i == 1 and C.actionbar.bottombars_mouseover then
+				BottomBarMouseOver(1)
+				ToggleBar[i]:SetAlpha(1)
+				return
+			end
 			ToggleBar[i]:FadeIn()
+		end
+		if i == 5 then
+			GameTooltip:SetOwner(ToggleBar[i], "ANCHOR_LEFT")
+			GameTooltip:AddLine(L_MINIMAP_TOGGLE, 0.40, 0.78, 1)
+			GameTooltip:AddDoubleLine(" ", TALENT_TREE_LOCKED..": "..(ViksUISettingsPerChar.BarsLocked and "|cff55ff55"..L_STATS_ON or "|cffff5555"..strupper(OFF)), 1, 1, 1, 0.75, 0.90, 1)
+			GameTooltip:Show()
 		end
 	end)
 
@@ -371,28 +406,41 @@ for i = 1, 5 do
 			end
 		elseif i == 3 or i == 4 then
 			if InCombatLockdown() then return end
-			ToggleBar[3]:FadeOut()
-			ToggleBar[4]:FadeOut()
-			if not T.classic then
-				VehicleButtonAnchor:ClearAllPoints()
-				if SavedOptionsPerChar.SplitBars == true then
+			if C.actionbar.bottombars_mouseover then
+				ToggleBar[i]:SetAlpha(0)
+				BottomBarMouseOver(0)
+			else
+				ToggleBar[3]:FadeOut()
+				ToggleBar[4]:FadeOut()
+			end
+			VehicleButtonAnchor:ClearAllPoints()
+			if T.Wrath or T.Cata or T.Mainline then
+				if ViksUISettingsPerChar.SplitBars == true then
 					VehicleButtonAnchor:SetPoint("BOTTOMRIGHT", SplitBarLeft, "BOTTOMLEFT", -C.actionbar.button_space, 0)
 				else
 					VehicleButtonAnchor:SetPoint("BOTTOMRIGHT", ActionBarAnchor, "BOTTOMLEFT", -C.actionbar.button_space, 0)
 				end
 			end
 		else
+			if i == 1 and C.actionbar.bottombars_mouseover then
+				BottomBarMouseOver(0)
+				ToggleBar[i]:SetAlpha(0)
+				return
+			end
 			ToggleBar[i]:FadeOut()
+		end
+		if i == 5 then
+			GameTooltip:Hide()
 		end
 	end)
 
 	ToggleBar[i]:SetScript("OnUpdate", function()
 		if InCombatLockdown() then return end
-		if SavedOptionsPerChar.BarsLocked == true then
+		if ViksUISettingsPerChar.BarsLocked == true then
 			for i = 1, 4 do
 				ToggleBar[i]:EnableMouse(false)
 			end
-		elseif SavedOptionsPerChar.BarsLocked == false then
+		elseif ViksUISettingsPerChar.BarsLocked == false then
 			for i = 1, 4 do
 				ToggleBar[i]:EnableMouse(true)
 			end

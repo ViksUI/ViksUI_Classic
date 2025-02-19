@@ -1,4 +1,4 @@
-﻿local T, C, L, _ = unpack(select(2, ...))
+local T, C, L = unpack(ViksUI)
 
 ----------------------------------------------------------------------------------------
 --	Skin some ViksUI frames if loaded Aurora
@@ -55,9 +55,8 @@ AuroraSkin:SetScript("OnEvent", function()
 		end
 	end
 
-	F.ReskinTab(_G["FriendsFrameTab4"])
 	if IsAddOnLoaded("!BaudErrorFrame") then
-		F.ReskinScroll(_G["BaudErrorFrameListScrollBoxScrollBarScrollBar"])
-		F.ReskinScroll(_G["BaudErrorFrameDetailScrollFrameScrollBar"])
+		F.ReskinScroll(BaudErrorFrameListScrollBoxScrollBar.ScrollBar)
+		F.ReskinScroll(BaudErrorFrameDetailScrollFrame.ScrollBar)
 	end
 end)

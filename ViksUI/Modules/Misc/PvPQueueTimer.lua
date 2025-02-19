@@ -1,5 +1,5 @@
-﻿local T, C, L, _ = unpack(select(2, ...))
-if T.classic or IsAddOnLoaded("DBM-Core") then return end
+local T, C, L = unpack(ViksUI)
+if IsAddOnLoaded("DBM-Core") then return end
 
 ----------------------------------------------------------------------------------------
 --	Queue timer on PVPReadyDialog

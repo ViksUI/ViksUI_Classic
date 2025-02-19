@@ -1,4 +1,4 @@
-﻿local T, C, L, _ = unpack(select(2, ...))
+local T, C, L = unpack(ViksUI)
 if C.skins.omen ~= true or not IsAddOnLoaded("Omen") then return end
 
 ----------------------------------------------------------------------------------------
@@ -73,14 +73,14 @@ end
 Omen.db.profile.Autocollapse = true
 Omen.db.profile.Bar.Spacing = 7
 Omen.db.profile.Bar.Height = 12
-Omen.db.profile.Bar.Texture = "Smooth"
+Omen.db.profile.Bar.Texture = "Smooth!"
 Omen.db.profile.Bar.FontSize = 8
 Omen.db.profile.Bar.Font = "Hooge"
 Omen.db.profile.Bar.ShowHeadings = false
 Omen.db.profile.TitleBar.ShowTitleBar = false
 Omen.db.profile.TitleBar.FontSize = 8
 Omen.db.profile.TitleBar.Font = "Hooge"
-Omen.db.profile.Background.Texture = "Smooth"
+Omen.db.profile.Background.Texture = "Smooth!"
 Omen.db.profile.Bar.FontSize = 8
 Omen.db.profile.Bar.ShowHeadings = false
 Omen.db.profile.Shown = true

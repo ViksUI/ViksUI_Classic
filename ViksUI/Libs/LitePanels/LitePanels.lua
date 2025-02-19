@@ -1,4 +1,4 @@
-local T, C, L, _ = unpack(select(2, ...))
+local T, C, L = unpack(ViksUI)
 
 ----------------------------------------------------------------------------------------
 --	Based on LitePanels(by Katae)
@@ -186,7 +186,7 @@ function lpanels:MakePanel(f)
 
 			-- Texts string
 			if not t.string then t.string = d.text.string end
-			text:SetText(is(t.string, "function") and t.string(text) or t.string)
+			text:SetText(tostring(is(t.string, "function") and t.string(text) or t.string))
 
 			-- Texts color
 			local tx_r, tx_g, tx_b = setcolor(t.color or d.text.color)
@@ -212,7 +212,7 @@ function lpanels:MakePanel(f)
 			if is(t.string, "function") and t.update ~= 0 then
 				text.elapsed = 0
 				local update, string = t.update or 1, t.string
-				local function OnUpdate(self, u)
+				local function OnUpdate(_, u)
 					text.elapsed = text.elapsed + u
 					if text.elapsed > update then text:SetText(string(text)) text.elapsed = 0 end
 				end
@@ -276,7 +276,7 @@ function lpanels:Exit()
 	self.reset = 1 self.reset = nil
 end
 
-function lpanels.OnEvent(self, event)
+function lpanels.OnEvent(_, event)
 	if event == "PLAYER_LOGIN" then
 		lpanels:Init()
 		lpanels = lpanels:Exit()
@@ -293,7 +293,7 @@ function lpanels.CreateFrame(_, frame)
 		local panel = _G[child]
 		if not panel.anchor_frame or _G[panel.anchor_frame] then
 			local points = {panel:GetPoint()} points[2] = _G[panel.anchor_frame] or frame
-			panel:SetParent(frame or UIParent)
+			panel:SetParent(_G.frame or UIParent)
 			panel:ClearAllPoints()
 			panel:SetPoint(unpack(points))
 			Resize(panel, panel.width, panel.height)

@@ -5,6 +5,7 @@ local _FRAMES = {}
 local OnRangeFrame
 
 local UnitInRange, UnitIsConnected = UnitInRange, UnitIsConnected
+local LibRangeCheck = oUF:IsClassic() and LibStub("LibRangeCheck-3.0-ViksUI")
 
 local function Update(self, event)
 	local element = self.Range
@@ -22,8 +23,13 @@ local function Update(self, event)
 	local inRange, checkedRange
 	local connected = UnitIsConnected(unit)
 	if(connected) then
-		inRange, checkedRange = UnitInRange(unit)
-		if(checkedRange and not inRange) then
+		if(LibRangeCheck) then
+			-- GetRange(unit, checkVisible, noItems)
+			_, inRange = LibRangeCheck:GetRange(unit, true, true)
+		else
+			inRange, checkedRange = UnitInRange(unit)
+		end
+		if((oUF:IsMainline() and checkedRange and not inRange) or (not inRange)) then
 			self:SetAlpha(element.outsideAlpha)
 		else
 			self:SetAlpha(element.insideAlpha)

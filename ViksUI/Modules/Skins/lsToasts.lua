@@ -1,4 +1,4 @@
-local T, C, L, _ = unpack(select(2, ...))
+local T, C, L = unpack(ViksUI)
 if C.skins.ls_toasts ~= true or not IsAddOnLoaded("ls_Toasts") then return end
 
 ----------------------------------------------------------------------------------------
@@ -39,7 +39,7 @@ function toast_F:SkinToast(toast, toastType)
 		toast.backdrop:SetPoint("TOPLEFT", toast.IconBorder, 1, -1)
 		toast.backdrop:SetPoint("BOTTOMRIGHT", toast.IconBorder, -1, 1)
 		toast.backdrop:SetBackdropColor(0, 0, 0, 0)
-		r, g, b = toast.IconBorder:GetVertexColor()
+		local r, g, b = toast.IconBorder:GetVertexColor()
 		toast.backdrop:SetBackdropBorderColor(r, g, b, 1)
 		toast.backdrop:SetFrameStrata("FULLSCREEN")
 		if toast.Icon then

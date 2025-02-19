@@ -1,5 +1,5 @@
-local T, C, L, _ = unpack(select(2, ...))
-if T.classic or C.skins.blizzard_frames ~= true then return end
+local T, C, L = unpack(ViksUI)
+if C.skins.blizzard_frames ~= true then return end
 
 ----------------------------------------------------------------------------------------
 --	Flight Map skin
@@ -7,6 +7,7 @@ if T.classic or C.skins.blizzard_frames ~= true then return end
 local function LoadSkin()
 	FlightMapFrame:CreateBackdrop("Transparent")
 	FlightMapFrame.BorderFrame:StripTextures()
+	FlightMapFramePortrait:Kill()
 
 	FlightMapFrame.ScrollContainer:ClearAllPoints()
 	FlightMapFrame.ScrollContainer:SetPoint("TOPLEFT")

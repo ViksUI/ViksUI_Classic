@@ -1,9 +1,8 @@
-local T, C, L, _ = unpack(select(2, ...))
+local T, C, L = unpack(ViksUI)
 
 ----------------------------------------------------------------------------------------
 --	Prevent users config errors
 ----------------------------------------------------------------------------------------
---[[
 if C.actionbar.rightbars > 3 then
 	C.actionbar.rightbars = 3
 end
@@ -12,12 +11,11 @@ if C.actionbar.bottombars > 3 then
 	C.actionbar.bottombars = 3
 end
 
-if C.actionbar.bottombars == 3 and C.actionbar.rightbars == 3 then
+if C.actionbar.split_bars == true then
 	C.actionbar.bottombars = 3
-	C.actionbar.rightbars = 2
 end
 
-if C.actionbar.split_bars == true then
+if T.Classic and C.actionbar.bottombars == 3 and C.actionbar.rightbars == 3 then
 	C.actionbar.bottombars = 3
 	C.actionbar.rightbars = 2
 end
@@ -26,32 +24,26 @@ if C.actionbar.bottombars < 1 then
 	C.actionbar.bottombars = 1
 end
 
-if C.actionbar.petbar_horizontal == true then
-	C.actionbar.stancebar_horizontal = false
-end
---]]
-if C.error.black == true and C.error.white == true then
-	C.error.white = false
-end
-
-if C.error.combat == true then
-	C.error.black = false
-	C.error.white = false
+if C.actionbar.editor then
+	C.actionbar.bottombars_mouseover = false
+	C.actionbar.rightbars_mouseover = false
+	C.actionbar.toggle_mode = false
 end
 
 ----------------------------------------------------------------------------------------
 --	Auto-overwrite script config is X addon is found
 ----------------------------------------------------------------------------------------
-if IsAddOnLoaded("Stuf") or IsAddOnLoaded("PitBull4") or IsAddOnLoaded("ShadowedUnitFrames") then
+if IsAddOnLoaded("Stuf") or IsAddOnLoaded("PitBull4") or IsAddOnLoaded("ShadowedUnitFrames") or IsAddOnLoaded("LunaUnitFrames") then
 	C.unitframe.enable = false
 end
 
-if IsAddOnLoaded("Grid") or IsAddOnLoaded("Grid2") or IsAddOnLoaded("HealBot") or IsAddOnLoaded("VuhDo") or IsAddOnLoaded("oUF_Freebgrid") then
-	C.unitframe.ShowParty = false
-	C.unitframe.ShowRaid = false
+if C.unitframe.Autohide then
+	if IsAddOnLoaded("Grid") or IsAddOnLoaded("Grid2") or IsAddOnLoaded("HealBot") or IsAddOnLoaded("VuhDo") or IsAddOnLoaded("Cell") or IsAddOnLoaded("Aptechka") then
+		C.unitframe.ShowRaid = false
+	end
 end
 
-if IsAddOnLoaded("TidyPlates") or IsAddOnLoaded("nPlates") or IsAddOnLoaded("Kui_Nameplates") or IsAddOnLoaded("rNamePlates") or IsAddOnLoaded("EKplates") or IsAddOnLoaded("bdNameplates") then
+if IsAddOnLoaded("TidyPlates") or IsAddOnLoaded("nPlates") or IsAddOnLoaded("Kui_Nameplates") or IsAddOnLoaded("rNamePlates") or IsAddOnLoaded("EKplates") or IsAddOnLoaded("bdNameplates") or IsAddOnLoaded("Plater") or IsAddOnLoaded("Nameplates") or IsAddOnLoaded("NeatPlates") then
 	C.nameplate.enable = false
 end
 
@@ -64,7 +56,7 @@ if IsAddOnLoaded("Mapster") then
 	C.minimap.fog_of_war = false
 end
 
-if IsAddOnLoaded("Prat-3.0") or IsAddOnLoaded("Chatter") or IsAddOnLoaded("BasicChatMods") then
+if IsAddOnLoaded("Prat-3.0") or IsAddOnLoaded("Chatter") or IsAddOnLoaded("BasicChatMods") or IsAddOnLoaded("Glass") then
 	C.chat.enable = false
 end
 
@@ -82,11 +74,11 @@ if IsAddOnLoaded("TipTac") or IsAddOnLoaded("FreebTip") or IsAddOnLoaded("bToolt
 	C.tooltip.enable = false
 end
 
-if IsAddOnLoaded("Gladius") or IsAddOnLoaded("GladiusEx") then
+if IsAddOnLoaded("Gladius") or IsAddOnLoaded("GladiusEx") or IsAddOnLoaded("Gladdy") then
 	C.unitframe.show_arena = false
 end
 
-if IsAddOnLoaded("Omen") or IsAddOnLoaded("rThreat") or IsAddOnLoaded("ClassicThreatMeter") then
+if IsAddOnLoaded("Omen") or IsAddOnLoaded("rThreat") or IsAddOnLoaded("ClassicThreatMeter") or IsAddOnLoaded("ThreatClassic2") then
 	C.threat.enable = false
 end
 
@@ -94,11 +86,7 @@ if IsAddOnLoaded("DBM-SpellTimers") then
 	C.raidcooldown.enable = false
 end
 
-if IsAddOnLoaded("TipTacTalents") then
-	C.tooltip.talents = false
-end
-
-if IsAddOnLoaded("AdiBags") or IsAddOnLoaded("ArkInventory") or IsAddOnLoaded("cargBags_Nivaya") or IsAddOnLoaded("cargBags") or IsAddOnLoaded("Bagnon") or IsAddOnLoaded("Combuctor") or IsAddOnLoaded("TBag") or IsAddOnLoaded("BaudBag") then
+if IsAddOnLoaded("AdiBags") or IsAddOnLoaded("ArkInventory") or IsAddOnLoaded("cargBags_Nivaya") or IsAddOnLoaded("cargBags") or IsAddOnLoaded("Bagnon") or IsAddOnLoaded("Combuctor") or IsAddOnLoaded("TBag") or IsAddOnLoaded("BaudBag") or IsAddOnLoaded("Baganator") then
 	C.bag.enable = false
 end
 
@@ -111,7 +99,7 @@ if IsAddOnLoaded("Doom_CooldownPulse") then
 end
 
 if IsAddOnLoaded("GnomishVendorShrinker") or IsAddOnLoaded("AlreadyKnown") then
-	C.misc.already_known = false
+	C.trade.already_known = false
 end
 
 if IsAddOnLoaded("Clique") or IsAddOnLoaded("sBinder") then
@@ -141,4 +129,15 @@ end
 
 if IsAddOnLoaded("BigWigs") or IsAddOnLoaded("DBM-Core") then
 	C.automation.auto_role = false
+end
+
+if IsAddOnLoaded("QuickQuest") then
+	C.quest.accept_quest = false
+end
+
+----------------------------------------------------------------------------------------
+--	Load external profile settings
+----------------------------------------------------------------------------------------
+if T.PostDisable then
+	T.PostDisable()
 end

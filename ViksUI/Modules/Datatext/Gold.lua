@@ -1,4 +1,4 @@
-local T, C, L, _ = unpack(select(2, ...))
+local T, C, L = unpack(ViksUI)
 --------------------------------------------------------------------
 -- GOLD
 --------------------------------------------------------------------
@@ -17,7 +17,7 @@ if not C.datatext.Gold or C.datatext.Gold == 0 then return end
 	local Profit	= 0
 	local Spent		= 0
 	local OldMoney	= 0
-	local myPlayerRealm = T.realm
+	local myPlayerRealm = GetRealmName()
 	
 	local function formatMoney(money)
 		local gold = floor(math.abs(money) / 10000)
@@ -39,67 +39,66 @@ if not C.datatext.Gold or C.datatext.Gold == 0 then return end
 		return cash
 	end	
 
-if not T.classic then
-	local function Currency(id, weekly, capped)
-		local name, amount, tex, week, weekmax, maxed, discovered = GetCurrencyInfo(id)
-
-		local r, g, b = 1, 1, 1
-		for i = 1, GetNumWatchedTokens() do
-			local _, _, _, itemID = GetBackpackCurrencyInfo( i )
-			if id == itemID then r, g, b = .77, .12, .23 end
+local titleName
+local function Currency(id, weekly, capped)
+		local info = C_CurrencyInfo.GetCurrencyInfo(id)
+		if not info then return end  -- Add check to ensure info is not nil
+		local name, amount, tex, week, weekmax, maxed, discovered = info.name, info.quantity, info.iconFileID, info.canEarnPerWeek, info.maxWeeklyQuantity, info.maxQuantity, info.discovered
+		if amount == 0 then return end
+		if titleName then
+			GameTooltip:AddLine(" ")
+			GameTooltip:AddLine(titleName, ttsubh.r, ttsubh.g, ttsubh.b)
+			titleName = nil
 		end
-
-		if (amount == 0 and r == 1) then return end
 		if weekly then
-			if discovered then GameTooltip:AddDoubleLine("\124T" .. tex .. ":12\124t " .. name, "Current: " .. amount .. " - " .. WEEKLY .. ": " .. week .. " / " .. weekmax, r, g, b, r, g, b) end
-		elseif capped  then
-			if id == 392 then maxed = 4000 end
-			if discovered then GameTooltip:AddDoubleLine("\124T" .. tex .. ":12\124t " .. name, amount .. " / " .. maxed, r, g, b, r, g, b) end
-		else
-			if discovered then GameTooltip:AddDoubleLine("\124T" .. tex .. ":12\124t " .. name, amount, r, g, b, r, g, b) end
+		if discovered then GameTooltip:AddDoubleLine("\124T" .. tex .. ":12\124t " .. name, "Current: " .. amount .. " - " .. WEEKLY .. ": " .. week .. " / " .. weekmax, r, g, b, r, g, b) end
+	elseif capped  then
+		if id == 392 then maxed = 4000 end
+		if discovered then GameTooltip:AddDoubleLine("\124T" .. tex .. ":12\124t " .. name, amount .. " / " .. maxed, r, g, b, r, g, b) end
+	else
+		if discovered then GameTooltip:AddDoubleLine("\124T" .. tex .. ":12\124t " .. name, amount, r, g, b, r, g, b) end
+	end
+end
+	
+	local function OnEvent(self, event)
+		if event == "PLAYER_ENTERING_WORLD" then
+			OldMoney = GetMoney()
 		end
-	end
-end
-	
-local function OnEvent(self, event)
-	if event == "PLAYER_ENTERING_WORLD" then
-		OldMoney = GetMoney()
-	end
-	
-	local NewMoney	= GetMoney()
-	local Change = NewMoney-OldMoney -- Positive if we gain money
-	
-	if OldMoney>NewMoney then		-- Lost Money
-		Spent = Spent - Change
-	else							-- Gained Moeny
-		Profit = Profit + Change
-	end
-	
-	Text:SetText(formatMoney(NewMoney))
-	-- Setup Money Tooltip
-	self:SetAllPoints(Text)
+		
+		local NewMoney	= GetMoney()
+		local Change = NewMoney-OldMoney -- Positive if we gain money
+		
+		if OldMoney>NewMoney then		-- Lost Money
+			Spent = Spent - Change
+		else							-- Gained Moeny
+			Profit = Profit + Change
+		end
+		
+		Text:SetText(formatMoney(NewMoney))
+		-- Setup Money Tooltip
+		self:SetAllPoints(Text)
 
-	local realm = GetRealmName();
-	local name  = UnitName("player");				
-	if (SavedStats == nil) then SavedStats = {}; end
-	if (SavedStats.gold == nil) then SavedStats.gold = {}; end
-	if (SavedStats.gold[realm]==nil) then SavedStats.gold[realm]={}; end
-	SavedStats.gold[realm][name] = GetMoney();
-	OldMoney = NewMoney
+		local realm = GetRealmName();
+		local name  = UnitName("player");				
+		if (ViksUIStats == nil) then ViksUIStats = {}; end
+		if (ViksUIStats.gold == nil) then ViksUIStats.gold = {}; end
+		if (ViksUIStats.gold[realm]==nil) then ViksUIStats.gold[realm]={}; end
+		ViksUIStats.gold[realm][name] = GetMoney();
+		OldMoney = NewMoney
 end
 
-Stat:RegisterEvent("PLAYER_MONEY")
-Stat:RegisterEvent("SEND_MAIL_MONEY_CHANGED")
-Stat:RegisterEvent("SEND_MAIL_COD_CHANGED")
-Stat:RegisterEvent("PLAYER_TRADE_MONEY")
-Stat:RegisterEvent("TRADE_MONEY_CHANGED")
-Stat:RegisterEvent("PLAYER_ENTERING_WORLD")
+	Stat:RegisterEvent("PLAYER_MONEY")
+	Stat:RegisterEvent("SEND_MAIL_MONEY_CHANGED")
+	Stat:RegisterEvent("SEND_MAIL_COD_CHANGED")
+	Stat:RegisterEvent("PLAYER_TRADE_MONEY")
+	Stat:RegisterEvent("TRADE_MONEY_CHANGED")
+	Stat:RegisterEvent("PLAYER_ENTERING_WORLD")
 
 	
 Stat:SetScript("OnEvent", OnEvent)
 Stat:SetScript("OnEnter", function(self)
 	if InCombatLockdown() then return end
-	local prof1, prof2, archaeology, _, cooking = not T.classic and GetProfessions()
+	local prof1, prof2, archaeology, _, cooking = GetProfessions()
 	
 	GameTooltip:SetOwner(self, "ANCHOR_TOP", 0, 6);
 	GameTooltip:ClearAllPoints()
@@ -120,7 +119,7 @@ Stat:SetScript("OnEnter", function(self)
 	local totalGold = 0
 	GameTooltip:AddLine("Character: ")
 
-	local thisRealmList = SavedStats.gold[myPlayerRealm]
+	local thisRealmList = ViksUIStats.gold[myPlayerRealm]
 	for k, v in pairs(thisRealmList) do
 		GameTooltip:AddDoubleLine(k, FormatTooltipMoney(v), 1, 1, 1, 1, 1, 1)
 		totalGold = totalGold + v
@@ -160,7 +159,7 @@ Stat:SetScript("OnEnter", function(self)
 		Currency(402)
 	end
 
-	if C.datatext.CurrProfessions and not T.classic then
+	if C.datatext.CurrProfessions then
 		GameTooltip:AddLine(" ")
 		GameTooltip:AddLine("Profession Token")
 		Currency(910) 					--Secret of Draenor Alchemy
@@ -171,32 +170,32 @@ Stat:SetScript("OnEnter", function(self)
 
 	end
 
-	if C.datatext.CurrRaid and not T.classic then
+	if C.datatext.CurrRaid then
 		GameTooltip:AddLine(" ")
 		GameTooltip:AddLine("Raid")
 		Currency(1273, false, true)	-- Seal of Broken Fate
 		Currency(1580, false, true)	-- Seal of Wartorn Fate
 	end
 
-	if C.datatext.CurrPvP and not T.classic then
+	if C.datatext.CurrPvP then
 		GameTooltip:AddLine(" ")
 		GameTooltip:AddLine(PVP_FLAG)
-		Currency(1587)				-- War Supplies
+		Currency(391) -- Tol Barad Commendation - Cataclysm
+		Currency(789) -- Bloody Coin - Mists of Pandria
+		Currency(944) -- Artifact Fragment - Warlords of Draenor
+		Currency(1268) -- Timeworn Artifact - Warlords of Draenor
+		Currency(1356) -- Echoes of Battle - Legion
+		Currency(1357) -- Echoes of Domination - Legion
+		Currency(1602) -- Conquest
+		Currency(1792) -- Honor
 	end
 
-	if C.datatext.CurrMiscellaneous and not T.classic then
+	if C.datatext.CurrMiscellaneous then
 		GameTooltip:AddLine(" ")
-		GameTooltip:AddLine(MISCELLANEOUS)
-		Currency(515)					-- Darkmoon Prize Ticket
-		Currency(1710)					-- Seafarer's Dubloon
-		Currency(1565)					-- Rich Azerite Fragment
-		GameTooltip:AddLine(" ")
-		Currency(1220)					-- Order Resources
-		Currency(1721)					-- Prismatic Manapearl
-		Currency(1560)					-- War Resources
-		Currency(1716)					-- Honorbound Service Medal
-		Currency(1717)					-- 7th Legion Service Medal
-		Currency(1718)					-- Titan Residuum
+		GameTooltip:AddLine(EXPANSION_NAME9)
+		Currency(2122)	-- Storm Sigil
+		Currency(2118)	-- Elemental Overflow
+		Currency(2003)	-- Dragon Isles Supplies
 	end
 	GameTooltip:AddLine(" ")
 	GameTooltip:AddLine("Bags: Left Click")
@@ -212,24 +211,24 @@ end)
 
 
 local function RESETGOLD()
-	local myPlayerRealm = T.realm
+	local myPlayerRealm = GetRealmName()
 	local myPlayerName  = UnitName("player")
 
-	SavedStats.gold = {}
-	SavedStats.gold[myPlayerRealm] = {}
-	SavedStats.gold[myPlayerRealm][myPlayerName] = GetMoney()
+	ViksUIStats.gold = {}
+	ViksUIStats.gold[myPlayerRealm] = {}
+	ViksUIStats.gold[myPlayerRealm][myPlayerName] = GetMoney()
 end
 SLASH_RESETGOLD1 = "/resetgold"
 SlashCmdList["RESETGOLD"] = RESETGOLD
 
 Stat:SetScript("OnMouseDown", function(self, btn)
 	if btn == "RightButton" and IsShiftKeyDown() then
-		local myPlayerRealm = T.realm
+		local myPlayerRealm = GetRealmName()
 		local myPlayerName  = UnitName("player")
 	
-		SavedStats.gold = {}
-		SavedStats.gold[myPlayerRealm] = {}
-		SavedStats.gold[myPlayerRealm][myPlayerName] = GetMoney()
+		ViksUIStats.gold = {}
+		ViksUIStats.gold[myPlayerRealm] = {}
+		ViksUIStats.gold[myPlayerRealm][myPlayerName] = GetMoney()
 	elseif btn == "LeftButton" then
 		ToggleAllBags()
 	else

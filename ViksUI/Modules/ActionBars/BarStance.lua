@@ -1,42 +1,29 @@
-local T, C, L, _ = unpack(select(2, ...))
+local T, C, L = unpack(ViksUI)
 if C.actionbar.enable ~= true then return end
 
 ----------------------------------------------------------------------------------------
 --	StanceBar(by Tukz)
 ----------------------------------------------------------------------------------------
-local ShiftHolder = CreateFrame("Frame", "ShiftHolder", T_PetBattleFrameHider or UIParent)
-if C.actionbar.stancebar_horizontal == true then
-	ShiftHolder:SetPoint(unpack(C.position.stance_bar))
-	ShiftHolder:SetWidth((C.actionbar.button_size * 7) + (C.actionbar.button_space * 6))
-	ShiftHolder:SetHeight(C.actionbar.button_size)
-else
-	if (PetActionBarFrame:IsShown() or PetHolder) and C.actionbar.petbar_horizontal ~= true then
-		ShiftHolder:SetPoint("RIGHT", "PetHolder", "LEFT", -C.actionbar.button_space, (C.actionbar.button_size / 2) + 1)
+-- Hide bar
+if C.actionbar.stancebar_hide then
+	if T.Classic then
+		StanceBarFrame:SetParent(StanceBarAnchor)
 	else
-		ShiftHolder:SetPoint("RIGHT", "RightActionBarAnchor", "LEFT", -C.actionbar.button_space, (C.actionbar.button_size / 2) + 1)
+		StanceBar:SetParent(StanceBarAnchor)
+		StanceBar:UnregisterAllEvents()
+		for _, button in pairs(StanceBar.actionButtons) do
+			button:UnregisterAllEvents()
+			button:SetAttribute("statehidden", true)
+			button:Hide()
+		end
 	end
-	ShiftHolder:SetWidth(C.actionbar.button_size)
-	ShiftHolder:SetHeight((C.actionbar.button_size * 7) + (C.actionbar.button_space * 6))
+	StanceBarAnchor:Hide()
+	return
 end
 
--- Hide bar
-if C.actionbar.stancebar_hide then ShiftHolder:Hide() return end
-
 -- Create bar
-local bar = CreateFrame("Frame", "UIShapeShift", ShiftHolder, "SecureHandlerStateTemplate")
-bar:ClearAllPoints()
-bar:SetAllPoints(ShiftHolder)
-
-local States = {
-	["DEATHKNIGHT"] = "show",
-	["DRUID"] = "show",
-	["MONK"] = "show",
-	["PALADIN"] = "show",
-	["PRIEST"] = "show",
-	["ROGUE"] = "show",
-	["WARLOCK"] = "show",
-	["WARRIOR"] = "show",
-}
+local bar = CreateFrame("Frame", "StanceHolder", UIParent, "SecureHandlerStateTemplate")
+bar:SetAllPoints(StanceBarAnchor)
 
 bar:RegisterEvent("PLAYER_LOGIN")
 bar:RegisterEvent("PLAYER_ENTERING_WORLD")
@@ -46,15 +33,15 @@ bar:RegisterEvent("UPDATE_SHAPESHIFT_COOLDOWN")
 bar:RegisterEvent("ACTIONBAR_PAGE_CHANGED")
 bar:SetScript("OnEvent", function(self, event)
 	if event == "PLAYER_LOGIN" then
-		for i = 1, NUM_STANCE_SLOTS do
+		for i = 1, 10 do
 			local button = _G["StanceButton"..i]
 			button:ClearAllPoints()
 			button:SetParent(self)
 			if i == 1 then
 				if C.actionbar.stancebar_horizontal == true then
-					button:SetPoint("BOTTOMLEFT", ShiftHolder, "BOTTOMLEFT", 0, 0)
+					button:SetPoint("BOTTOMLEFT", StanceBarAnchor, "BOTTOMLEFT", 0, 0)
 				else
-					button:SetPoint("TOPLEFT", ShiftHolder, "TOPLEFT", 0, 0)
+					button:SetPoint("TOPLEFT", StanceBarAnchor, "TOPLEFT", 0, 0)
 				end
 			else
 				local previous = _G["StanceButton"..i-1]
@@ -71,20 +58,9 @@ bar:SetScript("OnEvent", function(self, event)
 				button:Hide()
 			end
 		end
-		RegisterStateDriver(self, "visibility", States[T.class] or "hide")
-		local function moveStance()
-			if not InCombatLockdown() then
-				if C.actionbar.stancebar_horizontal == true then
-					StanceButton1:SetPoint("BOTTOMLEFT", ShiftHolder, "BOTTOMLEFT", 0, 0)
-				else
-					StanceButton1:SetPoint("TOPLEFT", ShiftHolder, "TOPLEFT", 0, 0)
-				end
-			end
-		end
-		hooksecurefunc("StanceBar_Update", moveStance)
 	elseif event == "UPDATE_SHAPESHIFT_FORMS" then
 		if InCombatLockdown() then return end
-		for i = 1, NUM_STANCE_SLOTS do
+		for i = 1, 10 do
 			local button = _G["StanceButton"..i]
 			local icon = GetShapeshiftFormInfo(i)
 			if icon then
@@ -101,26 +77,118 @@ bar:SetScript("OnEvent", function(self, event)
 	end
 end)
 
--- Mouseover bar
-if C.actionbar.rightbars_mouseover == true and C.actionbar.stancebar_horizontal == false then
-	ShapeShiftBarAnchor:SetAlpha(0)
-	ShapeShiftBarAnchor:SetScript("OnEnter", function() RightBarMouseOver(1) end)
-	ShapeShiftBarAnchor:SetScript("OnLeave", function() if not HoverBind.enabled then RightBarMouseOver(0) end end)
-	for i = 1, NUM_STANCE_SLOTS do
-		local b = _G["StanceButton"..i]
-		b:SetAlpha(0)
-		b:HookScript("OnEnter", function() RightBarMouseOver(1) end)
-		b:HookScript("OnLeave", function() if not HoverBind.enabled then RightBarMouseOver(0) end end)
+local function reposition()
+	for i = 1, 10 do
+		local button = _G["StanceButton"..i]
+		button:ClearAllPoints()
+		if i == 1 then
+			if C.actionbar.stancebar_horizontal == true then
+				button:SetPoint("BOTTOMLEFT", StanceBarAnchor, "BOTTOMLEFT", 0, 0)
+			else
+				button:SetPoint("TOPLEFT", StanceBarAnchor, "TOPLEFT", 0, 0)
+			end
+		else
+			local previous = _G["StanceButton"..i-1]
+			if C.actionbar.stancebar_horizontal == true then
+				button:SetPoint("LEFT", previous, "RIGHT", C.actionbar.button_space, 0)
+			else
+				button:SetPoint("TOP", previous, "BOTTOM", 0, -C.actionbar.button_space)
+			end
+		end
 	end
 end
-if C.actionbar.stancebar_mouseover == true and C.actionbar.stancebar_horizontal == true then
-	ShapeShiftBarAnchor:SetAlpha(0)
-	ShapeShiftBarAnchor:SetScript("OnEnter", function() StanceBarMouseOver(1) end)
-	ShapeShiftBarAnchor:SetScript("OnLeave", function() if not HoverBind.enabled then StanceBarMouseOver(0) end end)
-	for i = 1, NUM_STANCE_SLOTS do
-		local b = _G["StanceButton"..i]
-		b:SetAlpha(0)
-		b:HookScript("OnEnter", function() StanceBarMouseOver(1) end)
-		b:HookScript("OnLeave", function() if not HoverBind.enabled then StanceBarMouseOver(0) end end)
+
+hooksecurefunc(StanceButton1, "SetPoint", function(_, _, anchor)
+	if InCombatLockdown() then return end
+	if anchor and anchor == StanceBar then
+		local forms = GetNumShapeshiftForms()
+		local button = _G["StanceButton"..forms]
+		if button and not button.hook then
+			hooksecurefunc(button, "SetPoint", function(_, _, anchor)
+				if InCombatLockdown() then return end
+				if anchor and anchor == StanceBar then
+					reposition()
+				end
+			end)
+			button.hook = true
+		end
+	end
+end)
+
+-- Mouseover bar
+if C.actionbar.rightbars_mouseover == true and C.actionbar.stancebar_horizontal == false then
+	if T.class == "SHAMAN" then
+		MultiCastSummonSpellButton:SetAlpha(0)
+		MultiCastSummonSpellButton:HookScript("OnEnter", function() RightBarMouseOver(1) end)
+		MultiCastSummonSpellButton:HookScript("OnLeave", function() if not HoverBind.enabled then RightBarMouseOver(0) end end)
+		MultiCastRecallSpellButton:SetAlpha(0)
+		MultiCastRecallSpellButton:HookScript("OnEnter", function() RightBarMouseOver(1) end)
+		MultiCastRecallSpellButton:HookScript("OnLeave", function() if not HoverBind.enabled then RightBarMouseOver(0) end end)
+		MultiCastFlyoutFrameOpenButton:HookScript("OnEnter", function() RightBarMouseOver(1) end)
+		MultiCastFlyoutFrameOpenButton:HookScript("OnLeave", function() if not HoverBind.enabled then RightBarMouseOver(0) end end)
+		MultiCastFlyoutFrame:HookScript("OnEnter", function() RightBarMouseOver(1) end)
+		MultiCastFlyoutFrame:HookScript("OnLeave", function() if not HoverBind.enabled then RightBarMouseOver(0) end end)
+		MultiCastActionBarFrame:HookScript("OnEnter", function() RightBarMouseOver(1) end)
+		MultiCastActionBarFrame:HookScript("OnLeave", function() if not HoverBind.enabled then RightBarMouseOver(0) end end)
+		for i = 1, 12 do
+			local b = _G["MultiCastActionButton"..i]
+			b:SetAlpha(0)
+			b:HookScript("OnEnter", function() RightBarMouseOver(1) end)
+			b:HookScript("OnLeave", function() if not HoverBind.enabled then RightBarMouseOver(0) end end)
+		end
+		for i = 1, 4 do
+			local b = _G["MultiCastSlotButton"..i]
+			b:SetAlpha(0)
+			b:HookScript("OnEnter", function() RightBarMouseOver(1) end)
+			b:HookScript("OnLeave", function() if not HoverBind.enabled then RightBarMouseOver(0) end end)
+		end
+	else
+		StanceBarAnchor:SetAlpha(0)
+		StanceBarAnchor:SetScript("OnEnter", function() if StanceButton1:IsShown() then RightBarMouseOver(1) end end)
+		StanceBarAnchor:SetScript("OnLeave", function() if not HoverBind.enabled then RightBarMouseOver(0) end end)
+		for i = 1, 10 do
+			local b = _G["StanceButton"..i]
+			b:SetAlpha(0)
+			b:HookScript("OnEnter", function() RightBarMouseOver(1) end)
+			b:HookScript("OnLeave", function() if not HoverBind.enabled then RightBarMouseOver(0) end end)
+		end
+	end
+end
+if C.actionbar.stancebar_mouseover == true and (C.actionbar.stancebar_horizontal == true or C.actionbar.editor) then
+	if T.class == "SHAMAN" then
+		MultiCastSummonSpellButton:SetAlpha(0)
+		MultiCastSummonSpellButton:HookScript("OnEnter", function() StanceBarMouseOver(1) end)
+		MultiCastSummonSpellButton:HookScript("OnLeave", function() if not HoverBind.enabled then StanceBarMouseOver(0) end end)
+		MultiCastRecallSpellButton:SetAlpha(0)
+		MultiCastRecallSpellButton:HookScript("OnEnter", function() StanceBarMouseOver(1) end)
+		MultiCastRecallSpellButton:HookScript("OnLeave", function()  if not HoverBind.enabled then StanceBarMouseOver(0) end end)
+		MultiCastFlyoutFrameOpenButton:HookScript("OnEnter", function() StanceBarMouseOver(1) end)
+		MultiCastFlyoutFrameOpenButton:HookScript("OnLeave", function() if not HoverBind.enabled then StanceBarMouseOver(0) end end)
+		MultiCastFlyoutFrame:HookScript("OnEnter", function() StanceBarMouseOver(1) end)
+		MultiCastFlyoutFrame:HookScript("OnLeave", function() if not HoverBind.enabled then StanceBarMouseOver(0) end end)
+		MultiCastActionBarFrame:HookScript("OnEnter", function() StanceBarMouseOver(1) end)
+		MultiCastActionBarFrame:HookScript("OnLeave", function() if not HoverBind.enabled then StanceBarMouseOver(0) end end)
+		for i = 1, 12 do
+			local b = _G["MultiCastActionButton"..i]
+			b:SetAlpha(0)
+			b:HookScript("OnEnter", function() StanceBarMouseOver(1) end)
+			b:HookScript("OnLeave", function() if not HoverBind.enabled then StanceBarMouseOver(0) end end)
+		end
+		for i = 1, 4 do
+			local b = _G["MultiCastSlotButton"..i]
+			b:SetAlpha(0)
+			b:HookScript("OnEnter", function() StanceBarMouseOver(1) end)
+			b:HookScript("OnLeave", function() if not HoverBind.enabled then StanceBarMouseOver(0) end end)
+		end
+	else
+		StanceBarAnchor:SetAlpha(0)
+		StanceBarAnchor:SetScript("OnEnter", function() StanceBarMouseOver(1) end)
+		StanceBarAnchor:SetScript("OnLeave", function() if not HoverBind.enabled then StanceBarMouseOver(0) end end)
+		for i = 1, 10 do
+			local b = _G["StanceButton"..i]
+			b:SetAlpha(C.actionbar.stancebar_mouseover_alpha)
+			b:HookScript("OnEnter", function() StanceBarMouseOver(1) end)
+			b:HookScript("OnLeave", function() if not HoverBind.enabled then StanceBarMouseOver(C.actionbar.stancebar_mouseover_alpha) end end)
+		end
 	end
 end

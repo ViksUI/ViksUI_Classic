@@ -1,34 +1,60 @@
-﻿local T, C, L, _ = unpack(select(2, ...))
+local T, C, L = unpack(ViksUI)
 if C.automation.buff_on_scroll ~= true or T.level ~= MAX_PLAYER_LEVEL then return end
 
 ----------------------------------------------------------------------------------------
 --	Cast buff on mouse scroll(by Gsuz)
 ----------------------------------------------------------------------------------------
-MAGE1 = {
-	1459,	-- Arcane Intellect
-}
+local function SpellName(id)
+	local name = GetSpellInfo(id)
+	if name then
+		return name
+	else
+		print("|cffff0000WARNING: spell ID ["..tostring(id).."] no longer exists! Report this to Vik.|r")
+		return "Empty"
+	end
+end
 
-MAGE2 = MAGE1
-MAGE3 = MAGE1
+local spells = {}
+if T.Classic then
+	spells = {
+		DRUID = {
+			[SpellName(1126)] = true,	-- Mark of the Wild
+		},
+		MAGE = {
+			[SpellName(1459)] = true,	-- Arcane Intellect
+		},
+		PRIEST = {
+			[SpellName(1243)] = true,	-- Power Word: Fortitude
+		},
+		WARRIOR = {
+			[SpellName(6673)] = true,	-- Battle Shout
+		},
+	}
+else
+	spells = {
+		DRUID = {
+			[SpellName(1126)] = true,	-- Mark of the Wild
+		},
+		EVOKER = {
+			[SpellName(364342)] = true,	-- Blessing of the Bronze
+		},
+		MAGE = {
+			[SpellName(1459)] = true,	-- Arcane Intellect
+		},
+		PRIEST = {
+			[SpellName(21562)] = true,	-- Power Word: Fortitude
+		},
+		WARRIOR = {
+			[SpellName(6673)] = true,	-- Battle Shout
+		},
+	}
+end
 
-PRIEST1 = {
-	21562,	-- Power Word: Fortitude
-}
-
-PRIEST2 = PRIEST1
-PRIEST3 = PRIEST1
-
-WARRIOR1 = {
-	6673,	-- Battle Shout
-}
-
-WARRIOR2 = WARRIOR1
-WARRIOR3 = WARRIOR1
-
+local specSpells = spells[T.class]
 local frame = CreateFrame("Frame")
 -- Function for waiting through the global cooldown
-local GcTimer = 0
-local function WaitForGC(self, elapsed)
+local GcTimer, CheckBuffs = 0
+local function WaitForGC(_, elapsed)
 	GcTimer = GcTimer + elapsed
 	if GcTimer >= 1.5 then
 		CheckBuffs()
@@ -46,13 +72,11 @@ btn:SetAttribute("unit", "player")
 
 -- Main function for changing keybinding to mousewheel when a buff is needed
 function CheckBuffs()
-	local spec = GetSpecialization() or 1
 	if IsFlying() or IsMounted() or UnitIsDeadOrGhost("Player") or InCombatLockdown() then return end
 	ClearOverrideBindings(btn)
 	btn:SetAttribute("spell", nil)
-	if _G[T.class..spec] then
-		for _, spell in pairs(_G[T.class..spec]) do
-			local name = GetSpellInfo(spell)
+	if specSpells then
+		for name in pairs(specSpells) do
 			if name and not T.CheckPlayerBuff(name) then
 				if GetSpellCooldown(name) == 0 then
 					btn:SetAttribute("spell", name)
@@ -70,10 +94,12 @@ end
 
 -- Events that will trigger the Main Function
 frame:RegisterEvent("PLAYER_ENTERING_WORLD")
-frame:RegisterEvent("UNIT_AURA")
+frame:RegisterUnitEvent("UNIT_AURA", "player", "")
 frame:RegisterEvent("SPELL_UPDATE_USABLE")
 frame:RegisterEvent("SPELL_UPDATE_COOLDOWN")
 frame:RegisterEvent("PLAYER_LEAVE_COMBAT")
 frame:RegisterEvent("READY_CHECK")
-frame:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
+if T.Wrath or T.Cata or T.Mainline then
+	frame:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
+end
 frame:SetScript("OnEvent", CheckBuffs)

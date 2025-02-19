@@ -1,5 +1,5 @@
-local T, C, L, _ = unpack(select(2, ...))
-if T.classic or C.skins.blizzard_frames ~= true then return end
+local T, C, L = unpack(ViksUI)
+if C.skins.blizzard_frames ~= true then return end
 
 ----------------------------------------------------------------------------------------
 --	RaidUI skin
@@ -22,6 +22,10 @@ local function LoadSkin()
 
 	for i = 1, MAX_RAID_GROUPS * 5 do
 		_G["RaidGroupButton"..i]:SkinButton(true)
+	end
+
+	if T.Classic then
+		_G["RaidFrameReadyCheckButton"]:SkinButton()
 	end
 
 	for i = 1, 8 do

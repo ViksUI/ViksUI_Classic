@@ -1,4 +1,4 @@
-﻿local T, C, L, _ = unpack(select(2, ...))
+local T, C, L = unpack(ViksUI)
 if C.tooltip.enable ~= true then return end
 
 ----------------------------------------------------------------------------------------
@@ -49,14 +49,28 @@ end
 local function TranslateClass(text)
 	if text then
 		for rus, replaceclass in next, replaceclass do
-			text = text:gsub(rus, replaceclass)
+			if not (rus == "Охотник" and string.find(text, "Охотник на демонов")) then
+				text = text:gsub(rus, replaceclass)
+			end
 		end
 		return text
 	end
 end
 
+local whiteTooltip = {
+	[GameTooltip] = true,
+	[ItemRefTooltip] = true,
+	[ShoppingTooltip1] = true,
+	[ShoppingTooltip2] = true,
+}
+
 local function UpdateTooltip(self)
-	if not self:GetItem() then return end
+	if T.Classic then
+		if not self:GetItem() or self:IsForbidden() then return end
+	else
+		if not whiteTooltip[self] or self:IsForbidden() or not TooltipUtil.GetDisplayedItem(self) then end
+	end
+
 	local tname = self:GetName()
 	for i = 3, self:NumLines() do
 		ttext = _G[tname.."TextLeft"..i]
@@ -69,7 +83,11 @@ local function UpdateTooltip(self)
 	ttext = nil
 end
 
-GameTooltip:HookScript("OnTooltipSetItem", UpdateTooltip)
-ItemRefTooltip:HookScript("OnTooltipSetItem", UpdateTooltip)
-ShoppingTooltip1:HookScript("OnTooltipSetItem", UpdateTooltip)
-ShoppingTooltip2:HookScript("OnTooltipSetItem", UpdateTooltip)
+if T.Classic then
+	GameTooltip:HookScript("OnTooltipSetItem", UpdateTooltip)
+	ItemRefTooltip:HookScript("OnTooltipSetItem", UpdateTooltip)
+	ShoppingTooltip1:HookScript("OnTooltipSetItem", UpdateTooltip)
+	ShoppingTooltip2:HookScript("OnTooltipSetItem", UpdateTooltip)
+else
+	TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Item, UpdateTooltip)
+end

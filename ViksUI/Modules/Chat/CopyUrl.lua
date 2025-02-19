@@ -1,4 +1,4 @@
-local T, C, L, _ = unpack(select(2, ...))
+local T, C, L = unpack(ViksUI)
 if C.chat.enable ~= true then return end
 
 ----------------------------------------------------------------------------------------
@@ -30,7 +30,7 @@ for _, event in next, {
 	"CHAT_MSG_CHANNEL",
 	"CHAT_MSG_SYSTEM"
 } do
-	ChatFrame_AddMessageEventFilter(event, function(self, event, str, ...)
+	ChatFrame_AddMessageEventFilter(event, function(_, event, str, ...)
 		for _, pattern in pairs(patterns) do
 			local result, match = string.gsub(str, pattern, "|cff00FF00|Hurl:%1|h[%1]|h|r")
 			if match > 0 then

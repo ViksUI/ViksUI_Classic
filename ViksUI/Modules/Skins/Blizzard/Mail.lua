@@ -1,5 +1,5 @@
-local T, C, L, _ = unpack(select(2, ...))
-if T.classic or C.skins.blizzard_frames ~= true then return end
+local T, C, L = unpack(ViksUI)
+if C.skins.blizzard_frames ~= true then return end
 
 ----------------------------------------------------------------------------------------
 --	Mail skin
@@ -14,6 +14,7 @@ local function LoadSkin()
 	MailFrameInset:StripTextures()
 	SendMailMoneyInset:StripTextures()
 	SendMailMoneyBg:StripTextures()
+	MailFramePortrait:SetAlpha(0)
 
 	for i = 1, INBOXITEMS_TO_DISPLAY do
 		local bg = _G["MailItem"..i]
@@ -44,15 +45,38 @@ local function LoadSkin()
 	T.SkinTab(MailFrameTab1)
 	T.SkinTab(MailFrameTab2)
 
+	if T.Classic then
+		InboxPrevPageButton:ClearAllPoints()
+		InboxPrevPageButton:SetPoint("CENTER", InboxFrame, "BOTTOMLEFT", 28, 114)
+		InboxNextPageButton:ClearAllPoints()
+		InboxNextPageButton:SetPoint("CENTER", InboxFrame, "BOTTOMLEFT", 304, 114)
+
+		MailFrameTab1:ClearAllPoints()
+		MailFrameTab1:SetPoint("BOTTOMLEFT", 14, -34)
+	end
+
 	-- Send mail
 	SendMailFrame:StripTextures()
 
-	SendMailScrollFrame:StripTextures(true)
-	SendMailScrollFrame:CreateBackdrop("Overlay")
-	SendMailScrollFrame.backdrop:SetPoint("TOPLEFT", 12, 0)
-	SendMailScrollFrame.backdrop:SetPoint("BOTTOMRIGHT", 2, 0)
+	if T.Classic then
+		-- FIXME
+		--[[
+		MailEditBox:StripTextures(true)
+		MailEditBox:CreateBackdrop("Overlay")
+		MailEditBox.backdrop:SetPoint("TOPLEFT", 12, 0)
+		MailEditBox.backdrop:SetPoint("BOTTOMRIGHT", 2, 0)
+		T.SkinScrollBar(MailEditBoxScrollBar)
+		--]]
+	else
+		SendMailScrollFrame:StripTextures(true)
+		SendMailScrollFrame:CreateBackdrop("Overlay")
+		SendMailScrollFrame.backdrop:SetPoint("TOPLEFT", 12, 0)
+		SendMailScrollFrame.backdrop:SetPoint("BOTTOMRIGHT", 2, 0)
+		T.SkinScrollBar(SendMailScrollFrame.ScrollBar)
+	end
 
-	T.SkinScrollBar(SendMailScrollFrameScrollBar)
+	select(3, SendMailNameEditBox:GetRegions()):SetDrawLayer("OVERLAY")
+	select(3, SendMailSubjectEditBox:GetRegions()):SetDrawLayer("OVERLAY")
 
 	T.SkinEditBox(SendMailNameEditBox)
 	T.SkinEditBox(SendMailSubjectEditBox)
@@ -60,10 +84,20 @@ local function LoadSkin()
 	T.SkinEditBox(SendMailMoneySilver)
 	T.SkinEditBox(SendMailMoneyCopper)
 
+	if T.Classic then
+		SendMailMoneyGold.texture:SetDrawLayer("ARTWORK")
+	end
+
 	SendMailNameEditBox.backdrop:SetPoint("TOPLEFT", -3, -2)
 	SendMailNameEditBox.backdrop:SetPoint("BOTTOMRIGHT", 2, 3)
 	SendMailSubjectEditBox.backdrop:SetPoint("TOPLEFT", -3, 0)
 	SendMailSubjectEditBox.backdrop:SetPoint("BOTTOMRIGHT", -4, 0)
+
+	if T.Mainline then
+		SendMailNameEditBox:ClearAllPoints()
+		SendMailNameEditBox:SetPoint("TOPLEFT", SendMailFrame, "TOPLEFT", 90, -30)
+		SendMailNameEditBox.SetPoint = T.dummy
+	end
 
 	local function MailFrameSkin()
 		for i = 1, ATTACHMENTS_MAX_SEND do
@@ -114,11 +148,12 @@ local function LoadSkin()
 	OpenMailScrollFrame:CreateBackdrop("Overlay")
 	OpenMailScrollFrame.backdrop:SetPoint("TOPLEFT", 5, 5)
 	OpenMailScrollFrame.backdrop:SetPoint("BOTTOMRIGHT", 0, -5)
+	T.SkinScrollBar(OpenMailScrollFrame.ScrollBar)
 
-	T.SkinScrollBar(OpenMailScrollFrameScrollBar)
-
-	SendMailBodyEditBox:SetTextColor(1, 1, 1)
-	OpenMailBodyText:SetTextColor(1, 1, 1)
+	if T.Mainline then
+		SendMailBodyEditBox:SetTextColor(1, 1, 1)
+	end
+	MailTextFontNormal:SetTextColor(1, 1, 1)
 	InvoiceTextFontNormal:SetTextColor(1, 1, 1)
 	OpenMailArithmeticLine:Kill()
 

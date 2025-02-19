@@ -1,4 +1,4 @@
-﻿local T, C, L, _ = unpack(select(2, ...))
+local T, C, L = unpack(ViksUI)
 if C.skins.mage_nuggets ~= true then return end
 
 ----------------------------------------------------------------------------------------
@@ -673,10 +673,10 @@ frame:SetScript("OnEvent", function()
 	MageNugAlliFrameClose:SkinButton()
 	MageNugAlliFrameShowOptions:SkinButton()
 
-	MageNugAlliFrameText:SetFont(C.media.normal_font, 13)
-	MageNugAlliFrameText2:SetFont(C.media.normal_font, 13)
-	MageNugHordeFrameText:SetFont(C.media.normal_font, 13)
-	MageNugHordeFrameText2:SetFont(C.media.normal_font, 13)
+	MageNugAlliFrameText:SetFont(C.media.normal_font, 13, "")
+	MageNugAlliFrameText2:SetFont(C.media.normal_font, 13, "")
+	MageNugHordeFrameText:SetFont(C.media.normal_font, 13, "")
+	MageNugHordeFrameText2:SetFont(C.media.normal_font, 13, "")
 
 	local portals = {
 		"MageNugAlliFramePortDal",

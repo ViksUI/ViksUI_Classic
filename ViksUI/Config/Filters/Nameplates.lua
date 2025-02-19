@@ -1,5 +1,5 @@
-﻿local T, C, L, _ = unpack(select(2, ...))
-if T.classic or C.nameplate.enable ~= true then return end
+local T, C, L = unpack(ViksUI)
+if C.nameplate.enable ~= true then return end
 
 ----------------------------------------------------------------------------------------
 --	The best way to add or delete spell is to go at www.wowhead.com, search for a spell.
@@ -30,10 +30,12 @@ T.DebuffWhiteList = {
 	[SpellName(58180)] = true,	-- Infected Wounds
 	[SpellName(155722)] = true,	-- Rake
 	[SpellName(1079)] = true,	-- Rip
+	-- Evoker
+	[SpellName(360806)] = true,	-- Sleep Walk
 	-- Hunter
 	[SpellName(3355)] = true,	-- Freezing Trap
-	[SpellName(194279)] = true,	-- Caltrops
 	[SpellName(13812)] = true,	-- Explosive Trap
+	[SpellName(217200)] = true,	-- Barbed Shot
 	-- Mage
 	[SpellName(118)] = true,	-- Polymorph
 	[SpellName(31661)] = true,	-- Dragon's Breath
@@ -87,141 +89,100 @@ T.DebuffWhiteList = {
 	[SpellName(107079)] = true,	-- Quaking Palm (Pandaren)
 }
 
+for _, spell in pairs(C.nameplate.debuffs_list) do
+	T.DebuffWhiteList[SpellName(spell)] = true
+end
+
 T.DebuffBlackList = {
 	-- [SpellName(spellID)] = true,	-- Spell Name
 }
 
 T.BuffWhiteList = {
-	-- Demon Hunter
-	[SpellName(203819)] = true,	-- Demon Spikes
-	[SpellName(187827)] = true,	-- Metamorphosis (Vengeance)
-	[SpellName(212800)] = true,	-- Blur
-	[SpellName(196555)] = true,	-- Netherwalk
-	[SpellName(209426)] = true,	-- Darkness
-	-- Druid
-	[SpellName(22842)] = true,	-- Frenzied Regeneration
-	[SpellName(192081)] = true,	-- Ironfur
-	[SpellName(61336)] = true,	-- Survival Instincts
-	[SpellName(22812)] = true,	-- Barkskin
-	[SpellName(213680)] = true,	-- Guardian of Elune
-	[SpellName(774)] = true,	-- Rejuvenation
-	[SpellName(8936)] = true,	-- Regrowth
-	[SpellName(33763)] = true,	-- Lifebloom
-	[SpellName(188550)] = true,	-- Lifebloom (Hfc 4-Set Bonus)
-	[SpellName(48438)] = true,	-- Wild Growth
-	[SpellName(102342)] = true,	-- Ironbark
-	[SpellName(155777)] = true,	-- Rejuvenation (Germination)
-	[SpellName(102351)] = true,	-- Cenarion Ward
-	[SpellName(102352)] = true,	-- Cenarion Ward Proc
-	[SpellName(77761)] = true,	-- Stampeding Roar
-	-- Hunter
-	[SpellName(190931)] = true,	-- Mongoose Fury
-	[SpellName(186257)] = true,	-- Aspect of the Cheetah
-	[SpellName(186258)] = true,	-- Aspect of the Cheetah
-	[SpellName(186289)] = true,	-- Aspect of the Eagle
-	[SpellName(186265)] = true,	-- Aspect of the Turtle
-	[SpellName(34477)] = true,	-- Misdirection
-	-- Mage
-	[SpellName(108839)] = true,	-- Ice Floes
-	[SpellName(108843)] = true,	-- Blazing Speed
-	[SpellName(116014)] = true,	-- Rune of Power
-	[SpellName(116267)] = true,	-- Incanter's Flow
-	[SpellName(198924)] = true,	-- Quickening
-	[SpellName(205766)] = true,	-- Bone Chilling
-	[SpellName(130)] = true,	-- Slow Fall
-	-- Monk
-	[SpellName(116680)] = true,	-- Thunder Focus Tea
-	[SpellName(116847)] = true,	-- Rushing Jade Wind
-	[SpellName(119085)] = true,	-- Chi Torpedo
-	[SpellName(120954)] = true,	-- Fortifying Brew
-	[SpellName(122278)] = true,	-- Dampen Harm
-	[SpellName(122783)] = true,	-- Diffuse Magic
-	[SpellName(196725)] = true,	-- Refreshing Jade Wind
-	[SpellName(215479)] = true,	-- Ironskin Brew
-	[SpellName(116841)] = true,	-- Tiger's Lust
-	[SpellName(116844)] = true,	-- Ring of Peace
-	[SpellName(116849)] = true,	-- Life Cocoon
-	[SpellName(119611)] = true,	-- Renewing Mist
-	[SpellName(124081)] = true,	-- Zen Sphere
-	[SpellName(124682)] = true,	-- Enveloping Mist
-	[SpellName(191840)] = true,	-- Essence Font
-	-- Paladin
-	[SpellName(184662)] = true,	-- Shield of Vengeance
-	[SpellName(53563)] = true,	-- Beacon of Light
-	[SpellName(156910)] = true,	-- Beacon of Faith
-	[SpellName(6940)] = true,	-- Blessing of Sacrifice
-	[SpellName(1044)] = true,	-- Blessing of Freedom
-	[SpellName(1022)] = true,	-- Blessing of Protection
-	-- Priest
-	[SpellName(17)] = true,		-- Power Word: Shield
-	[SpellName(81782)] = true,	-- Power Word: Barrier
-	[SpellName(139)] = true,	-- Renew
-	[SpellName(33206)] = true,	-- Pain Suppression
-	[SpellName(41635)] = true,	-- Prayer of Mending
-	[SpellName(47788)] = true,	-- Guardian Spirit
-	[SpellName(114908)] = true,	-- Spirit Shell Shield
-	[SpellName(152118)] = true,	-- Clarity of Will
-	[SpellName(121557)] = true,	-- Angelic Feather
-	[SpellName(65081)] = true,	-- Body and Soul
-	[SpellName(214121)] = true,	-- Body and Mind
-	[SpellName(77489)] = true,	-- Echo of Light
-	[SpellName(64901)] = true,	-- Symbol of Hope
-	[SpellName(194384)] = true,	-- Attonement
-	-- Rogue
-	[SpellName(5171)] = true,	-- Slice and Dice
-	[SpellName(185311)] = true,	-- Crimson Vial
-	[SpellName(193538)] = true,	-- Alacrity
-	[SpellName(193356)] = true,	-- Broadsides
-	[SpellName(199600)] = true,	-- Buried Treasure
-	[SpellName(193358)] = true,	-- Grand Melee
-	[SpellName(199603)] = true,	-- Jolly Roger
-	[SpellName(193357)] = true,	-- Shark Infested Waters
-	[SpellName(193359)] = true,	-- True Bearing
-	-- Shaman
-	[SpellName(61295)] = true,	-- Riptide
-	-- Warlock
-	[SpellName(5697)] = true,	-- Unending Breath
-	[SpellName(20707)] = true,	-- Soulstone
-	-- Warrior
-	[SpellName(871)] = true,	-- Shield Wall
-	[SpellName(1719)] = true,	-- Battle Cry
-	[SpellName(12975)] = true,	-- Last Stand
-	[SpellName(18499)] = true,	-- Berserker Rage
-	[SpellName(23920)] = true,	-- Spell Reflection
-	[SpellName(107574)] = true,	-- Avatar
-	[SpellName(114030)] = true,	-- Vigilance
-	[SpellName(132404)] = true,	-- Shield Block
-	[SpellName(184362)] = true,	-- Enrage
-	[SpellName(184364)] = true,	-- Enraged Regeneration
-	[SpellName(190456)] = true,	-- Ignore Pain
-	[SpellName(202539)] = true,	-- Frenzy
-	[SpellName(202602)] = true,	-- Into the Fray
-	[SpellName(206333)] = true,	-- Taste for Blood
-	[SpellName(227744)] = true,	-- Ravager
+	[SpellName(226510)] = true,	-- Sanguine Ichor
 }
+
+for _, spell in pairs(C.nameplate.buffs_list) do
+	T.BuffWhiteList[SpellName(spell)] = true
+end
 
 T.BuffBlackList = {
 	-- [SpellName(spellID)] = true,	-- Spell Name
 }
 
 T.PlateBlacklist = {
-	-- Army of the Dead
-	["Army of the Dead"] = true,
-	["Войско мертвых"] = true,
-	-- Wild Imp
-	["Wild Imp"] = true,
-	["Дикий бес"] = true,
-	-- Hunter Trap
-	["Venomous Snake"] = true,
-	["Ядовитая змея"] = true,
-	["Viper"] = true,
-	["Гадюка"] = true,
-	-- Raid
-	["Liquid Obsidian"] = true,
-	["Жидкий обсидиан"] = true,
-	["Lava Parasites"] = true,
-	["Лавовый паразит"] = true,
-	-- Gundrak
-	["Fanged Pit Viper"] = true,
-	["Клыкастая глубинная гадюка"] = true,
+	["24207"] = true,	-- Army of the Dead
+	["29630"] = true,	-- Fanged Pit Viper (Gundrak)
+	["55659"] = true,	-- Wild Imp
+	["167966"] = true,	-- Experimental Sludge (De Other Side)
+}
+
+T.InterruptCast = { -- Yellow border for interruptible cast
+	-- Algeth'ar Academy
+	[396812] = true,	-- Mystic Blast
+	[332612] = true,	-- Healing Touch
+	[377389] = true,	-- Call of the Flock
+	[387843] = true,	-- Astral Bomb
+	-- The Azure Vault
+	[370225] = true,	-- Shriek
+	-- The Nokhud Offensive
+	[386024] = true,	-- Tempest
+	[373395] = true,	-- Bloodcurdling Shout
+	-- Halls of Valor
+	[215433] = true,	-- Holy Radiance
+	-- Shadowmoon Burial Grounds
+	[152818] = true,	-- Shadow Mend
+	-- Temple of the Jade Serpent
+	[395859] = true,	-- Haunting Scream
+}
+
+T.ImportantCast = { -- Red border for non-interruptible cast
+	-- The Nokhud Offensive
+	[383823] = true,	-- Rally the Clan
+	-- Ruby Life Pools
+	[372743] = true,	-- Ice Shield
+	-- Court of Stars
+	[210261] = true,	-- Sound Alarm
+}
+
+local color = C.nameplate.mob_color
+local color_alt = {0, 0.7, 0.6}
+T.ColorPlate = {
+	-- Algeth'ar Academy
+	["196548"] = color,		-- Ancient Branch
+	-- The Azure Vault
+	["187159"] = color_alt,	-- Shrieking Whelp
+	-- The Nokhud Offensive
+	["194894"] = color,		-- Primalist Stormspeaker
+	-- Temple of the Jade Serpent
+	["59555"] = color,		-- Haunting Sha
+	["59545"] = color,		-- The Golden Beetle
+	-- Court of Stars
+	["104251"] = color_alt,	-- Duskwatch Sentry
+	-- PvP
+	["5925"] = color,		-- Grounding Totem
+}
+
+T.ShortNames = {
+	-- Академия Алгет'ар
+	["Рассерженная стрекотуха"] = "Cтрекотуха",
+	["Мерзкий плеточник"] = "Плеточник",
+	["Алгет'арский охранник"] = "Охранник",
+	["Алгет'арский рыцарь эха"] = "Рыцарь",
+	["Алгет'арская заклинательница"] = "Заклинательница",
+	["Алгет'арский целитель"] = "Целитель",
+	-- Наступление клана Нокхуд
+	["Мастер копья из клана Нокхуд"] = "Мастер копья",
+	["Лучница из клана Нокхуд"] = "Лучница",
+	["Боевое копье клана Нокхуд"] = "Копье",
+	["Трубач из клана Нокхуд"] = "Трубач",
+	["Нокхудский копейщик"] = "Копейщик",
+	["Громовой кулак из клана Нокхуд"] = "Кулак",
+	["Псарь из клана Нокхуд"] = "Псарь",
+	["Заступник из клана Нокхуд"] = "Заступник",
+	-- Квартал Звезд
+	["Караульный из Сумеречной стражи"] = "Караульный",
+	["Часовой из Сумеречной стражи"] = "Часовой",
+	["Бдительный инквизитор"] = "Инквизитор",
+	["Пылающий бес"] = "Бес",
+	["Порабощенная Скверной карательница"] = "Карательница",
 }

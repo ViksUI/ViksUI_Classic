@@ -1,41 +1,47 @@
-local T, C, L, _ = unpack(select(2, ...))
-if T.classic or C.skins.blizzard_frames ~= true then return end
+local T, C, L = unpack(ViksUI)
+if C.skins.blizzard_frames ~= true then return end
 
 ----------------------------------------------------------------------------------------
 --	RaidInfo skin
 ----------------------------------------------------------------------------------------
 local function LoadSkin()
 	local StripAllTextures = {
-		"RaidInfoScrollFrame",
-		"RaidInfoFrame",
-		"RaidInfoInstanceLabel",
-		"RaidInfoIDLabel"
+		RaidInfoScrollFrame,
+		RaidInfoFrame,
+		RaidInfoInstanceLabel,
+		RaidInfoIDLabel,
+		RaidInfoFrame.Header
 	}
 
 	local KillTextures = {
-		"RaidInfoScrollFrameScrollBarBG",
-		"RaidInfoScrollFrameScrollBarTop",
-		"RaidInfoScrollFrameScrollBarBottom",
-		"RaidInfoScrollFrameScrollBarMiddle"
+		RaidInfoScrollFrameScrollBarBG,
+		RaidInfoScrollFrameScrollBarTop,
+		RaidInfoScrollFrameScrollBarBottom,
+		RaidInfoScrollFrameScrollBarMiddle
 	}
 
 	local buttons = {
-		"RaidFrameConvertToRaidButton",
-		"RaidFrameRaidInfoButton",
-		"RaidInfoExtendButton",
-		"RaidInfoCancelButton"
+		RaidFrameConvertToRaidButton,
+		RaidFrameRaidInfoButton,
+		RaidInfoExtendButton,
+		RaidInfoCancelButton
 	}
 
 	for _, object in pairs(StripAllTextures) do
-		_G[object]:StripTextures()
+		object:StripTextures()
 	end
 
-	for _, texture in pairs(KillTextures) do
-		_G[texture]:Kill()
+	if T.Mainline then
+		for _, texture in pairs(KillTextures) do
+			texture:Kill()
+		end
 	end
 
 	for i = 1, #buttons do
-		_G[buttons[i]]:SkinButton()
+		local button = buttons[i]
+		if button then
+			button:SkinButton()
+		end
 	end
 
 	RaidInfoFrame:CreateBackdrop("Transparent")
@@ -44,7 +50,11 @@ local function LoadSkin()
 	RaidInfoFrame:SetPoint("TOPLEFT", FriendsFrame, "TOPRIGHT", 3, 0)
 	T.SkinCloseButton(RaidInfoCloseButton, RaidInfoFrame)
 	T.SkinCheckBox(RaidFrameAllAssistCheckButton)
-	T.SkinScrollBar(RaidInfoScrollFrameScrollBar)
+	if RaidInfoScrollFrameScrollBar then
+		T.SkinScrollBar(RaidInfoScrollFrameScrollBar)
+	else
+		T.SkinScrollBar(RaidInfoFrame.ScrollBar)
+	end
 end
 
 tinsert(T.SkinFuncs["ViksUI"], LoadSkin)

@@ -1,31 +1,31 @@
-﻿local T, C, L, _ = unpack(select(2, ...))
+local T, C, L = unpack(ViksUI)
 
 local ChangeLog = CreateFrame("frame")
 local ChangeLogData = {
-	"Changes:",
-		"Update 8.83",
-		"• Many more Patch 8.2 Bug Fixes",
-		"• ilvl in bags fixed",
-		"• Few skin updates",
-		"• Added Debuffs for Mechagon and Eternal Palace",
-		"• Updated chat default setting",
-		"",
-		--"• ",
-	--" ",
-	"FIRST PATREON: joelsoul - Huge Thanks for the support",
-	"SECOND PATREON: Wiggy - Huge Thanks for the support",
-	"THEY ARE KEEPING VIKSUI ALIVE: SO BIG THANKS FROM ALL UI USERS!",
-	"Give them a thumbs up on Discord chat",
-		"",
-	"NOTE:",
-		"ALL support on Discord only",
-		"NEW Donate button added",
-		"NEW Patreon button added",
-		"7 years with hundreds of hours on coding, ",
-		"and countless hours with support for free!",
-		"BE NR 3 TO DONATE :)",
-		"",
-	"PATREON's: joelsoul & Wiggy",
+"Changes:",
+	"Update 11.12 for Wow 11 TWW ",
+	"• Skinned Spellbook",
+	"• Updated font file/added symbols",
+	"• Statspanel above char frame enabled/updated (wowhead)",
+	"• Debuff tracking for Tww Dungeons and Raid added",
+	"• Actionbars updated",
+	"• Bigger restyling of Objective Frame",
+	"• ^ Restyling in /config under Quest",
+	"• ^ Quest title color changes if not trivial difficulty",
+	"• ^ Added quality color for world quest for rare/epic",
+	"• ^ Ctrl+Click to abandon a quest or Alt+Click to share a quest",
+	"• ^ Ctrl+Click to expand all Headers or Alt+Click to Collapse all header",
+	"• ^ Click to expand/collapse a header",
+	"• Check Github for full changelog",
+
+" ",
+"EXTRA:",
+"Added Wow gift button and buymeacoffee button here on /changelog",
+"Patreon helps me keep subscription while not playing",
+	"",
+"PATREON's: Wiggy and nAyu",
+"But thanks to all who have used the addon and those supported my work",
+
 }
 
 --// TODO LIST
@@ -53,8 +53,8 @@ local function GetChangeLogInfo(i)
 	end
 end
 
-_G.StaticPopupDialogs["BUGREPORT"] = {
-	text = "Bugreporting for ViksUI",
+_G.StaticPopupDialogs["WoW_Gift"] = {
+	text = "Send me a Gift in WoW. My BTag is:",
 	button1 = OKAY,
 	timeout = 0,
 	whileDead = true,
@@ -62,15 +62,15 @@ _G.StaticPopupDialogs["BUGREPORT"] = {
 	editBoxWidth = 325,
 	OnShow = function(self, ...) 
 		self.editBox:SetFocus()
-		self.editBox:SetText("https://discord.gg/Dhp5nHh")
+		self.editBox:SetText("VikingPower#2226")
 		self.editBox:HighlightText()
 	end,
 	EditBoxOnEnterPressed = function(self) self:GetParent():Hide() end,
 	EditBoxOnEscapePressed = function(self) self:GetParent():Hide() end,
 }
 
-_G.StaticPopupDialogs["TWITCH"] = {
-	text = "Twitch channel to ViksUI",
+_G.StaticPopupDialogs["BuyCoffee"] = {
+	text = "Help pay subscription to wow",
 	button1 = OKAY,
 	timeout = 0,
 	whileDead = true,
@@ -78,7 +78,7 @@ _G.StaticPopupDialogs["TWITCH"] = {
 	editBoxWidth = 325,
 	OnShow = function(self, ...) 
 		self.editBox:SetFocus()
-		self.editBox:SetText("https://www.twitch.tv/vikingpower")
+		self.editBox:SetText("https://www.buymeacoffee.com/ViksUI")
 		self.editBox:HighlightText()
 	end,
 	EditBoxOnEnterPressed = function(self) self:GetParent():Hide() end,
@@ -136,7 +136,7 @@ _G.StaticPopupDialogs["PATRON"] = {
 function ChangeLog:CreateChangelog()
 	local frame = CreateFrame("Frame", "ViksUIChangeLog", UIParent)
 	frame:SetPoint("TOP",0,-50)
-	frame:SetSize(445, 450)
+	frame:SetSize(445, 550)
 	frame:SetTemplate("Transparent")
 	frame:SetFrameLevel(4)
 	
@@ -147,7 +147,7 @@ function ChangeLog:CreateChangelog()
 	icon.bg = icon:CreateTexture(nil, "ARTWORK")
 	icon.bg:SetPoint("TOPLEFT", 2, -2)
 	icon.bg:SetPoint("BOTTOMRIGHT", -2, 2)
-	icon.bg:SetTexture([[Interface\AddOns\ViksUI\Media\textures\viksicon.blp]])
+	icon.bg:SetTexture([[Interface\AddOns\ViksUI\Media\Textures\viksicon.blp]])
 	
 	local title = CreateFrame("Frame", nil, frame)
 	title:SetPoint("LEFT", icon, "RIGHT", 3, 0)
@@ -162,13 +162,13 @@ function ChangeLog:CreateChangelog()
 	close:SetPoint("BOTTOMRIGHT", frame, -5, 5)
 	close:SetScript("OnClick", function(self) frame:Hide() end)
 	
-	T["CreateBtn"]("bReport", frame, 65, 19, "Bugreport", "Bugreport", frame)
+	T["CreateBtn"]("bReport", frame, 65, 19, "Send me a gift on wow", "WoW Gift", frame)
 	bReport:SetPoint("BOTTOMLEFT", frame, 5, 5)
-	bReport:SetScript("OnClick", function(self) StaticPopup_Show("BUGREPORT") end)
+	bReport:SetScript("OnClick", function(self) StaticPopup_Show("WoW_Gift") end)
 	
-	T["CreateBtn"]("bTwitch", frame, 65, 19, "Twitch", "Twitch", frame)
+	T["CreateBtn"]("bTwitch", frame, 65, 19, "Help pay wow Sub", "BuyCoffee", frame)
 	bTwitch:SetPoint("BOTTOMLEFT", bReport, "BOTTOMRIGHT", 5, 0)
-	bTwitch:SetScript("OnClick", function(self) StaticPopup_Show("TWITCH") end)
+	bTwitch:SetScript("OnClick", function(self) StaticPopup_Show("BuyCoffee") end)
 	
 	T["CreateBtn"]("bDiscord", frame, 65, 19, "Discord", "Discord", frame)
 	bDiscord:SetPoint("BOTTOMLEFT", bTwitch, "BOTTOMRIGHT", 5, 0)
@@ -204,11 +204,11 @@ function ViksUI_ToggleChangeLog()
 	ChangeLog:CreateChangelog()
 end
 
-if SavedOptionsPerChar == nil then SavedOptionsPerChar = {} end
+if ViksUISettingsPerChar == nil then ViksUISettingsPerChar = {} end
 
 function ChangeLog:OnCheckVersion(self)
-	if not SavedOptions["version"] or (SavedOptions["version"] and SavedOptions["version"] ~= T.version) then
-		SavedOptions["version"] = T.version
+	if ViksUISettingsPerChar.Install and ViksUISettings["version"] ~= T.version then
+		ViksUISettings["version"] = T.version
 		ChangeLog:CreateChangelog()
 	end
 end
@@ -216,7 +216,7 @@ end
 ChangeLog:RegisterEvent("ADDON_LOADED")
 ChangeLog:RegisterEvent("PLAYER_ENTERING_WORLD")
 ChangeLog:SetScript("OnEvent", function(self, event, ...)
-	if SavedOptions == nil then SavedOptions = {} end
+	if ViksUISettings == nil then ViksUISettings = {} end
 	ChangeLog:OnCheckVersion()
 end)
 
