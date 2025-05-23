@@ -1,4 +1,4 @@
-## Interface: 11505
+## Interface: 11507
 ## Title: ViksUI (Classic) Config
 ## Notes: In-game configuration for ViksUI
 ## Author: Viks

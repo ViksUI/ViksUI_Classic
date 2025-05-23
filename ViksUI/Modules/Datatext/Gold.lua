@@ -17,7 +17,7 @@ if not C.datatext.Gold or C.datatext.Gold == 0 then return end
 	local Profit	= 0
 	local Spent		= 0
 	local OldMoney	= 0
-	local myPlayerRealm = GetRealmName()
+	local myPlayerRealm = T.realm
 	
 	local function formatMoney(money)
 		local gold = floor(math.abs(money) / 10000)
@@ -42,7 +42,6 @@ if not C.datatext.Gold or C.datatext.Gold == 0 then return end
 local titleName
 local function Currency(id, weekly, capped)
 		local info = C_CurrencyInfo.GetCurrencyInfo(id)
-		if not info then return end  -- Add check to ensure info is not nil
 		local name, amount, tex, week, weekmax, maxed, discovered = info.name, info.quantity, info.iconFileID, info.canEarnPerWeek, info.maxWeeklyQuantity, info.maxQuantity, info.discovered
 		if amount == 0 then return end
 		if titleName then
@@ -211,7 +210,7 @@ end)
 
 
 local function RESETGOLD()
-	local myPlayerRealm = GetRealmName()
+	local myPlayerRealm = T.realm
 	local myPlayerName  = UnitName("player")
 
 	ViksUIStats.gold = {}
@@ -223,7 +222,7 @@ SlashCmdList["RESETGOLD"] = RESETGOLD
 
 Stat:SetScript("OnMouseDown", function(self, btn)
 	if btn == "RightButton" and IsShiftKeyDown() then
-		local myPlayerRealm = GetRealmName()
+		local myPlayerRealm = T.realm
 		local myPlayerName  = UnitName("player")
 	
 		ViksUIStats.gold = {}

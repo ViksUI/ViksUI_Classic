@@ -266,8 +266,7 @@ end
 local OnTooltipSetUnit = function(self)
 	if self ~= GameTooltip or self:IsForbidden() then return end
 	local lines = self:NumLines()
-	local GetMouseFocus = GetMouseFocus or GetMouseFoci
-	local unit = (select(2, self:GetUnit())) or (GetMouseFocus() and GetMouseFocus().GetAttribute and GetMouseFocus():GetAttribute("unit")) or (UnitExists("mouseover") and "mouseover") or nil
+	local unit = (select(2, self:GetUnit())) or (GetMouseFoci() and GetMouseFoci().GetAttribute and GetMouseFoci():GetAttribute("unit")) or (UnitExists("mouseover") and "mouseover") or nil
 
 	if not unit then return end
 
@@ -338,9 +337,9 @@ local OnTooltipSetUnit = function(self)
 		if GetCVar("colorblindMode") == "1" then
 			n = n + 1
 			local class = UnitClass(unit)
-			_G["GameTooltipTextLeft"..n]:SetFormattedText("|cff%02x%02x%02x%s|r |cffffffff%s %s|r", levelColor.r * 255, levelColor.g * 255, levelColor.b * 255, level, race or UNKNOWN, class or "")
+			_G["GameTooltipTextLeft"..n]:SetFormattedText("|cff%02x%02x%02x%s|r %s %s", levelColor.r * 255, levelColor.g * 255, levelColor.b * 255, level, race or UNKNOWN, class or "")
 		else
-			_G["GameTooltipTextLeft"..n]:SetFormattedText("|cff%02x%02x%02x%s|r |cffffffff%s|r", levelColor.r * 255, levelColor.g * 255, levelColor.b * 255, level, race or UNKNOWN)
+			_G["GameTooltipTextLeft"..n]:SetFormattedText("|cff%02x%02x%02x%s|r %s", levelColor.r * 255, levelColor.g * 255, levelColor.b * 255, level, race or UNKNOWN)
 		end
 
 		for i = n + 1, lines do

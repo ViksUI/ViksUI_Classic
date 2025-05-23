@@ -53,15 +53,62 @@ local function Enable()
 	GameMenuButton03.icon:SetTexture([[Interface\AddOns\ViksUI\Media\Microbar\talent.tga]])
 	GameMenuButton03:SetScript("OnMouseDown", function(self)
 		if (not PlayerTalentFrame) then
-			TalentFrame_LoadUI()
+		TalentFrame_LoadUI()
 		end
 		ShowUIPanel(PlayerTalentFrame)
 	end)
 
+	--Button 4 - Achievements
+	T.CreateBtn("GameMenuButton04", GameMenuBG, size, size, "Achievements", "", GameMenuBG)
+	GameMenuButton04:Point("LEFT", GameMenuButton03, "RIGHT", spacing, 0)
+	GameMenuButton04.icon:SetTexture([[Interface\AddOns\ViksUI\Media\Microbar\ach.tga]])
+	GameMenuButton04:SetScript("OnMouseDown", function(self)
+		ToggleAchievementFrame()
+	end)
+
+	--Button 5 - Mounts
+	T.CreateBtn("GameMenuButton05", GameMenuBG, size, size, "Collection Journal: Mounts", "", GameMenuBG)
+	GameMenuButton05:Point("LEFT", GameMenuButton04, "RIGHT", spacing, 0)
+	GameMenuButton05.icon:SetTexture([[Interface\AddOns\ViksUI\Media\Microbar\mount.tga]])
+	GameMenuButton05:SetScript("OnMouseDown", function(self)
+		ToggleCollectionsJournal(1)
+	end)
+
+	--Button 6 - Pets
+	T.CreateBtn("GameMenuButton06", GameMenuBG, size, size, "Collection Journal: Pets", "", GameMenuBG)
+	GameMenuButton06:Point("LEFT", GameMenuButton05, "RIGHT", spacing, 0)
+	GameMenuButton06.icon:SetTexture([[Interface\AddOns\ViksUI\Media\Microbar\pet.tga]])
+	GameMenuButton06:SetScript("OnMouseDown", function(self)
+		ToggleCollectionsJournal(2)
+	end)
+
+	--Button 7 - Toy Box
+	T.CreateBtn("GameMenuButton07", GameMenuBG, size, size, "Collection Journal: Toy Box", "", GameMenuBG)
+	GameMenuButton07:Point("LEFT", GameMenuButton06, "RIGHT", spacing, 0)
+	GameMenuButton07.icon:SetTexture([[Interface\AddOns\ViksUI\Media\Microbar\toybox.tga]])
+	GameMenuButton07:SetScript("OnMouseDown", function(self)
+		ToggleCollectionsJournal(3)
+	end)
+
+	--Button 8 - Heirlooms
+	T.CreateBtn("GameMenuButton08", GameMenuBG, size, size, "Collection Journal: Heirlooms", "", GameMenuBG)
+	GameMenuButton08:Point("LEFT", GameMenuButton07, "RIGHT", spacing, 0)
+	GameMenuButton08.icon:SetTexture([[Interface\AddOns\ViksUI\Media\Microbar\heirlooms.tga]])
+	GameMenuButton08:SetScript("OnMouseDown", function(self)
+		ToggleCollectionsJournal(4)
+	end)
+
+	--Button 9 - Dressing room
+	T.CreateBtn("GameMenuButton09", GameMenuBG, size, size, "Collection Journal: Transmogrification", "", GameMenuBG)
+	GameMenuButton09:Point("LEFT", GameMenuButton08, "RIGHT", spacing, 0)
+	GameMenuButton09.icon:SetTexture([[Interface\AddOns\ViksUI\Media\Microbar\bag.tga]])
+	GameMenuButton09:SetScript("OnMouseDown", function(self)
+		ToggleCollectionsJournal(5)
+	end)
 
 	--Button 10 - Social
 	T.CreateBtn("GameMenuButton10", GameMenuBG, size, size, "Social", "", GameMenuBG)
-	GameMenuButton10:Point("LEFT", GameMenuButton03, "RIGHT", spacing, 0)
+	GameMenuButton10:Point("LEFT", GameMenuButton09, "RIGHT", spacing, 0)
 	GameMenuButton10.icon:SetTexture([[Interface\AddOns\ViksUI\Media\Microbar\social.tga]])
 	GameMenuButton10:SetScript("OnMouseDown", function(self)
 		ToggleFriendsFrame(1)
@@ -82,12 +129,12 @@ local function Enable()
 	GameMenuButton13:SetScript("OnMouseDown", function(self)
 		if IsInGuild() then
 			if (not GuildFrame) then
-				GuildFrame_LoadUI()
+			GuildFrame_LoadUI()
 			end
 			GuildFrame_Toggle()
 		else
 			if (not LookingForGuildFrame) then
-				LookingForGuildFrame_LoadUI()
+			LookingForGuildFrame_LoadUI()
 			end
 			LookingForGuildFrame_Toggle()
 		end
@@ -115,7 +162,7 @@ local function Enable()
 	GameMenuButton16.icon:SetTexture([[Interface\AddOns\ViksUI\Media\Menuicons\calendar.tga]])
 	GameMenuButton16:SetScript("OnMouseDown", function(self)
 		if (not CalendarFrame) then
-			LoadAddOn("Blizzard_Calendar")
+		LoadAddOn("Blizzard_Calendar")
 		end
 		Calendar_Toggle()
 	end)
@@ -142,15 +189,15 @@ local function Enable()
 	GameMenuButton19:Point("LEFT", GameMenuButton18, "RIGHT", spacing, 0)
 	GameMenuButton19.icon:SetTexture([[Interface\AddOns\ViksUI\Media\Microbar\chat.tga]])
 	GameMenuButton19:SetScript("OnMouseDown", function(self)
-		if not SocialPostFrame then
+			if not SocialPostFrame then
 			LoadAddOn("Blizzard_SocialUI")
-		end
-		local IsTwitterEnabled = C_Social.IsSocialEnabled()
-		if IsTwitterEnabled then
+			end
+			local IsTwitterEnabled = C_Social.IsSocialEnabled()
+			if IsTwitterEnabled then
 			Social_SetShown(true)
-		else
+			else
 			T.Print(SOCIAL_TWITTER_TWEET_NOT_LINKED)
-		end
+			end
 	end)
 
 	--Button 20 - ViksUI config
@@ -166,7 +213,7 @@ local function Enable()
 	GameMenuButton21:SetAttribute("macrotext1", "/")
 	GameMenuButton21.icon:SetTexture([[Interface\AddOns\ViksUI\Media\Microbar\menu.tga]])
 	GameMenuButton21:SetScript("OnMouseDown", function(self)
-		GameMenuBG:Hide()
+	GameMenuBG:Hide()
 	end)
 	
 	RegisterStateDriver(GameMenuBG, "visibility", "[combat] hide; nil")
@@ -182,11 +229,11 @@ local Update = function(self)
 	self.Text:SetText("Game Menu")
 	
 	self:SetScript("OnEnter", function(self)
-		self.Text:SetTextColor(class.r, class.g, class.b)
+	self.Text:SetTextColor(class.r, class.g, class.b)
 	end)
 	
 	self:SetScript("OnLeave", function(self)
-		self.Text:SetTextColor(1, 1, 1)
+	self.Text:SetTextColor(1, 1, 1)
 	end)
 	
 end

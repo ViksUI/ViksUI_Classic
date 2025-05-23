@@ -1,4 +1,4 @@
-## Interface: 11505
+## Interface: 11507
 ## Title: ViksUI (Classic)
 ## Notes: A total UI overhaul for World of Warcraft
 ## Author: Viks

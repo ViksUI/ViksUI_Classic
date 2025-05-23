@@ -181,33 +181,46 @@ local function UnitGear(unit)
 end
 
 --- Scan Current Unit
-local function ScanUnit(unitID)
-    if not CanInspect(unitID) then return end
-    ScannedGUID = UnitGUID(unitID)
-    wipe(SlotCache)
-    wipe(ItemCache)
-    local numEquipped = 0
-    for _, slot in pairs(InventorySlots) do
-        if GetInventoryItemTexture(unitID, slot) then
-            SlotCache[slot] = false
-            numEquipped = numEquipped + 1
-        end
-    end
+local function ScanUnit(unit, forced)
+	local cachedGear
 
-    if numEquipped > 0 then
-        for slot in pairs(SlotCache) do
-            TestTips[slot].itemLink = GetInventoryItemLink(unitID, slot)
-            TestTips[slot]:SetOwner(WorldFrame, "ANCHOR_NONE")
-            TestTips[slot]:SetInventoryItem(unitID, slot)
-        end
-    else
-        local guid = ScannedGUID
-        if not GuidCache[guid] then GuidCache[guid] = {} end
-        GuidCache[guid].ilevel = 0
-        GuidCache[guid].weaponLevel = 0
-        GuidCache[guid].timestamp = GetTime()
-        E("ItemScanComplete", guid, GuidCache[guid])
-    end
+	if UnitIsUnit(unit, "player") then
+		cachedGear = UnitGear("player")
+
+		SetUnitInfo(cachedGear or CONTINUED)
+	else
+		if (not unit) or (UnitGUID(unit) ~= currentGUID) then return end
+
+		cachedGear = GearDB[currentGUID]
+
+		-- cachedGear? ok...skip get gear
+		if cachedGear and not forced then
+			SetUnitInfo(cachedGear)
+		end
+
+		if not (IsShiftKeyDown() or forced) then
+			if UnitAffectingCombat("player") then return end
+		end
+
+		if not UnitIsVisible(unit) then return end
+		if UnitIsDeadOrGhost("player") or UnitOnTaxi("player") then return end
+		if InspectFrame and InspectFrame:IsShown() then return end
+
+		-- Press SHIFT to refresh
+		if IsShiftKeyDown() then
+			SetUnitInfo(CONTINUED, CONTINUED)
+		else
+			SetUnitInfo(cachedGear or CONTINUED)
+		end
+
+		local lastRequest = GetTime() - (f.lastUpdate or 0)
+		if (lastRequest >= 1.5) then
+			f.nextUpdate = 0
+		else
+			f.nextUpdate = 1.5 - lastRequest
+		end
+		f:Show()
+	end
 end
 
 --- Handle Events
