@@ -62,13 +62,9 @@ end
 
 local function Visibility(self)
     local element = self.HarmonyBar
-    local spec = C_SpecializationInfo.GetSpecialization and C_SpecializationInfo.GetSpecialization() or GetSpecialization and GetSpecialization()
-    if spec == 3 then
-        element:Show()
-        if self.Debuffs then self.Debuffs:SetPoint("BOTTOMRIGHT", self, "TOPRIGHT", 2, 19) end
-    else
-        element:Hide()
-        if self.Debuffs then self.Debuffs:SetPoint("BOTTOMRIGHT", self, "TOPRIGHT", 2, 5) end
+    element:Show()
+    if self.Debuffs then
+        self.Debuffs:SetPoint("BOTTOMRIGHT", self, "TOPRIGHT", 2, 19)
     end
 end
 

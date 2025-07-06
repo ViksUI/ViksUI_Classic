@@ -19,7 +19,7 @@ T.RaidBuffs = {
 	},
 	MONK = {
 		{115151, "TOPRIGHT", {0.2, 0.7, 0.7}},				-- Renewing Mist
-		{119611, "TOPRIGHT", {0.2, 0.7, 0.7}},				-- Renewing Mist
+		-- {119611, "TOPRIGHT", {0.2, 0.7, 0.7}},				-- Renewing Mist
 		{116841, "RIGHT", {0.12, 1.00, 0.53}},				-- Tiger's Lust (Freedom)
 		{115175, "BOTTOMRIGHT", {0.7, 0.4, 0}},				-- Soothing Mist
 		{124682, "BOTTOMLEFT", {0.4, 0.8, 0.2}},			-- Enveloping Mist
