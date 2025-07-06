@@ -4,7 +4,7 @@ local T, C, L = unpack(ViksUI)
 --	Change position
 ----------------------------------------------------------------------------------------
 WorldMapFrame.BlackoutFrame:StripTextures()
-WorldMapFrame.BlackoutFrame:EnableMouse(false)
+WorldMapFrame.BlackoutFrame:EnableMouse(true)
 WorldMapFrame:SetScale(0.75)
 
 WorldMapFrame.ScrollContainer.GetCursorPosition = function()

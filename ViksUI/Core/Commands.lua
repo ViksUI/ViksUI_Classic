@@ -17,7 +17,7 @@ SLASH_TICKET1 = "/gm"
 SLASH_TICKET2 = "/гм"
 SLASH_TICKET3 = "/пь"
 
-if T.Cata or T.Mainline then
+if T.Cata or T.Mists or T.Mainline then
 	SlashCmdList.JOURNAL = function() ToggleEncounterJournal() end
 	SLASH_JOURNAL1 = "/ej"
 	SLASH_JOURNAL2 = "/уо"
@@ -48,7 +48,7 @@ SLASH_UIHELP3 = "/гшрудз"
 --	Enable/Disable addons
 ----------------------------------------------------------------------------------------
 SlashCmdList.DISABLE_ADDON = function(addon)
-	local _, _, _, _, _, reason = GetAddOnInfo(addon)
+	local _, _, _, _, _, reason = C_AddOns.GetAddOnInfo(addon)
 	if reason ~= "MISSING" then
 		DisableAddOn(addon)
 		ReloadUI()
@@ -60,7 +60,7 @@ SLASH_DISABLE_ADDON1 = "/dis"
 SLASH_DISABLE_ADDON2 = "/disable"
 
 SlashCmdList.ENABLE_ADDON = function(addon)
-	local _, _, _, _, _, reason = GetAddOnInfo(addon)
+	local _, _, _, _, _, reason = C_AddOns.GetAddOnInfo(addon)
 	if reason ~= "MISSING" then
 		EnableAddOn(addon)
 		LoadAddOn(addon)
@@ -73,8 +73,8 @@ SLASH_ENABLE_ADDON1 = "/en"
 SLASH_ENABLE_ADDON2 = "/enable"
 
 SlashCmdList.ONLY_UI = function()
-	for i = 1, GetNumAddOns() do
-		local name = GetAddOnInfo(i)
+	for i = 1, C_AddOns.GetNumAddOns() do
+		local name = C_AddOns.GetAddOnInfo(i)
 		if name ~= "ViksUI" and name ~= "Viks_ConfigUI" and name ~= "!BaudErrorFrame" and GetAddOnEnableState(T.name, name) == 2 then
 			DisableAddOn(name, T.name)
 		end
@@ -158,7 +158,7 @@ SLASH_PARTYTORAID4 = "/сщтмуке"
 ----------------------------------------------------------------------------------------
 --	Instance teleport
 ----------------------------------------------------------------------------------------
-if T.Wrath or T.Cata or T.Mainline then
+if T.Wrath or T.Cata or T.Mists or T.Mainline then
 	SlashCmdList.INSTTELEPORT = function()
 		local inInstance = IsInInstance()
 		if inInstance then
@@ -174,7 +174,7 @@ end
 ----------------------------------------------------------------------------------------
 --	Spec switching(by Monolit)
 ----------------------------------------------------------------------------------------
-if T.SoD or T.Wrath or T.Cata then
+if T.SoD or T.Wrath or T.Cata or T.Mists then
 	SlashCmdList.SPEC = function()
 		local spec = GetActiveTalentGroup()
 		if spec == 1 then SetActiveTalentGroup(2) elseif spec == 2 then SetActiveTalentGroup(1) end
@@ -214,7 +214,7 @@ SLASH_NPCID1 = "/getid"
 ----------------------------------------------------------------------------------------
 --	Demo mode for DBM
 ----------------------------------------------------------------------------------------
-SlashCmdList.DBMTEST = function() if IsAddOnLoaded("DBM-Core") then DBM:DemoMode() end end
+SlashCmdList.DBMTEST = function() if C_AddOns.IsAddOnLoaded("DBM-Core") then DBM:DemoMode() end end
 SLASH_DBMTEST1 = "/dbmtest"
 SLASH_DBMTEST2 = "/виьеуые"
 
@@ -322,7 +322,7 @@ SLASH_CLEAR_CHAT2 = "/сдуфк"
 ----------------------------------------------------------------------------------------
 --	Test Blizzard Alerts
 ----------------------------------------------------------------------------------------
-if T.Wrath or T.Cata then
+if T.Wrath or T.Cata or T.Mists then
 	SlashCmdList.TEST_ACHIEVEMENT = function()
 		PlaySound(SOUNDKIT.LFG_REWARDS)
 		if not AchievementFrame then

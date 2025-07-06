@@ -6,6 +6,8 @@ local T, C, L = unpack(ViksUI)
 function T.GetSpecialization(isInspect, isPet, specGroup)
 	if T.Cata then
 		return GetPrimaryTalentTree(isInspect, isPet, specGroup)
+	elseif T.Mists then
+		--return C_SpecializationInfo.GetSpecialization(isInspect, isPet, specGroup)
 	else
 		if (isInspect or isPet) then
 			return

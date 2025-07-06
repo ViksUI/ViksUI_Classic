@@ -83,12 +83,12 @@
 	<Script file="Modules\Trade\AlreadyKnown.lua"/>
 	<Script file="Modules\Trade\Archaeology.lua"/>
 	<Script file="Modules\Trade\Merchant.lua"/>
-	<!-- <Script file="Modules\Trade\OneClickDisenchanting.lua"/> -->
+	<Script file="Modules\Trade\OneClickDisenchanting.lua"/>
 	<Script file="Modules\Trade\OneClickEnchantScroll.lua"/>
 	<Script file="Modules\Trade\ProfessionTabs.lua"/>
 	<Script file="Modules\Trade\SumAucBuyouts.lua"/>
 	<Script file="Modules\Trade\TrainAll.lua"/>
-	
+
 	<Script file="Modules\ActionBars\Core.lua"/>
 	<Script file="Modules\ActionBars\Bindings.lua"/>
 	<Script file="Modules\ActionBars\Bar1.lua"/>
@@ -118,14 +118,14 @@
 	<Script file="Modules\Announcements\SafariHat.lua"/>
 	<Script file="Modules\Announcements\SayThanks.lua"/>
 	<Script file="Modules\Announcements\Spells.lua"/>
-	
+
 	<Script file="Modules\Auras\AuraSource.lua"/>
 	<Script file="Modules\Auras\BuffFrame.lua"/>
 	<Script file="Modules\Auras\ClassTimer.lua"/>
 	<Script file="Modules\Auras\Filger.lua"/>
 	<Script file="Modules\Auras\SelfBuffsReminder.lua"/>
 	<Script file="Modules\Auras\RaidBuffsReminder.lua"/>
-	
+
 	<Script file="Modules\Automation\AutoInvite.lua"/>
 	<Script file="Modules\Automation\AutoOpens.lua"/>
 	<Script file="Modules\Automation\AutoRelease.lua"/>
@@ -263,7 +263,7 @@
 	<Script file="Modules\Skins\Rematch.lua"/>
 	<Script file="Modules\Skins\Postal.lua"/>
 	<Script file="Modules\Skins\lsToasts.lua"/>
-	
+
 	<Script file="Modules\Tooltip\Tooltip.lua"/>
 	<Script file="Modules\Tooltip\HyperLink.lua"/>
 	<Script file="Modules\Tooltip\Achievement.lua"/>

@@ -10573,7 +10573,7 @@ local step6 = function()
 end
 -- Step 5 / Setting up skada Profile
 local step5 = function()
-	if IsAddOnLoaded("Details") then
+	if C_AddOns.IsAddOnLoaded("Details") then
 		if ViksUISettings.DetailsSettings then
 		step6()
 		return end
@@ -10592,7 +10592,7 @@ local step5 = function()
 			ViksUISettings.DetailsSettings = true
 			step6()
 		end)
-	elseif IsAddOnLoaded("Skada") then
+	elseif C_AddOns.IsAddOnLoaded("Skada") then
 		if ViksUISettings.SkadaSettings then
 		step6()
 		return end
@@ -10631,7 +10631,7 @@ local step5 = function()
 end
 -- Step 4 / Setting up bartenders profile
 local step4 = function()
-	if IsAddOnLoaded("Bartender4") then
+	if C_AddOns.IsAddOnLoaded("Bartender4") then
 		if ViksUISettings.BTSettings then
 		step5()
 		return end
@@ -10673,7 +10673,7 @@ local step3 = function()
 	sb:SetValue(3)
 	header:SetText("3. Social")
 	sbt:SetText("3/ "..maxsteps)
-	if IsAddOnLoaded("Prat") or IsAddOnLoaded("Chatter") then
+	if C_AddOns.IsAddOnLoaded("Prat") or C_AddOns.IsAddOnLoaded("Chatter") then
 		text1:SetText("Another chat addon is found.  We will ignore this step.  Please press skip to continue installation.")
 		option2:Hide()
 	else
@@ -10863,7 +10863,7 @@ OnLogon:SetScript("OnEvent", function(self)
 		end
 	end
 
-	if IsAddOnLoaded("Bartender4") then
+	if C_AddOns.IsAddOnLoaded("Bartender4") then
 		ExtraActionBarFrame:SetSize(50,50) -- Reduce annoying background frame that right button camera turning
 		ExtraAbilityContainer:SetSize(50,50) -- Reduce annoying background frame that right button camera turning
 		if ViksUISettingsPerChar.Install and ViksUISettingsPerChar.BartenderSet ~= true and ViksUISettingsPerChar.NoPanels then
@@ -10986,12 +10986,12 @@ StaticPopupDialogs.SETTINGS_ALL = {
 	button1 = ACCEPT,
 	button2 = CANCEL,
 	OnAccept = function()
-		if IsAddOnLoaded("DBM-Core") and C.skins.dbm then T.UploadDBM() end
-		if IsAddOnLoaded("BigWigs") and C.skins.bigwigs then T.UploadBW() end
-		if IsAddOnLoaded("MikScrollingBattleText") then UploadMSBT() end
-		if IsAddOnLoaded("Skada") then UploadSkada() end
-		if IsAddOnLoaded("Bartender4") then UploadBartender() end
-		if IsAddOnLoaded("Details") then UploadDetails() end
+		if C_AddOns.IsAddOnLoaded("DBM-Core") and C.skins.dbm then T.UploadDBM() end
+		if C_AddOns.IsAddOnLoaded("BigWigs") and C.skins.bigwigs then T.UploadBW() end
+		if C_AddOns.IsAddOnLoaded("MikScrollingBattleText") then UploadMSBT() end
+		if C_AddOns.IsAddOnLoaded("Skada") then UploadSkada() end
+		if C_AddOns.IsAddOnLoaded("Bartender4") then UploadBartender() end
+		if C_AddOns.IsAddOnLoaded("Details") then UploadDetails() end
 		UploadMasque()
 		T.ChatSetup()
 		cvarsetup()
@@ -11005,7 +11005,7 @@ StaticPopupDialogs.SETTINGS_ALL = {
 
 SlashCmdList.SETTINGS = function(msg)
 	if msg == "dbm" then
-		if IsAddOnLoaded("DBM-Core") then
+		if C_AddOns.IsAddOnLoaded("DBM-Core") then
 			if C.skins.dbm == true then
 				StaticPopup_Show("SETTINGS_DBM")
 			else
@@ -11015,7 +11015,7 @@ SlashCmdList.SETTINGS = function(msg)
 			print("|cffffff00DBM"..L_INFO_NOT_INSTALLED.."|r")
 		end
 	elseif msg == "bw" then
-		if IsAddOnLoaded("BigWigs") then
+		if C_AddOns.IsAddOnLoaded("BigWigs") then
 			if C.skins.bigwigs == true then
 				StaticPopup_Show("SETTINGS_BIGWIGS")
 			else
@@ -11025,21 +11025,21 @@ SlashCmdList.SETTINGS = function(msg)
 			print("|cffffff00BigWigs"..L_INFO_NOT_INSTALLED.."|r")
 		end
 	elseif msg == "msbt" then
-		if IsAddOnLoaded("MikScrollingBattleText") then
+		if C_AddOns.IsAddOnLoaded("MikScrollingBattleText") then
 			UploadMSBT()
 			ReloadUI()
 		else
 			print("|cffffff00MSBT"..L_INFO_NOT_INSTALLED.."|r")
 		end
 	elseif msg == "details" then
-		if IsAddOnLoaded("Details") then
+		if C_AddOns.IsAddOnLoaded("Details") then
 			UploadDetails()
 			ReloadUI()
 		else
 			print("|cffffff00Details"..L_INFO_NOT_INSTALLED.."|r")
 		end
 	elseif msg == "skada" then
-		if IsAddOnLoaded("Skada") then
+		if C_AddOns.IsAddOnLoaded("Skada") then
 			UploadSkada()
 			ReloadUI()
 		else
@@ -11050,21 +11050,21 @@ SlashCmdList.SETTINGS = function(msg)
 	elseif msg == "cvar" then
 			cvarsetup()
 	elseif msg == "details" then
-		if IsAddOnLoaded("Details") then
+		if C_AddOns.IsAddOnLoaded("Details") then
 			UploadDetails()
 			ReloadUI()
 		else
 			print("|cffffff00Bartender"..L_INFO_NOT_INSTALLED.."|r")
 		end
 	elseif msg == "bartender" then
-		if IsAddOnLoaded("Bartender4") then
+		if C_AddOns.IsAddOnLoaded("Bartender4") then
 			UploadBartender()
 			ReloadUI()
 		else
 			print("|cffffff00Bartender"..L_INFO_NOT_INSTALLED.."|r")
 		end
 	elseif msg == "OPie" then
-		if IsAddOnLoaded("OPie") then
+		if C_AddOns.IsAddOnLoaded("OPie") then
 			UploadOpie()
 			ReloadUI()
 		else

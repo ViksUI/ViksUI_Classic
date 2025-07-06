@@ -138,7 +138,7 @@ StanceAnchor:RegisterEvent("PLAYER_LOGIN")
 StanceAnchor:RegisterEvent("PLAYER_ENTERING_WORLD")
 StanceAnchor:RegisterEvent("UPDATE_SHAPESHIFT_FORMS")
 StanceAnchor:RegisterEvent("UPDATE_SHAPESHIFT_FORM")
-if T.Wrath or T.Cata or T.Mainline then
+if T.Wrath or T.Cata or T.Mists or T.Mainline then
 	StanceAnchor:RegisterUnitEvent("PLAYER_SPECIALIZATION_CHANGED", "player", "")
 end
 StanceAnchor:SetScript("OnEvent", function()
@@ -231,7 +231,7 @@ RABar:SetAlpha(pAlpha)
 
 
 --Background Panel For Omen if used
-if IsAddOnLoaded("Omen") then
+if C_AddOns.IsAddOnLoaded("Omen") then
 local R_Omen = CreateFrame("Frame", "R_Omen",OmenBarList)
 R_Omen:CreatePanel("Transparent", Pscale*CPSidesWidth, Pscale*(CPbarsheight+yoffset+CPTextheight+CPbarsheight+yoffset), "BOTTOMRIGHT", RABar, "BOTTOMLEFT", -xoffset, 0)
 R_Omen:SetFrameLevel(2)
@@ -242,7 +242,7 @@ end
 
 --Background Panel For Details if used
 
-if IsAddOnLoaded("Details") then
+if C_AddOns.IsAddOnLoaded("Details") then
 local L_Details = CreateFrame("Frame", "L_Details", Details_WindowFrame3)
 L_Details:CreatePanel("Transparent", (Pscale*CPSidesWidth)-10, LABar:GetHeight(), "BOTTOMLEFT", LABar, "BOTTOMRIGHT", xoffset, 0)
 L_Details:SetFrameLevel(2)

@@ -1,5 +1,5 @@
 local T, C, L = unpack(ViksUI)
-if C.skins.blizzard_frames ~= true then return else return end -- incomplete
+if C.skins.blizzard_frames ~= true then return end -- incomplete
 
 ----------------------------------------------------------------------------------------
 --	Quest skin

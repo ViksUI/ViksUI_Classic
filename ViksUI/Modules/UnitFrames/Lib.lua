@@ -1578,7 +1578,7 @@ end
 
 --WARLOCK
 lib.genShards = function(self)
-    if (T.Cata or T.Mainline) and C.unitframe_class_bar.shard == true and T.class == "WARLOCK" then
+    if (T.Cata or T.Mists or T.Mainline) and C.unitframe_class_bar.shard == true and T.class == "WARLOCK" then
 		local ShardsFrame = CreateFrame("Frame", self:GetName().."SoulShards", self, "BackdropTemplate")
 		ShardsFrame:CreateBackdrop("Default")
 		ShardsFrame:SetPoint("BOTTOMLEFT", self, "TOPLEFT", 1,7)
@@ -1676,7 +1676,7 @@ lib.addEssence = function(self)
 end
 -- Paladins, HolyPowerbar
 lib.genHolyPower = function(self)
-	if (T.Cata or T.Mainline) and C.unitframe_class_bar.holy == true and T.class == "PALADIN" then
+	if (T.Cata or T.Mists or T.Mainline) and C.unitframe_class_bar.holy == true and T.class == "PALADIN" then
 		self.HolyPower = CreateFrame("Frame", self:GetName().."_HolyPowerBar", self, "BackdropTemplate")
 		self.HolyPower:CreateBackdrop("Default")
 		self.HolyPower:SetPoint("BOTTOMLEFT", self, "TOPLEFT", 1, 7)
@@ -1764,13 +1764,14 @@ end
 
 lib.genHarmony = function(self)
 	if playerClass ~= "MONK" then return end
+	local maxChi = UnitPowerMax("player", Enum.PowerType.Chi or 12)
 	-- Chi bar
 	self.HarmonyBar = CreateFrame("Frame", self:GetName().."_HarmonyBar", self, "BackdropTemplate")
 	self.HarmonyBar:CreateBackdrop("Default")
 	self.HarmonyBar:SetPoint("BOTTOMLEFT", self, "TOPLEFT", 1, 7)
 	self.HarmonyBar:SetSize((self:GetWidth()-2), 7)
 
-	for i = 1, 6 do
+	for i = 1, maxChi do
 		self.HarmonyBar[i] = CreateFrame("StatusBar", self:GetName().."_HarmonyBar", self.HarmonyBar, "BackdropTemplate")
 		self.HarmonyBar[i]:SetSize((self.HarmonyBar:GetWidth()-4) / 6, 7)
 		if i == 1 then

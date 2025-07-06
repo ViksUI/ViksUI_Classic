@@ -7,7 +7,7 @@ if C.skins.capping ~= true then return end
 local frame = CreateFrame("Frame")
 frame:RegisterEvent("PLAYER_ENTERING_WORLD")
 frame:SetScript("OnEvent", function()
-	if not IsAddOnLoaded("Capping") then return end
+	if not C_AddOns.IsAddOnLoaded("Capping") then return end
 
 	local db = CappingFrame.db.profile
 	db.barTexture = "Smooth!"
@@ -15,7 +15,7 @@ frame:SetScript("OnEvent", function()
 	db.font = "Hooge"
 	db.fontSize = C.font.stylization_font_size
 
-	CappingFrame:HookScript('OnUpdate', function(self)
+	CappingFrame:HookScript("OnUpdate", function(self)
 		for bar in pairs(self.bars) do
 			if not bar.backdrop then
 				bar:CreateBackdrop("Default")

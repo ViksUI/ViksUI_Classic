@@ -300,7 +300,7 @@ if clock.enabled then
 					if extended then tr, tg, tb = 0.3, 1, 0.3 else tr, tg, tb = 1, 1, 1 end
 
 					local isHeroic, displayHeroic, displayMythic
-					if T.Wrath or T.Cata or T.Mainline then
+					if T.Wrath or T.Cata or T.Mists or T.Mainline then
 						_, _, isHeroic, _, displayHeroic, displayMythic = GetDifficultyInfo(difficulty)
 						if displayMythic then
 							diff = "M"
@@ -407,10 +407,10 @@ if fps.enabled then
 		local totalMemory = 0
 		UpdateAddOnMemoryUsage()
 		wipe(memoryt)
-		for i = 1, GetNumAddOns() do
+		for i = 1, C_AddOns.GetNumAddOns() do
 			local memory = GetAddOnMemoryUsage(i)
-			local addon, name = GetAddOnInfo(i)
-			if IsAddOnLoaded(i) then tinsert(memoryt, {name or addon, memory}) end
+			local addon, name = C_AddOns.GetAddOnInfo(i)
+			if C_AddOns.IsAddOnLoaded(i) then tinsert(memoryt, {name or addon, memory}) end
 			totalMemory = totalMemory + memory
 		end
 		table.sort(memoryt, sortdesc)
@@ -430,14 +430,14 @@ if fps.enabled then
 		local totalCPU = 0
 		UpdateAddOnCPUUsage()
 		wipe(cput)
-		for i = 1, GetNumAddOns() do
+		for i = 1, C_AddOns.GetNumAddOns() do
 			local cpu = GetAddOnCPUUsage(i)
-			local addon, name = GetAddOnInfo(i)
+			local addon, name = C_AddOns.GetAddOnInfo(i)
 			local cpus = cpu / (GetTime() - startTime)
 			local cpur = cpu - (lastCPU[i] and lastCPU[i] or cpu)
 			lastCPU[i] = cpu
 
-			if IsAddOnLoaded(i) then tinsert(cput, {name or addon, cpu, cpus, cpur}) end
+			if C_AddOns.IsAddOnLoaded(i) then tinsert(cput, {name or addon, cpu, cpus, cpur}) end
 			totalCPU = totalCPU + cpu
 		end
 		table.sort(cput, sortdesc)
@@ -1719,14 +1719,14 @@ if damage.enabled then
 	Inject("Damage", {
 		text = {
 			string = function()
-				if IsAddOnLoaded("Details") then
+				if C_AddOns.IsAddOnLoaded("Details") then
 					_detalhes.data_broker_text = "{dps}"
 					_detalhes:BrokerTick()
 					local effectiveDPS = _detalhes.databroker.text
 					if effectiveDPS and effectiveDPS ~= "0" then
 						return format(damage.alt_fmt, DAMAGE, effectiveDPS)
 					end
-				elseif IsAddOnLoaded("Numeration") then
+				elseif C_AddOns.IsAddOnLoaded("Numeration") then
 					local text = LibStub:GetLibrary("LibDataBroker-1.1"):GetDataObjectByName("Numeration").text
 					if text and text ~= "Numeration" then
 						return format(damage.alt_fmt, DAMAGE, text)
@@ -1735,9 +1735,9 @@ if damage.enabled then
 			end
 		},
 		OnClick = function(self, button)
-			if IsAddOnLoaded("Details") then
+			if C_AddOns.IsAddOnLoaded("Details") then
 				_detalhes:ToggleWindows()
-			elseif IsAddOnLoaded("Numeration") then
+			elseif C_AddOns.IsAddOnLoaded("Numeration") then
 				Numeration:ToggleVisibility()
 			end
 		end
@@ -1930,7 +1930,7 @@ if gold.enabled then
 				-- Currency(1580, false, true)	-- Seal of Wartorn Fate
 				-- end
 
-				if (T.Wrath or T.Cata) and C.stats.currency_raid and T.level == MAX_PLAYER_LEVEL then
+				if (T.Wrath or T.Cata or T.Mists) and C.stats.currency_raid and T.level == MAX_PLAYER_LEVEL then
 					--[[
 					titleName = L_STATS_CURRENCY_RAID
 					Currency(101, false, false)	-- Emblem of Heroism

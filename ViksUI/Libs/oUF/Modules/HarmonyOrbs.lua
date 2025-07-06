@@ -17,15 +17,15 @@ local function Update(self, _, unit, powerType)
 
 	local cur = UnitPower("player", SPELL_POWER_CHI)
 	local max = UnitPowerMax("player", SPELL_POWER_CHI)
-	local spacing = select(4, element[5]:GetPoint())
+	local spacing = select(4, element[4]:GetPoint())
 	local barWidth = element:GetWidth()
 	local lastBar = 0
 
 	if element.max ~= max then
-		if max == 5 then
-			element[6]:Hide()
+		if max == 4 then
+			element[5]:Hide()
 		else
-			element[6]:Show()
+			element[5]:Show()
 		end
 
 		for i = 1, max do
@@ -63,14 +63,14 @@ end
 
 local function Visibility(self)
 	local element = self.HarmonyBar
-	local spec = GetSpecialization()
+	local spec = C_SpecializationInfo.GetSpecialization()
 
 	if spec == SPEC_MONK_WINDWALKER then
 		element:Show()
-		-- if self.Debuffs then self.Debuffs:SetPoint("BOTTOMRIGHT", self, "TOPRIGHT", 2, 19) end  --Not changing as its on own anchor
+		if self.Debuffs then self.Debuffs:SetPoint("BOTTOMRIGHT", self, "TOPRIGHT", 2, 19) end
 	else
 		element:Hide()
-		-- if self.Debuffs then self.Debuffs:SetPoint("BOTTOMRIGHT", self, "TOPRIGHT", 2, 5) end  --Not changing as its on own anchor
+		if self.Debuffs then self.Debuffs:SetPoint("BOTTOMRIGHT", self, "TOPRIGHT", 2, 5) end
 	end
 end
 

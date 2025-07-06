@@ -185,6 +185,7 @@ local UnitSpecific = {
 		if C.unitframe.plugins_combat_feedback == true then
 		lib.combat_feedback(self)
 		end
+		lib.genComboPoints(self)
 		if cfg.CPoints and C.unitframe_class_bar.combo_old == true then lib.genCPoints(self) end
 		--lib.createAuras(self)
 		if cfg.showPortrait or cfg.portraitHPbar then lib.gen_portrait(self) end

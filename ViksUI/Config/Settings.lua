@@ -314,6 +314,15 @@ C["unitframe"] = {
 	["CastbarFocus_h"] = 13,
 }
 
+if T.Classic then
+	C["unitframe"]["castbar_ticks"] = true
+	C["unitframe"]["plugins_swing"] = true
+	C["unitframe"]["plugins_experience_bar"] = true
+else
+	C["unitframe"]["plugins_power_spark"] = false
+	C["unitframe"]["bar_color_happiness"] = false
+end
+
 ----------------------------------------------------------------------------------------
 --	Unit Frames Class bar options
 ----------------------------------------------------------------------------------------
@@ -331,6 +340,10 @@ C["unitframe_class_bar"] = {
 	["totem"] = true,							-- Totem bar for Shaman
 	["totem_other"] = true,						-- Totem bar for other classes
 }
+
+if T.Classic then
+	C["unitframe_class_bar"]["combo_old"] = true
+end
 
 ----------------------------------------------------------------------------------------
 --	Raid Frames options
@@ -545,6 +558,12 @@ C["tooltip"] = {
 	["topleft"] = true, 						-- Anchor to Top Left
 }
 
+if T.Classic then
+	C["tooltip"]["realm"] = false
+	C["tooltip"]["item_count"] = true
+	C["tooltip"]["vendor_price"] = true
+end
+
 ----------------------------------------------------------------------------------------
 --	Chat options
 ----------------------------------------------------------------------------------------
@@ -623,6 +642,12 @@ C["nameplate"] = {
 	["targetglow_color"] = {0, 1, 1},			-- Color for Target Glow	
 }
 
+if T.Classic then
+	C["nameplate"]["health_value"] = true
+	C["nameplate"]["show_castbar_name"] = true
+	C["nameplate"]["track_debuffs"] = true
+end
+
 ----------------------------------------------------------------------------------------
 --	Combat text options
 ----------------------------------------------------------------------------------------
@@ -687,6 +712,10 @@ C["loot"] = {
 	["auto_confirm_de"] = true,					-- Auto confirm disenchant and take BoP loot
 	["faster_loot"] = false,					-- Faster auto looting
 }
+
+if T.Classic then
+	C["loot"]["auto_confirm_de"] = false
+end
 
 ----------------------------------------------------------------------------------------
 --	Filger options
@@ -777,6 +806,12 @@ C["reminder"] = {
 	["raid_buffs_alpha"] = 0,					-- Transparent icons when the buff is present
 }
 
+if T.Vanilla or T.TBC then
+	C["reminder"]["raid_buffs_size"] = 16
+elseif T.Wrath or T.Cata or T.Mists then
+	C["reminder"]["raid_buffs_size"] = 19.1
+end
+
 ----------------------------------------------------------------------------------------
 --	Raid cooldowns options
 ----------------------------------------------------------------------------------------
@@ -865,6 +900,10 @@ C["stats"] = {
 	["CurrPvP"] = false,						-- Show PvP under currency tab
 	["CurrMiscellaneous"] = true,				-- Show Miscellaneous under currency tab
 }
+
+if T.Classic then
+	C["stats"]["talents"] = false
+end
 
 ----------------------------------------------------------------------------------------
 --	Trade options

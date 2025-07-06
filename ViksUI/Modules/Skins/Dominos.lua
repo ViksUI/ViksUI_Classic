@@ -7,7 +7,7 @@ if C.skins.dominos ~= true then return end
 local frame = CreateFrame("Frame")
 frame:RegisterEvent("PLAYER_LOGIN")
 frame:SetScript("OnEvent", function()
-	if not IsAddOnLoaded("Dominos") then return end
+	if not C_AddOns.IsAddOnLoaded("Dominos") then return end
 
 	local function StyleNormalButton(self)
 		local name = self:GetName()
@@ -105,7 +105,7 @@ frame:SetScript("OnEvent", function()
 			icon:SetPoint("BOTTOMRIGHT", button, -2, 2)
 
 			if pet then
-				local autocast = button.AutoCastable
+				local autocast = button.AutoCastable or _G[name.."AutoCastable"]
 				autocast:SetSize((button:GetWidth() * 2) - 10, (button:GetWidth() * 2) - 10)
 				autocast:ClearAllPoints()
 				autocast:SetPoint("CENTER", button, 0, 0)

@@ -7,7 +7,7 @@ if C.skins.mage_nuggets ~= true then return end
 local frame = CreateFrame("Frame")
 frame:RegisterEvent("PLAYER_LOGIN")
 frame:SetScript("OnEvent", function()
-	if not IsAddOnLoaded("MageNuggets") then return end
+	if not C_AddOns.IsAddOnLoaded("MageNuggets") then return end
 
 	MageNuggets.cooldownSize = 3
 
@@ -25,7 +25,7 @@ frame:SetScript("OnEvent", function()
 	for i = 1, getn(sparks) do
 		local spark = _G[sparks[i]]
 		if spark then
-			spark:SetTexture(nil)
+			spark:SetTexture(0)
 		end
 	end
 

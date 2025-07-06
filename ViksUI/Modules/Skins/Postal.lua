@@ -7,7 +7,7 @@ if C.skins.postal ~= true then return end
 local frame = CreateFrame("Frame")
 frame:RegisterEvent("PLAYER_LOGIN")
 frame:SetScript("OnEvent", function()
-	if not IsAddOnLoaded("Postal") then return end
+	if not C_AddOns.IsAddOnLoaded("Postal") then return end
 	T.SkinRotateButton(Postal_ModuleMenuButton)
 	Postal_ModuleMenuButton:ClearAllPoints()
 	Postal_ModuleMenuButton:SetWidth(18)
@@ -29,4 +29,16 @@ frame:SetScript("OnEvent", function()
 	PostalSelectOpenButton:SkinButton()
 	PostalSelectReturnButton:SkinButton()
 	PostalOpenAllButton:SkinButton()
+
+	if T.Classic then
+		for i = 1, INBOXITEMS_TO_DISPLAY do
+			local button = _G["MailItem"..i]
+			local expireTime = _G["MailItem"..i.."ExpireTime"]
+
+			button:SetWidth(290)
+
+			expireTime:ClearAllPoints()
+			expireTime:SetPoint("TOPRIGHT", button, "TOPRIGHT", 0, -4)
+		end
+	end
 end)

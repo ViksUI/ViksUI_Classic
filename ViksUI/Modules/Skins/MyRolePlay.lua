@@ -1,5 +1,5 @@
 local T, C, L = unpack(ViksUI)
-if C.skins.my_role_play ~= true or not IsAddOnLoaded("MyRolePlay") then return end
+if T.Classic or C.skins.my_role_play ~= true or not C_AddOns.IsAddOnLoaded("MyRolePlay") then return end -- FIXME for Classic
 
 ----------------------------------------------------------------------------------------
 --	MyRolePlay skin

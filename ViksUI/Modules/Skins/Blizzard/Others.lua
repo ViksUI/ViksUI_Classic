@@ -6,7 +6,7 @@ local T, C, L = unpack(ViksUI)
 local SkinBlizzUI = CreateFrame("Frame")
 SkinBlizzUI:RegisterEvent("ADDON_LOADED")
 SkinBlizzUI:SetScript("OnEvent", function(_, _, addon)
-	if IsAddOnLoaded("Skinner") or IsAddOnLoaded("Aurora") then return end
+	if C_AddOns.IsAddOnLoaded("Skinner") or C_AddOns.IsAddOnLoaded("Aurora") then return end
 
 	-- Stuff not in Blizzard load-on-demand
 	if addon == "ViksUI" then
@@ -44,11 +44,11 @@ SkinBlizzUI:SetScript("OnEvent", function(_, _, addon)
 		GameMenuFrame:StripTextures()
 		OpacityFrame:StripTextures()
 
-		if T.Wrath or T.Cata then
+		if T.Wrath or T.Cata or T.Mists then
 			RolePollPopup:StripTextures()
 		end
 
-		if T.Wrath or T.Cata or T.Mainline then
+		if T.Wrath or T.Cata or T.Mists or T.Mainline then
 			QueueStatusFrame:StripTextures()
 			LFDRoleCheckPopup:StripTextures()
 		end

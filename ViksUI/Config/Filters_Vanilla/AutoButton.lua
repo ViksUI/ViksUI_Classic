@@ -1,5 +1,5 @@
 local T, C, L = unpack(ViksUI)
-if C.quest.quest_auto_button ~= true or IsAddOnLoaded("ExtraQuestButton") then return end
+if C.quest.quest_auto_button ~= true or C_AddOns.IsAddOnLoaded("ExtraQuestButton") then return end
 
 ----------------------------------------------------------------------------------------
 --	The best way to add or delete item is to go at www.wowhead.com, search for a item.

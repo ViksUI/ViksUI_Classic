@@ -1,5 +1,5 @@
 local T, C, L = unpack(ViksUI)
-if IsAddOnLoaded("DBM-Core") then return end
+if C_AddOns.IsAddOnLoaded("DBM-Core") then return end
 
 ----------------------------------------------------------------------------------------
 --	Queue timer on PVPReadyDialog

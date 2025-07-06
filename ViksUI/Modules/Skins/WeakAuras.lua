@@ -4,7 +4,7 @@ if C.skins.weak_auras ~= true then return end
 ----------------------------------------------------------------------------------------
 --	WeakAuras skin
 ----------------------------------------------------------------------------------------
-if not IsAddOnLoaded("WeakAuras") then return end
+if not C_AddOns.IsAddOnLoaded("WeakAuras") then return end
 
 local i = 0
 local function Skin_WeakAuras(frame, type)
@@ -63,26 +63,17 @@ local function Skin_WeakAuras(frame, type)
 	end
 end
 
-if WeakAuras.regionPrototype then
-	hooksecurefunc(WeakAuras.regionPrototype, "create", function(region)
-		if region.regionType == "icon" or region.regionType == "aurabar" then
-			Skin_WeakAuras(region, region.regionType)
-		end
+-- TODO: FIXME
+--[[
+hooksecurefunc(WeakAuras.regionPrototype, "create", function(region)
+	if region.regionType == "icon" or region.regionType == "aurabar" then
+		Skin_WeakAuras(region, region.regionType)
+	end
 
-	end)
-	hooksecurefunc(WeakAuras.regionPrototype, "modifyFinish", function(_, region)
-		if region.regionType == "icon" or region.regionType == "aurabar" then
-			Skin_WeakAuras(region, region.regionType)
-		end
-	end)
-elseif WeakAuras.SetTextureOrAtlas then
-	hooksecurefunc(WeakAuras, "SetTextureOrAtlas", function(icon)
-		local parent = icon:GetParent()
-		if parent then
-			local region = parent.regionType and parent or parent:GetParent()
-			if region.regionType == "icon" or region.regionType == "aurabar" then
-				Skin_WeakAuras(region, region.regionType)
-			end
-		end
-	end)
-end
+end)
+hooksecurefunc(WeakAuras.regionPrototype, "modifyFinish", function(_, region)
+	if region.regionType == "icon" or region.regionType == "aurabar" then
+		Skin_WeakAuras(region, region.regionType)
+	end
+end)
+--]]
