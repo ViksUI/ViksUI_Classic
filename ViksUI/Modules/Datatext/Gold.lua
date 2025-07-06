@@ -41,8 +41,9 @@ if not C.datatext.Gold or C.datatext.Gold == 0 then return end
 
 local titleName
 local function Currency(id, weekly, capped)
-		local info = C_CurrencyInfo.GetCurrencyInfo(id)
-		local name, amount, tex, week, weekmax, maxed, discovered = info.name, info.quantity, info.iconFileID, info.canEarnPerWeek, info.maxWeeklyQuantity, info.maxQuantity, info.discovered
+    local info = C_CurrencyInfo.GetCurrencyInfo(id)
+    if not info then return end -- Prevents the nil error
+    local name, amount, tex, week, weekmax, maxed, discovered = info.name, info.quantity, info.iconFileID, info.canEarnPerWeek, info.maxWeeklyQuantity, info.maxQuantity, info.discovered
 		if amount == 0 then return end
 		if titleName then
 			GameTooltip:AddLine(" ")

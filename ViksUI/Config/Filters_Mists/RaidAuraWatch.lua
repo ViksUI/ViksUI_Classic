@@ -17,6 +17,15 @@ T.RaidBuffs = {
 		-- {102342, "LEFT", {0.45, 0.3, 0.2}, true},			-- Ironbark
 		-- {155777, "RIGHT", {0.4, 0.9, 0.4}},					-- Rejuvenation (Germination)
 	},
+	MONK = {
+		{115151, "TOPRIGHT", {0.2, 0.7, 0.7}},				-- Renewing Mist
+		{119611, "TOPRIGHT", {0.2, 0.7, 0.7}},				-- Renewing Mist
+		{116841, "RIGHT", {0.12, 1.00, 0.53}},				-- Tiger's Lust (Freedom)
+		{115175, "BOTTOMRIGHT", {0.7, 0.4, 0}},				-- Soothing Mist
+		{124682, "BOTTOMLEFT", {0.4, 0.8, 0.2}},			-- Enveloping Mist
+		-- {325209, "BOTTOM", {0.3, 0.6, 0.6}},				-- Enveloping Breath
+		{116849, "LEFT", {0.81, 0.85, 0.1}, true},			-- Life Cocoon
+	},
 	HUNTER = {
 		{34477, "TOPRIGHT", {0.2, 0.2, 1}},					-- Misdirection
 	},
@@ -43,7 +52,7 @@ T.RaidBuffs = {
 	SHAMAN = {
 		{61295, "TOPRIGHT", {0.7, 0.3, 0.7}, true},			-- Riptide
 		{974, "BOTTOMLEFT", {0.2, 0.7, 0.2}, true},			-- Earth Shield
-		{16177, "TOPLEFT", {0.4, 0.7, 0.2}},				-- Ancestral Fortitude
+		-- {16177, "TOPLEFT", {0.4, 0.7, 0.2}},				-- Ancestral Fortitude
 		{51945, "BOTTOMRIGHT", {0.7, 0.4, 0}},				-- Earthliving
 	},
 	ROGUE = {
@@ -1238,7 +1247,7 @@ if C.unitframe.plugins_pvp_debuffs == true then
 		[SpellName(51514)] = 3,		-- Hex
 		-- Warlock
 		[SpellName(6789)] = 3,		-- Death Coil
-		[SpellName(60995)] = 3,		-- Demon Leap (Metamorphosis)
+		-- [SpellName(60995)] = 3,		-- Demon Leap (Metamorphosis)
 		[SpellName(5782)] = 3,		-- Fear
 		[SpellName(5484)] = 3,		-- Howl of Terror
 		[SpellName(30153)] = 3,		-- Intercept (Felguard)

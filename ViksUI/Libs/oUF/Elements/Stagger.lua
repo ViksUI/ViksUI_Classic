@@ -1,191 +1,136 @@
-if(select(2, UnitClass('player')) ~= 'MONK') then return end
+-- Stagger element for oUF, updated for WoW Classic: Mists of Pandaria
+if (select(2, UnitClass("player")) ~= "MONK") then return end
 
 local _, ns = ...
 local oUF = ns.oUF
 
-if(oUF:IsClassic()) then return end
+-- Ensure UnitStagger exists (MoP+ only)
+if not UnitStagger then return end
 
--- sourced from FrameXML/Constants.lua
-local SPEC_MONK_BREWMASTER = _G.SPEC_MONK_BREWMASTER or 1
+-- MoP Classic: specialization indices
+local SPEC_MONK_BREWMASTER = 1
 
--- sourced from FrameXML/MonkStaggerBar.lua
-local BREWMASTER_POWER_BAR_NAME = _G.BREWMASTER_POWER_BAR_NAME or 'STAGGER'
+-- Bar color thresholds (MoP default: green/yellow/red)
+local STAGGER_YELLOW_TRANSITION = 0.3
+local STAGGER_RED_TRANSITION = 0.6
+local STAGGER_GREEN_INDEX = 1
+local STAGGER_YELLOW_INDEX = 2
+local STAGGER_RED_INDEX = 3
 
--- percentages at which bar should change color
-local STAGGER_YELLOW_TRANSITION =  _G.STAGGER_YELLOW_TRANSITION or 0.3
-local STAGGER_RED_TRANSITION = _G.STAGGER_RED_TRANSITION or 0.6
-
--- table indices of bar colors
-local STAGGER_GREEN_INDEX = _G.STAGGER_GREEN_INDEX or 1
-local STAGGER_YELLOW_INDEX = _G.STAGGER_YELLOW_INDEX or 2
-local STAGGER_RED_INDEX = _G.STAGGER_RED_INDEX or 3
+-- Default colors for stagger (if oUF colors not set)
+local defaultColors = {
+    {0.52, 1.00, 0.52}, -- Green
+    {1.00, 0.98, 0.72}, -- Yellow
+    {1.00, 0.42, 0.42}, -- Red
+}
 
 local function UpdateColor(element, cur, max)
-	local colors = element.__owner.colors.power[BREWMASTER_POWER_BAR_NAME]
-	local perc = cur / max
+    local colors = (element.__owner.colors and element.__owner.colors.power and element.__owner.colors.power.STAGGER) or defaultColors
+    local perc = max > 0 and (cur / max) or 0
 
-	local t
-	if(perc >= STAGGER_RED_TRANSITION) then
-		t = colors and colors[STAGGER_RED_INDEX]
-	elseif(perc > STAGGER_YELLOW_TRANSITION) then
-		t = colors and colors[STAGGER_YELLOW_INDEX]
-	else
-		t = colors and colors[STAGGER_GREEN_INDEX]
-	end
+    local t
+    if perc >= STAGGER_RED_TRANSITION then
+        t = colors[STAGGER_RED_INDEX]
+    elseif perc > STAGGER_YELLOW_TRANSITION then
+        t = colors[STAGGER_YELLOW_INDEX]
+    else
+        t = colors[STAGGER_GREEN_INDEX]
+    end
 
-	local r, g, b
-	if(t) then
-		r, g, b = t[1], t[2], t[3]
-		if(b) then
-			element:SetStatusBarColor(r, g, b)
-
-			local bg = element.bg
-			if(bg and b) then
-				local mu = bg.multiplier or 1
-				bg:SetVertexColor(r * mu, g * mu, b * mu)
-			end
-		end
-	end
+    if t then
+        element:SetStatusBarColor(t[1], t[2], t[3])
+        if element.bg then
+            local mu = element.bg.multiplier or 1
+            element.bg:SetVertexColor(t[1] * mu, t[2] * mu, t[3] * mu)
+        end
+    end
 end
 
 local function Update(self, event, unit)
-	if(unit and unit ~= self.unit) then return end
+    if unit and unit ~= self.unit then return end
+    local element = self.Stagger
 
-	local element = self.Stagger
+    if element.PreUpdate then element:PreUpdate() end
 
-	--[[ Callback: Stagger:PreUpdate()
-	Called before the element has been updated.
+    local cur = UnitStagger("player") or 0
+    local max = UnitHealthMax("player")
 
-	* self - the Stagger element
-	--]]
-	if(element.PreUpdate) then
-		element:PreUpdate()
-	end
+    element:SetMinMaxValues(0, max)
+    element:SetValue(cur)
 
-	-- Blizzard code has nil checks for UnitStagger return
-	local cur = UnitStagger('player') or 0
-	local max = UnitHealthMax('player')
+    if element.UpdateColor then
+        element:UpdateColor(cur, max)
+    end
 
-	element:SetMinMaxValues(0, max)
-	element:SetValue(cur)
-
-	--[[ Override: Stagger:UpdateColor(cur, max)
-	Used to completely override the internal function for updating the widget's colors.
-
-	* self - the Stagger element
-	* cur  - the amount of staggered damage (number)
-	* max  - the player's maximum possible health value (number)
-	--]]
-	element:UpdateColor(cur, max)
-
-	--[[ Callback: Stagger:PostUpdate(cur, max)
-	Called after the element has been updated.
-
-	* self - the Stagger element
-	* cur  - the amount of staggered damage (number)
-	* max  - the player's maximum possible health value (number)
-	--]]
-	if(element.PostUpdate) then
-		element:PostUpdate(cur, max)
-	end
+    if element.PostUpdate then
+        element:PostUpdate(cur, max)
+    end
 end
 
 local function Path(self, ...)
-	--[[ Override: Stagger.Override(self, event, unit)
-	Used to completely override the internal update function.
+    return (self.Stagger.Override or Update)(self, ...)
+end
 
-	* self  - the parent object
-	* event - the event triggering the update (string)
-	* unit  - the unit accompanying the event (string)
-	--]]
-	return (self.Stagger.Override or Update)(self, ...)
+-- MoP Classic specialization check
+local function IsBrewmaster()
+    return (GetPrimaryTalentTree and GetPrimaryTalentTree() == SPEC_MONK_BREWMASTER)
 end
 
 local function Visibility(self, event, unit)
-	if(SPEC_MONK_BREWMASTER ~= GetSpecialization() or UnitHasVehiclePlayerFrameUI('player')) then
-		if(self.Stagger:IsShown()) then
-			self.Stagger:Hide()
-			self:UnregisterEvent('UNIT_AURA', Path)
-		end
-		if SPEC_MONK_WINDWALKER ~= GetSpecialization() then
-			if self.Debuffs then self.Debuffs:SetPoint("BOTTOMRIGHT", self, "TOPRIGHT", 2, 5) end	-- ViksUI
-		end
-	else
-		if(not self.Stagger:IsShown()) then
-			self.Stagger:Show()
-			self:RegisterEvent('UNIT_AURA', Path)
-		end
-		if self.Debuffs then self.Debuffs:SetPoint("BOTTOMRIGHT", self, "TOPRIGHT", 2, 19) end	-- ViksUI
-
-		return Path(self, event, unit)
-	end
+    if not IsBrewmaster() or UnitHasVehiclePlayerFrameUI("player") then
+        if self.Stagger:IsShown() then
+            self.Stagger:Hide()
+            self:UnregisterEvent("UNIT_AURA", Path)
+        end
+    else
+        if not self.Stagger:IsShown() then
+            self.Stagger:Show()
+            self:RegisterEvent("UNIT_AURA", Path)
+        end
+        return Path(self, event, unit)
+    end
 end
 
 local function VisibilityPath(self, ...)
-	--[[ Override: Stagger.OverrideVisibility(self, event, unit)
-	Used to completely override the internal visibility toggling function.
-
-	* self  - the parent object
-	* event - the event triggering the update (string)
-	* unit  - the unit accompanying the event (string)
-	--]]
-	return (self.Stagger.OverrideVisibility or Visibility)(self, ...)
+    return (self.Stagger.OverrideVisibility or Visibility)(self, ...)
 end
 
 local function ForceUpdate(element)
-	return VisibilityPath(element.__owner, 'ForceUpdate', element.__owner.unit)
+    return VisibilityPath(element.__owner, "ForceUpdate", element.__owner.unit)
 end
 
 local function Enable(self)
-	local element = self.Stagger
-	if(element) then
-		element.__owner = self
-		element.ForceUpdate = ForceUpdate
+    local element = self.Stagger
+    if element then
+        element.__owner = self
+        element.ForceUpdate = ForceUpdate
 
-		self:RegisterEvent('UNIT_DISPLAYPOWER', VisibilityPath)
-		self:RegisterEvent('PLAYER_TALENT_UPDATE', VisibilityPath, true)
+        self:RegisterEvent("UNIT_DISPLAYPOWER", VisibilityPath)
+        self:RegisterEvent("PLAYER_TALENT_UPDATE", VisibilityPath, true)
+        self:RegisterEvent("PLAYER_ENTERING_WORLD", VisibilityPath, true)
 
-		element.handler = CreateFrame("Frame", nil, element)	-- ViksUI
-		element.handler:RegisterEvent("PLAYER_TALENT_UPDATE")
-		element.handler:RegisterEvent("PLAYER_ENTERING_WORLD")
-		element.handler:SetScript("OnEvent", function() Visibility(self) end)
+        if element:IsObjectType("StatusBar") and not element:GetStatusBarTexture() then
+            element:SetStatusBarTexture([[Interface\TargetingFrame\UI-StatusBar]])
+        end
 
-		if(element:IsObjectType('StatusBar') and not element:GetStatusBarTexture()) then
-			element:SetStatusBarTexture([[Interface\TargetingFrame\UI-StatusBar]])
-		end
+        if not element.UpdateColor then
+            element.UpdateColor = UpdateColor
+        end
 
-		if(not element.UpdateColor) then
-			element.UpdateColor = UpdateColor
-		end
-
-		MonkStaggerBar:UnregisterEvent('PLAYER_ENTERING_WORLD')
-		MonkStaggerBar:UnregisterEvent('PLAYER_SPECIALIZATION_CHANGED')
-		MonkStaggerBar:UnregisterEvent('UNIT_DISPLAYPOWER')
-		MonkStaggerBar:UnregisterEvent('UNIT_EXITED_VEHICLE')
-		MonkStaggerBar:UnregisterEvent('UPDATE_VEHICLE_ACTIONBAR')
-
-		-- do not change this without taking Visibility into account
-		element:Hide()
-
-		return true
-	end
+        element:Hide()
+        return true
+    end
 end
 
 local function Disable(self)
-	local element = self.Stagger
-	if(element) then
-		element:Hide()
-
-		self:UnregisterEvent('UNIT_AURA', Path)
-		self:UnregisterEvent('UNIT_DISPLAYPOWER', VisibilityPath)
-		self:UnregisterEvent('PLAYER_TALENT_UPDATE', VisibilityPath)
-
-		MonkStaggerBar:RegisterEvent('PLAYER_ENTERING_WORLD')
-		MonkStaggerBar:RegisterEvent('PLAYER_SPECIALIZATION_CHANGED')
-		MonkStaggerBar:RegisterEvent('UNIT_DISPLAYPOWER')
-		MonkStaggerBar:RegisterEvent('UNIT_EXITED_VEHICLE')
-		MonkStaggerBar:RegisterEvent('UPDATE_VEHICLE_ACTIONBAR')
-	end
+    local element = self.Stagger
+    if element then
+        element:Hide()
+        self:UnregisterEvent("UNIT_AURA", Path)
+        self:UnregisterEvent("UNIT_DISPLAYPOWER", VisibilityPath)
+        self:UnregisterEvent("PLAYER_TALENT_UPDATE", VisibilityPath)
+        self:UnregisterEvent("PLAYER_ENTERING_WORLD", VisibilityPath)
+    end
 end
 
-oUF:AddElement('Stagger', VisibilityPath, Enable, Disable)
+oUF:AddElement("Stagger", VisibilityPath, Enable, Disable)

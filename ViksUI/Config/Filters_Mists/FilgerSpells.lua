@@ -5575,7 +5575,7 @@ C["filger_spells"] = {
 			Position = {"TOP", P_BUFF_ICON_Anchor},
 
 			-- Elemental Devastation
-			{spellID = 29178, unitID = "player", caster = "player", filter = "BUFF"},
+			-- {spellID = 29178, unitID = "player", caster = "player", filter = "BUFF"},
 			-- Elemental Mastery
 			{spellID = 16166, unitID = "player", caster = "player", filter = "BUFF"},
 			-- Elemental Oath
@@ -5585,11 +5585,11 @@ C["filger_spells"] = {
 			-- Fire Resistance Totem
 			-- {spellID = 8185, unitID = "player", caster = "player", filter = "BUFF", absID = true},
 			-- Flurry
-			{spellID = 16257, unitID = "player", caster = "player", filter = "BUFF"},
+			-- {spellID = 16257, unitID = "player", caster = "player", filter = "BUFF"},
 			-- Focused (Shamanistic)
 			-- {spellID = 43339, unitID = "player", caster = "player", filter = "BUFF"},
 			-- Focused Insight
-			{spellID = 77800, unitID = "player", caster = "player", filter = "BUFF"},
+			-- {spellID = 77800, unitID = "player", caster = "player", filter = "BUFF"},
 			-- Frost Resistance Totem
 			-- {spellID = 8182, unitID = "player", caster = "player", filter = "BUFF", absID = true},
 			-- Ghost Wolf
@@ -5644,25 +5644,25 @@ C["filger_spells"] = {
 
 			-- Buffs
 			-- Astral Shift
-			{spellID = 52179, unitID = "player", caster = "player", filter = "BUFF"},
+			-- {spellID = 52179, unitID = "player", caster = "player", filter = "BUFF"},
 			-- Clearcasting (Elemental Focus)
 			{spellID = 16246, unitID = "player", caster = "player", filter = "BUFF", absID = true},
 			-- Lava Flows
-			{spellID = 65264, unitID = "player", caster = "player", filter = "BUFF"},
+			-- {spellID = 65264, unitID = "player", caster = "player", filter = "BUFF"},
 			-- Maelstrom Weapon
 			{spellID = 53817, unitID = "player", caster = "player", filter = "BUFF"},
 			-- Nature's Guardian
 			{spellID = 31616, unitID = "player", caster = "player", filter = "BUFF"},
 			-- Seasoned Winds (Arcane)
-			{spellID = 97621, unitID = "player", caster = "player", filter = "BUFF", absID = true},
+			-- {spellID = 97621, unitID = "player", caster = "player", filter = "BUFF", absID = true},
 			-- Seasoned Winds (Fire)
-			{spellID = 97618, unitID = "player", caster = "player", filter = "BUFF", absID = true},
+			-- {spellID = 97618, unitID = "player", caster = "player", filter = "BUFF", absID = true},
 			-- Seasoned Winds (Frost)
-			{spellID = 97619, unitID = "player", caster = "player", filter = "BUFF", absID = true},
+			-- {spellID = 97619, unitID = "player", caster = "player", filter = "BUFF", absID = true},
 			-- Seasoned Winds (Nature)
-			{spellID = 97620, unitID = "player", caster = "player", filter = "BUFF", absID = true},
+			-- {spellID = 97620, unitID = "player", caster = "player", filter = "BUFF", absID = true},
 			-- Seasoned Winds (Shadow)
-			{spellID = 97622, unitID = "player", caster = "player", filter = "BUFF", absID = true},
+			-- {spellID = 97622, unitID = "player", caster = "player", filter = "BUFF", absID = true},
 			-- Tidal Waves
 			{spellID = 53390, unitID = "player", caster = "player", filter = "BUFF"},
 
@@ -5921,9 +5921,9 @@ C["filger_spells"] = {
 			-- Precise Strikes (Attack Power, Use) [Talisman of the Tundra]
 			{spellID = 48847, unitID = "player", caster = "player", filter = "BUFF"},
 			-- Precision of the Iron Dwarves (Armor Penetration, Proc) [Deathbringer's Will]
-			{spellID = 71487, unitID = "player", caster = "player", filter = "BUFF", absID = true},
+			-- {spellID = 71487, unitID = "player", caster = "player", filter = "BUFF", absID = true},
 			-- Precision of the Iron Dwarves - Heroic (Armor Penetration, Proc) [Deathbringer's Will]
-			{spellID = 71557, unitID = "player", caster = "player", filter = "BUFF", absID = true},
+			-- {spellID = 71557, unitID = "player", caster = "player", filter = "BUFF", absID = true},
 			-- Pyrite Infusion (Attack Power, Proc) [Pyrite Infuser]
 			{spellID = 65014, unitID = "player", caster = "player", filter = "BUFF"},
 			-- Rage (Attack Power, Use) [Mark of Supremacy]
@@ -6297,7 +6297,7 @@ C["filger_spells"] = {
 			-- Spellsurge (Mana Regeneration to Party) [Enchant Weapon - Spellsurge]
 			{spellID = 27996, unitID = "player", caster = "all", filter = "BUFF"},
 			-- Swordguard Embroidery [Swordguard Embroidery]
-			{spellID = 55775, unitID = "player", caster = "player", filter = "BUFF"},
+			-- {spellID = 55775, unitID = "player", caster = "player", filter = "BUFF"},
 			-- The Darkest Night (Armor Penetration, Proc) [The Dusk Blade]
 			{spellID = 59043, unitID = "player", caster = "player", filter = "BUFF"},
 		},
@@ -6371,7 +6371,7 @@ C["filger_spells"] = {
 			Position = {"LEFT", T_DE_BUFF_BAR_Anchor},
 
 			-- Ancestral Fortitude
-			{spellID = 16177, unitID = "target", caster = "player", filter = "BUFF"},
+			-- {spellID = 16177, unitID = "target", caster = "player", filter = "BUFF"},
 			-- Chained Heal (HoT) [Frost Witch's Garb]
 			{spellID = 70809, unitID = "target", caster = "player", filter = "BUFF"},
 			-- Earthliving
@@ -6391,13 +6391,13 @@ C["filger_spells"] = {
 			-- Totemic Power (Spell Power, Proc) [The Earthshatterer]
 			{spellID = 28825, unitID = "target", caster = "player", filter = "BUFF", absID = true},
 			-- Gladiator's Totem of the Third Wind
-			{spellID = 34132, unitID = "target", caster = "player", filter = "BUFF"},
+			-- {spellID = 34132, unitID = "target", caster = "player", filter = "BUFF"},
 			-- Merciless Totem of the Third Wind
-			{spellID = 42371, unitID = "target", caster = "player", filter = "BUFF"},
+			-- {spellID = 42371, unitID = "target", caster = "player", filter = "BUFF"},
 			-- Vengeful Totem of the Third Wind
-			{spellID = 43729, unitID = "target", caster = "player", filter = "BUFF"},
+			-- {spellID = 43729, unitID = "target", caster = "player", filter = "BUFF"},
 			-- Brutal Totem of the Third Wind
-			{spellID = 46099, unitID = "target", caster = "player", filter = "BUFF"},
+			-- {spellID = 46099, unitID = "target", caster = "player", filter = "BUFF"},
 
 			-- Trinket Effects
 			-- Blessing of Ancient Kings (Absorb, Proc) [Val'anyr, Hammer of Ancient Kings]
@@ -6500,7 +6500,7 @@ C["filger_spells"] = {
 			-- Spiritwalker's Grace
 			{spellID = 79206, filter = "CD"},
 			-- Stoneclaw Totem
-			{spellID = 5730, filter = "CD"},
+			-- {spellID = 5730, filter = "CD"},
 			-- Stormstrike
 			{spellID = 17364, filter = "CD"},
 			-- Thunderstorm

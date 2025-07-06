@@ -129,7 +129,7 @@ local function Update(self, event, ...)
 		-- offline, since this does not automatically trigger the GuildRoster update from the server
 		if event == "CHAT_MSG_SYSTEM" then
 			local message = select(1, ...)
-			if find(message, friendOnline) or find(message, friendOffline) then C_GuildInfo_GuildRoster() end
+			if find(message, friendOnline, 1, true) or find(message, friendOffline, 1, true) then C_GuildInfo_GuildRoster() end
 		end
 		-- our guild xp changed, recalculate it
 		if event == "GUILD_XP_UPDATE" then UpdateGuildXP() return end

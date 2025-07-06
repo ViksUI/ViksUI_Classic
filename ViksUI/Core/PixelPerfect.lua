@@ -21,29 +21,19 @@ end
 
 T.mult = 768 / T.screenHeight / C.general.uiscale
 T.noscalemult = T.mult * C.general.uiscale
+if T.HiDPI then
+	T.noscalemult = T.noscalemult * 1
+end
 
-if C.general.alt_scale then
--- New Scale function
-	T.Scale = function(x)
-		local m = T.mult
-		if m == 1 or x == 0 then
-			return x
-		else
-			local y = m > 1 and m or -m
-			return x - x % (x < 0 and y or -y)
-		end
-	end
-else
-	-- Old Scale function
-	T.Scale = function(x)
-		return T.mult * math.floor(x / T.mult + 0.5)
-	end
+T.Scale = function(x)
+	return T.mult * math.floor(x / T.mult + 0.5)
 end
 
 ----------------------------------------------------------------------------------------
 --	Pixel perfect fonts for high resolution
 ----------------------------------------------------------------------------------------
-if T.screenHeight <= 1200 then return end
+if T.screenHeight <= 1200 or T.HiDPI then return end
+
 C.media.pixel_font_size = C.media.pixel_font_size * T.mult
 C.font.chat_tabs_font_size = C.font.chat_tabs_font_size * T.mult
 C.font.action_bars_font_size = C.font.action_bars_font_size * T.mult
