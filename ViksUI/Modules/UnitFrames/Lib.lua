@@ -1763,65 +1763,68 @@ lib.genComboPoints = function(self)
 end
 
 lib.genHarmony = function(self)
-	if playerClass ~= "MONK" then return end
-	local maxChi = UnitPowerMax("player", Enum.PowerType.Chi or 12)
-	-- Chi bar
-	self.HarmonyBar = CreateFrame("Frame", self:GetName().."_HarmonyBar", self, "BackdropTemplate")
-	self.HarmonyBar:CreateBackdrop("Default")
-	self.HarmonyBar:SetPoint("BOTTOMLEFT", self, "TOPLEFT", 1, 7)
-	self.HarmonyBar:SetSize((self:GetWidth()-2), 7)
+    if playerClass ~= "MONK" then return end
 
-	for i = 1, maxChi do
-		self.HarmonyBar[i] = CreateFrame("StatusBar", self:GetName().."_HarmonyBar", self.HarmonyBar, "BackdropTemplate")
-		self.HarmonyBar[i]:SetSize((self.HarmonyBar:GetWidth()-4) / 6, 7)
-		if i == 1 then
-			self.HarmonyBar[i]:SetPoint("BOTTOMLEFT", self, "TOPLEFT", 1, 7)
-		else
-			self.HarmonyBar[i]:SetPoint("TOPLEFT", self.HarmonyBar[i-1], "TOPRIGHT", 1, 0)
-		end
-		self.HarmonyBar[i]:SetStatusBarTexture(cfg.statusbar_texture)
-		self.HarmonyBar[i]:SetStatusBarColor(0.33, 0.63, 0.33)
+    local MAX_CHI = 5
+    local spacing = 1 -- Should match HarmonyOrbs.lua
 
-		self.HarmonyBar[i].bg = self.HarmonyBar[i]:CreateTexture(nil, "BORDER")
-		self.HarmonyBar[i].bg:SetAllPoints()
-		self.HarmonyBar[i].bg:SetTexture(cfg.statusbar_texture)
-		self.HarmonyBar[i].bg:SetVertexColor(0.33, 0.63, 0.33, 0.2)
-	end
-	-- Statue bar
-	if C.unitframe_class_bar.totem == true then
-		self.TotemBar = CreateFrame("Frame", self:GetName().."_TotemBar", self, "BackdropTemplate")
-		self.TotemBar:SetFrameLevel(self.Health:GetFrameLevel() + 2)
-		self.TotemBar:SetPoint("TOPRIGHT", self, "TOPRIGHT", 0, 0)
-		self.TotemBar:SetSize(53, 7)
-		self.TotemBar.Destroy = true
+    -- Create the HarmonyBar frame
+    self.HarmonyBar = CreateFrame("Frame", self:GetName().."_HarmonyBar", self, "BackdropTemplate")
+    self.HarmonyBar:CreateBackdrop("Default")
+    self.HarmonyBar:SetPoint("BOTTOMLEFT", self, "TOPLEFT", 1, 7)
+    self.HarmonyBar:SetSize((self:GetWidth()-2), 7)
 
-		for i = 1, 1 do
-			self.TotemBar[i] = CreateFrame("StatusBar", self:GetName().."_TotemBar", self.TotemBar, "BackdropTemplate")
-			self.TotemBar[i]:SetSize(53, 7)
-			self.TotemBar[i]:SetPoint("BOTTOM", self.Health, "BOTTOM", 0, 1)
-			self.TotemBar[i]:SetStatusBarTexture(cfg.statusbar_texture)
-			self.TotemBar[i]:SetMinMaxValues(0, 1)
-			self.TotemBar[i]:CreateBorder(false, true)
+    -- Always create 5 orbs
+    for i = 1, MAX_CHI do
+        self.HarmonyBar[i] = CreateFrame("StatusBar", self:GetName().."_HarmonyBar"..i, self.HarmonyBar, "BackdropTemplate")
+        self.HarmonyBar[i]:SetStatusBarTexture(cfg.statusbar_texture)
+        self.HarmonyBar[i]:SetStatusBarColor(0.33, 0.63, 0.33)
+        self.HarmonyBar[i]:SetMinMaxValues(0, 1)
+        self.HarmonyBar[i]:SetHeight(7)
+        self.HarmonyBar[i].bg = self.HarmonyBar[i]:CreateTexture(nil, "BORDER")
+        self.HarmonyBar[i].bg:SetAllPoints()
+        self.HarmonyBar[i].bg:SetTexture(cfg.statusbar_texture)
+        self.HarmonyBar[i].bg:SetVertexColor(0.33, 0.63, 0.33, 0.2)
+        -- Do NOT set width/position here; HarmonyOrbs.lua does this every update.
+    end
 
-			self.TotemBar[i].bg = self.TotemBar[i]:CreateTexture(nil, "BORDER")
-			self.TotemBar[i].bg:SetAllPoints()
-			self.TotemBar[i].bg:SetTexture(cfg.statusbar_texture)
-			self.TotemBar[i].bg.multiplier = 0.2
-		end
-	end
+    -- Statue bar (Totem)
+    if C.unitframe_class_bar.totem == true then
+        self.TotemBar = CreateFrame("Frame", self:GetName().."_TotemBar", self, "BackdropTemplate")
+        self.TotemBar:SetFrameLevel(self.Health:GetFrameLevel() + 2)
+        self.TotemBar:SetPoint("TOPRIGHT", self, "TOPRIGHT", 0, 0)
+        self.TotemBar:SetSize(53, 7)
+        self.TotemBar.Destroy = true
 
-	-- Stagger bar
-	if C.unitframe_class_bar.stagger == true then
-		self.Stagger = CreateFrame("StatusBar", self:GetName().."_Stagger", self, "BackdropTemplate")
-		self.Stagger:CreateBackdrop("Default")
-		self.Stagger:SetPoint("BOTTOMLEFT", self, "TOPLEFT", 1, 7)
-		self.Stagger:SetSize((self:GetWidth()-2), 7)
-		self.Stagger:SetStatusBarTexture(cfg.statusbar_texture)
+        for i = 1, 1 do
+            self.TotemBar[i] = CreateFrame("StatusBar", self:GetName().."_TotemBar"..i, self.TotemBar, "BackdropTemplate")
+            self.TotemBar[i]:SetSize(53, 7)
+            self.TotemBar[i]:SetPoint("BOTTOM", self.Health, "BOTTOM", 0, 1)
+            self.TotemBar[i]:SetStatusBarTexture(cfg.statusbar_texture)
+            self.TotemBar[i]:SetMinMaxValues(0, 1)
+            if self.TotemBar[i].CreateBorder then
+                self.TotemBar[i]:CreateBorder(false, true)
+            end
 
-		self.Stagger.Text = T.SetFontString(self.Stagger, C.font.unit_frames_font, C.font.unit_frames_font_size, C.font.unit_frames_font_style)
-		self.Stagger.Text:SetPoint("CENTER", self.Stagger, "CENTER", 0, 0)
-		self.Stagger = self.Stagger
-	end
+            self.TotemBar[i].bg = self.TotemBar[i]:CreateTexture(nil, "BORDER")
+            self.TotemBar[i].bg:SetAllPoints()
+            self.TotemBar[i].bg:SetTexture(cfg.statusbar_texture)
+            self.TotemBar[i].bg.multiplier = 0.2
+        end
+    end
+
+    -- Stagger bar
+    if C.unitframe_class_bar.stagger == true then
+        self.Stagger = CreateFrame("StatusBar", self:GetName().."_Stagger", self, "BackdropTemplate")
+        self.Stagger:CreateBackdrop("Default")
+        self.Stagger:SetPoint("BOTTOMLEFT", self, "TOPLEFT", 1, 7)
+        self.Stagger:SetSize((self:GetWidth()-2), 7)
+        self.Stagger:SetStatusBarTexture(cfg.statusbar_texture)
+
+        self.Stagger.Text = T.SetFontString(self.Stagger, C.font.unit_frames_font, C.font.unit_frames_font_size, C.font.unit_frames_font_style)
+        self.Stagger.Text:SetPoint("CENTER", self.Stagger, "CENTER", 0, 0)
+        self.Stagger = self.Stagger
+    end
 end
 
 lib.AltPowerBar = function(self)

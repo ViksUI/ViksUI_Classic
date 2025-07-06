@@ -14,8 +14,6 @@ T.color = (CUSTOM_CLASS_COLORS or RAID_CLASS_COLORS)[T.class]
 T.TexCoords = {.1, .9, .1, .9}
 T.version = C_AddOns.GetAddOnMetadata("ViksUI", "Version")
 T.screenWidth, T.screenHeight = GetPhysicalScreenSize()
-T.HiDPI = GetScreenHeight() / T.screenHeight < 0.75
-
 T.toc = select(4, GetBuildInfo())
 T.newPatch = T.toc >= 100105
 

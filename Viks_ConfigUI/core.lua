@@ -928,10 +928,8 @@ local function displaySettings()
 
 	for _, slider in pairs(sliders) do
 		local value = C[slider.group][slider.option]
-		if T.screenHeight > 1200 and slider.group == "font" and slider.option ~= "nameplates_font_size" then
-			if not T.HiDPI then
-				value = value / T.mult
-			end
+		if T.screenHeight > 1200 and (slider.group == "font" and slider.option ~= "nameplates_font_size") or slider.option == "pixel_font_size" then
+			value = value / T.mult
 		end
 		slider:SetValue(value)
 		slider.textInput:SetText(floor(value * 1000) / 1000)

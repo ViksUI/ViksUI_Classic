@@ -414,28 +414,27 @@ if T.screenHeight > 1200 then
 	Mult = T.mult
 end
 
-local auraFontHeight = (T.Classic and T.HiDPI) and (C.font.auras_font_size * T.noscalemult * (2/3) / Mult) or (C.font.auras_font_size * T.noscalemult / Mult)
-
-local AurasPostCreateButton = function(element, button)
+local AurasPostCreateIcon = function(element, button)
 	CreateBorderFrame(button)
 
-	button.remaining = T.SetFontString(button, C.font.auras_font, auraFontHeight, C.font.auras_font_style)
+	button.remaining = T.SetFontString(button, C.font.auras_font, C.font.auras_font_size * T.noscalemult / Mult, C.font.auras_font_style)
 	button.remaining:SetShadowOffset(C.font.auras_font_shadow and 1 or 0, C.font.auras_font_shadow and -1 or 0)
-	button.remaining:SetPoint("CENTER", button, "CENTER", T.Classic and 0 or 1, 0)
+	button.remaining:SetPoint("CENTER", button, "CENTER", 1, 0)
 	button.remaining:SetJustifyH("CENTER")
 
 	button.Cooldown.noCooldownCount = true
 
 	button.Icon:SetTexCoord(0.1, 0.9, 0.1, 0.9)
 
-	button.Count:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT", T.Classic and 2 or 1, T.Classic and -6 or 0)
+	button.Count:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT", 1, 0)
 	button.Count:SetJustifyH("RIGHT")
-	button.Count:SetFont(C.font.auras_font, auraFontHeight, C.font.auras_font_style)
+	button.Count:SetFont(C.font.auras_font, C.font.auras_font_size * T.noscalemult / Mult, C.font.auras_font_style)
 	button.Count:SetShadowOffset(C.font.auras_font_shadow and 1 or 0, C.font.auras_font_shadow and -1 or 0)
 
 	if C.aura.show_spiral == true then
 		element.disableCooldown = false
 		button.Cooldown:SetReverse(true)
+		button.Cooldown:SetHideCountdownNumbers(true)
 		button.parent = CreateFrame("Frame", nil, button)
 		button.parent:SetFrameLevel(button.Cooldown:GetFrameLevel() + 1)
 		button.Count:SetParent(button.parent)
