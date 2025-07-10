@@ -8,14 +8,11 @@ if C.unitframe.plugins_aura_watch ~= true then return end
 ----------------------------------------------------------------------------------------
 T.RaidBuffs = {
 	DRUID = {
-															-- Abolish Poison (in all)
-															-- Innervate
 		{774, "TOPRIGHT", {0.8, 0.4, 0.8}},					-- Rejuvenation
 		{8936, "BOTTOMLEFT", {0.2, 0.8, 0.2}},				-- Regrowth
 		{33763, "TOPLEFT", {0.4, 0.8, 0.2}},				-- Lifebloom
 		{48438, "BOTTOMRIGHT", {0.8, 0.4, 0}},				-- Wild Growth
-		-- {102342, "LEFT", {0.45, 0.3, 0.2}, true},			-- Ironbark
-		-- {155777, "RIGHT", {0.4, 0.9, 0.4}},					-- Rejuvenation (Germination)
+		{29166, "LEFT", {0.45, 0.3, 0.2}, true},			-- Innervate
 	},
 	MONK = {
 		{115151, "TOPRIGHT", {0.2, 0.7, 0.7}},				-- Renewing Mist

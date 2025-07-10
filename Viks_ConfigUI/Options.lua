@@ -29,6 +29,10 @@ local function IsCataBuild()
 	return _G.WOW_PROJECT_ID == _G.WOW_PROJECT_CATACLYSM_CLASSIC
 end
 
+local function IsMistsBuild()
+	return _G.WOW_PROJECT_ID == _G.WOW_PROJECT_MISTS_CLASSIC
+end
+
 local function HideOptions(list)
 	for i = 1, #list do
 		local frame = list[i]
@@ -206,7 +210,7 @@ local RaidTable = {
 	"BLIZZARD"
 }
 
-if IsClassicBuild() then
+if IsClassicBuild() and not IsMistsBuild() then
 	tremove(CollapseTable, 3)
 	tremove(RaidTable, 3)
 end
@@ -239,6 +243,7 @@ local FilgerTable = {
 	L.filger_show_proc,
 	L.filger_show_debuff,
 	L.filger_show_aura_bar,
+	L.filger_show_aura_bar_player,
 	L.filger_show_cd,
 	IGNORE
 }
@@ -281,7 +286,7 @@ SpellList.makeSpellsList = function(_, db, double)
 	while _G["SpellList"..i.."_cbs"] do
 		_G["SpellList"..i.."_fs"]:SetText("")
 		_G["SpellList"..i.."_fs2"]:SetText("")
-		_G["SpellList"..i.."_texture"]:SetTexture(nil)
+		_G["SpellList"..i.."_texture"]:SetTexture(0)
 		_G["SpellList"..i.."_cbs"]:ClearAllPoints()
 		_G["SpellList"..i.."_cbs"]:Hide()
 		i = i + 1
@@ -293,7 +298,7 @@ SpellList.makeSpellsList = function(_, db, double)
 			if not isFilger or isFilger and spell[2] == T.class then
 				local sp = (double or ViksUIOptionsPanelfilger:IsShown()) and spell[1] or spell
 				local name, _, icon = GetSpellInfo(sp)
-				local bf = _G["SpellList"..i.."_cbs"] or CreateFrame("Button", "SpellList"..i.."_cbs", scroll, "BackdropTemplate")
+				local bf = _G["SpellList"..i.."_cbs"] or CreateFrame("Button", "SpellList"..i.."_cbs", scroll, BackdropTemplateMixin and "BackdropTemplate")
 
 				if i == 1 then
 					bf:SetPoint("TOPLEFT", scroll, "TOPLEFT", 10, -5)

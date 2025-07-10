@@ -1,10 +1,18 @@
 if C_AddOns.IsAddOnLoaded("Fizzle") then return end
 
 local _E
-local slots = {
-	"Head", "Neck", "Shoulder", "Shirt", "Chest", "Waist", "Legs", "Feet", "Wrist", "Hands",
-	"Finger0", "Finger1", "Trinket0", "Trinket1", "Back", "MainHand", "SecondaryHand", [19] = "Tabard"
-}
+local slots = {}
+if not oGlow:IsClassic() and not oGlow:IsMists() then
+	slots = {
+		"Head", "Neck", "Shoulder", "Shirt", "Chest", "Waist", "Legs", "Feet", "Wrist", "Hands",
+		"Finger0", "Finger1", "Trinket0", "Trinket1", "Back", "MainHand", "SecondaryHand", [19] = "Tabard"
+	}
+else
+	slots = {
+		"Head", "Neck", "Shoulder", "Shirt", "Chest", "Waist", "Legs", "Feet", "Wrist", "Hands",
+		"Finger0", "Finger1", "Trinket0", "Trinket1", "Back", "MainHand", "SecondaryHand", "Ranged", "Tabard"
+	}
+end
 
 local _MISSING = {}
 local pollFrame = CreateFrame("Frame")
