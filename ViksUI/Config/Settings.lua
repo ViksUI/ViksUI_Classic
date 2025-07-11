@@ -69,24 +69,23 @@ C["general"] = {
 	["auto_scale"] = true,						-- Autoscale
 	["uiscale"] = 0.75,							-- Your value(between 0.64 and 1) if "auto_scale" is disable
 	["welcome_message"] = true,					-- Enable welcome message in chat
+	["alt_scale"] = false,						-- Alternative way to scale
 	["auto_scale"] = true,						-- Auto UI Scale
 	["uiscale"] = 0.75,							-- Your value (between 0.2 and 1) if "auto_scale" is disable
 	-- Blizzard UI
 	["error_filter"] = "BLACKLIST",				-- Filter Blizzard red errors (BLACKLIST, WHITELIST, COMBAT, NONE)
-	["move_blizzard"] = false,					-- Move some Blizzard frames
-	["color_picker"] = false,					-- Improved ColorPicker
+	["move_blizzard"] = true,					-- Move some Blizzard frames
+	["color_picker"] = true,					-- Improved ColorPicker
 	["vehicle_mouseover"] = false,				-- Vehicle frame on mouseover
 	["minimize_mouseover"] = false,				-- Mouseover for quest minimize button
 	["hide_banner"] = false,					-- Hide Boss Banner Loot Frame
 	["hide_talking_head"] = false,				-- Hide Talking Head Frame
 }
 
---[[
-if T.screenHeight > 1400 and T.screenHeight < 1500 then
+if T.screenHeight == 1440 then
 	C.general.auto_scale = false
 	C.general.uiscale = 0.64
 end
---]]
 
 ----------------------------------------------------------------------------------------
 --	Minimap options
@@ -94,7 +93,7 @@ end
 C["minimap"] = {
 	["enable"] = true,
 	["tracking_icon"] = false,				-- Tracking icon
-	["garrison_icon"] = false,				-- Garrison icon
+	["garrison_icon"] = false,				-- Expansion Summary icon
 	["size"] = 136,							-- Minimap size
 	["toggle_menu"] = false,				-- Show toggle menu
 	["hide_combat"] = false,				-- Hide minimap in combat
@@ -130,6 +129,7 @@ C["misc"] = {
 	["GameMenuBar"] = true,						-- Show Game Menu Bar
 	["XPBar"] = true,							-- XP/Honor/Rep bar above chat windows
 	["meters"] = true,							-- Show button for toggle dps meters and move chat (only in line layout)
+	["meters_show"] = true,						-- Show meters and hide Chat by default on login
 	["InfoPanel_Stats"] = true,					-- Stats Panel with info from https://www.icy-veins.com
 }
 
@@ -155,6 +155,8 @@ C["panels"] = {
 	["Pscale"] = C["misc"].Pscale,					-- Can be used to resize all panels. It does not change X Y Values
 	["NoPanels"] = false,							-- Will Set all panels to hidden and show lines instead. On test stage still!
 	["HideABPanels"] = false,						-- Hides all panels behind actionbars!
+	["HideDetailsPanels"] = false,					-- Don't show panels behind detail
+	["twoDetailsPanels"] = false,					-- Don't show 2 panels on right side, Details
 }
 ----------------------------------------------------------------------------------------
 --	Skins options
@@ -191,7 +193,6 @@ C["skins"] = {
 	["rarescanner"] = false,					-- RareScanner skin
 	["recount"] = false,						-- Recount skin
 	["rematch"] = false,						-- Rematch skin
-	["skada"] = true,							-- Skada skin
 	["tiny_dps"] = false,						-- TinyDPS skin
 	["vanaskos"] = false,						-- VanasKoS skin
 	["weak_auras"] = false,						-- WeakAuras skin
@@ -250,21 +251,22 @@ C["unitframe"] = {
 	["showPortraitHPbar"] = false,														-- show portraits on Healthbar, Icon must be turned off
 	["portrait_type"] = "3D",															-- Type of portraits (3D, 2D, ICONS)
 	-- Plugins
-	["plugins_gcd"] = false,					-- Global cooldown spark on player frame
-	["plugins_swing"] = false,					-- Swing bar
-	["plugins_reputation_bar"] = false,			-- Reputation bar
-	["plugins_experience_bar"] = false,			-- Experience bar
-	["plugins_smooth_bar"] = false,				-- Smooth bar
-	--["plugins_enemy_spec"] = false,				-- Enemy specialization
-	["plugins_combat_feedback"] = false,		-- Combat text on player/target frame
-	["plugins_fader"] = false,					-- Ø Fade unit frames
-	--["plugins_diminishing"] = false,			-- Diminishing Returns icons on arena frames
-	["plugins_debuffhighlight_icon"] = false,	-- Debuff highlight texture + icon
-	["plugins_aura_watch"] = true,				-- Raid debuff icons (from the list)
-	["plugins_aura_watch_timer"] = false,		-- Timer on raid debuff icons
-	["plugins_pvp_debuffs"] = true,			-- Show also PvP debuff icons (from the list)
-	["plugins_healcomm"] = true,				-- Show incoming heals in player and raid frames
-	["plugins_auto_resurrection"] = false,		-- Auto cast resurrection on middle-click(doesn't work with Clique)
+	["plugins_gcd"] = false,															-- Global cooldown spark on player frame
+	["plugins_swing"] = false,															-- Swing bar
+	["plugins_reputation_bar"] = false,													-- Reputation bar
+	["plugins_experience_bar"] = false,													-- Experience bar
+	["plugins_smooth_bar"] = false,														-- Smooth bar
+	--["plugins_enemy_spec"] = false,													-- Enemy specialization
+	["plugins_combat_feedback"] = false,												-- Combat text on player/target frame
+	["plugins_fader"] = false,															-- Ø Fade unit frames
+	--["plugins_diminishing"] = false,													-- Diminishing Returns icons on arena frames
+	["plugins_debuffhighlight_icon"] = false,											-- Debuff highlight texture + icon
+	["plugins_aura_watch"] = false,														-- Raid debuff icons (from the list)
+	["plugins_aura_watch_timer"] = false,												-- Timer on raid debuff icons
+	["plugins_buffs_timer"] = false,													-- Timer on raid buffs icons
+	["plugins_pvp_debuffs"] = false,														-- Show also PvP debuff icons (from the list)
+	["plugins_healcomm"] = false,														-- Show incoming heals in player and raid frames
+	["plugins_auto_resurrection"] = false,												-- Auto cast resurrection on middle-click(doesn't work with Clique)
 	-- Unit Size
 	["Portrait_w"] = 56,
 	["Portrait_h"] = 56,
@@ -352,66 +354,66 @@ C["raidframes"] = {
 	["enable"] = false,
 	["scale"] = 1.0,
 	["width"] = 101,
-    ["height"] = 30,
+	["height"] = 30,
 	["width25"] = 60,
-    ["height25"] = 30,
+	["height25"] = 30,
 	["width40"] = 60,
-    ["height40"] = 24,
-    ["fontsize"] = 12,
-    ["fontsizeEdge"] = 12,
-    ["outline"] = "OUTLINE",
-    ["solo"] = false,
-    ["player"] = true,
-    ["party"] = false,
-    ["numCol"] = 5,
-    ["numUnits"] = 5,
-    ["spacing"] = 7,
-    ["orientation"] = "HORIZONTAL",
-    ["porientation"] = "HORIZONTAL",
-    ["horizontal"] = true, 
-    ["growth"] = "UP", 
-    ["reversecolors"] = true,
-    ["definecolors"] = true,
-    ["powerbar"] = true,
-    ["powerbarsize"] = 0.12,
-    ["outsideRange"] = .40,
-    ["healtext"] = true,
-    ["healbar"] = true,
-    ["healoverflow"] = true,
-    ["healothersonly"] = false,
-    ["healalpha"] = .40,
-    ["roleicon"] = true,
+	["height40"] = 24,
+	["fontsize"] = 12,
+	["fontsizeEdge"] = 12,
+	["outline"] = "OUTLINE",
+	["solo"] = false,
+	["player"] = true,
+	["party"] = false,
+	["numCol"] = 5,
+	["numUnits"] = 5,
+	["spacing"] = 7,
+	["orientation"] = "HORIZONTAL",
+	["porientation"] = "HORIZONTAL",
+	["horizontal"] = true, 
+	["growth"] = "UP", 
+	["reversecolors"] = true,
+	["definecolors"] = true,
+	["powerbar"] = true,
+	["powerbarsize"] = 0.12,
+	["outsideRange"] = .40,
+	["healtext"] = true,
+	["healbar"] = true,
+	["healoverflow"] = true,
+	["healothersonly"] = false,
+	["healalpha"] = .40,
+	["roleicon"] = true,
 	["showIndicators"] = true,
-    ["indicatorsize"] = 6,
-    ["symbolsize"] = 11,
-    ["leadersize"] = 12,
+	["indicatorsize"] = 6,
+	["symbolsize"] = 11,
+	["leadersize"] = 12,
 	["autorez"] = true,
-    ["aurasize"] = 18,
-    ["multi"] = true, --Use multiple headers for better group sorting. Note: This disables units per group and sets it to 5.
-    ["deficit"] = true,
+	["aurasize"] = 18,
+	["multi"] = true, --Use multiple headers for better group sorting. Note: This disables units per group and sets it to 5.
+	["deficit"] = true,
 	["multi2"] = true,
-    ["perc"] = true,
-    ["actual"] = true,
-    ["myhealcolor"] = { 0, 1, 0.5, 0.4 },
-    ["otherhealcolor"] = { 0, 1, 0, 0.4 },
-    ["hpcolor"] = { 0.1, 0.1, 0.1, 1 },
-    ["hpbgcolor"] = { 0.5, 0.5, 0.5, 1 },
-    ["powercolor"] = { 1, 1, 1, 1 },
-    ["powerbgcolor"] = { 0.33, 0.33, 0.33, 1 },
-    ["powerdefinecolors"] = false,
-    ["colorSmooth"] = false,
-    ["gradient"] = { 1, 0, 0, 1 },
-    ["tborder"] = true,
-    ["fborder"] = true,
-    ["afk"] = true,
-    ["highlight"] = true,
-    ["dispel"] = true,
-    ["powerclass"] = true,
-    ["tooltip"] = true,
-    ["sortName"] = false,
-    ["sortClass"] = false,
-    ["classOrder"] = "DEATHKNIGHT,DRUID,HUNTER,MAGE,PALADIN,PRIEST,ROGUE,SHAMAN,WARLOCK,WARRIOR", --Uppercase English class names separated by a comma. \n { CLASS[,CLASS]... }"
-    ["hidemenu"] = false,
+	["perc"] = true,
+	["actual"] = true,
+	["myhealcolor"] = { 0, 1, 0.5, 0.4 },
+	["otherhealcolor"] = { 0, 1, 0, 0.4 },
+	["hpcolor"] = { 0.1, 0.1, 0.1, 1 },
+	["hpbgcolor"] = { 0.5, 0.5, 0.5, 1 },
+	["powercolor"] = { 1, 1, 1, 1 },
+	["powerbgcolor"] = { 0.33, 0.33, 0.33, 1 },
+	["powerdefinecolors"] = false,
+	["colorSmooth"] = false,
+	["gradient"] = { 1, 0, 0, 1 },
+	["tborder"] = true,
+	["fborder"] = true,
+	["afk"] = true,
+	["highlight"] = true,
+	["dispel"] = true,
+	["powerclass"] = true,
+	["tooltip"] = true,
+	["sortName"] = false,
+	["sortClass"] = false,
+	["classOrder"] = "DEATHKNIGHT,DRUID,HUNTER,MAGE,PALADIN,PRIEST,ROGUE,SHAMAN,WARLOCK,WARRIOR", --Uppercase English class names separated by a comma. \n { CLASS[,CLASS]... }"
+	["hidemenu"] = false,
 }
 
 ----------------------------------------------------------------------------------------
@@ -583,7 +585,7 @@ C["chat"] = {
 	["tabs_mouseover"] = false,					-- Chat tabs on mouseover
 	["sticky"] = true,							-- Remember last channel
 	["damage_meter_spam"] = true,				-- Merge damage meter spam in one line-link
-	["smileys"] = true,							-- Insert smileys instead of symbols like xD
+	["smileys"] = false,							-- Insert smileys instead of symbols like xD
 	["loot_icons"] = false,						-- Icons for loot
 	["role_icons"] = false,						-- Role Icons
 	["history"] = false,						-- Chat history
@@ -609,6 +611,7 @@ C["nameplate"] = {
 	["show_castbar_name"] = false,				-- Show castbar name
 	["class_icons"] = false,					-- Icons by class in PvP
 	["name_abbrev"] = false,					-- Display abbreviated names
+	["short_name"] = false,						-- Replace names with short ones (from the list)
 	["clamp"] = true,							-- Clamp nameplates to the top of the screen when outside of view
 	["track_debuffs"] = true,					-- Show your debuffs (from the list)
 	["track_buffs"] = true,						-- Show dispellable enemy buffs and buffs from the list
@@ -802,6 +805,7 @@ C["reminder"] = {
 	-- Raid buffs
 	["raid_buffs_enable"] = true,				-- Show missing raid buffs
 	["raid_buffs_always"] = false,				-- Show frame always (default show only in raid)
+	["raid_buffs_classcolor"] = false,			-- Enable classcolor border
 	["raid_buffs_size"] = 19.2,					-- Icon size
 	["raid_buffs_alpha"] = 0,					-- Transparent icons when the buff is present
 }
@@ -923,38 +927,38 @@ C["trade"] = {
 ----------------------------------------------------------------------------------------
 C["datatext"] = {
 	["Arena"] = 0, 
-	["Armor"] = 0,                          -- show your armor value against the level mob you are currently targeting	
-	["RunSpeed"] = 3,                  		-- show your current Run Speed
-	["Avd"] = 0,                            -- show your current avoidance against the level of the mob your targeting
-	["Bags"] = 5,                			-- show space used in bags on panels
-	["Battleground"] = true,                -- enable 3 stats in battleground only that replace stat1,stat2,stat3.
-	["Crit"] = 0,                           -- show your crit rating on panels.
-	["Durability"] = 6,                		-- show your equipment durability on panels.
-	["Friends"] = 9,                		-- show number of friends connected.
-	["Gold"] = 4,                			-- show your current gold on panels
-	["Guild"] = 11,                			-- show number on guildmate connected on panels
-	["Haste"] = 2,                          -- show your haste rating on panels.
-	["Versatility"] = 0,                    -- show versatility
-	["location"] = 10,                      -- show location
-	["showcoords"] = true,                  -- show coordinates on location
-	["Mastery"] = 0,                        -- show mastery rating
-	["Power"] = 1,                          -- show your attackpower/spellpower/healpower/rangedattackpower whatever stat is higher gets displayed
-	["Regen"] = 0,  						-- show mana regeneration
-	["System"] = 7,                			-- show fps and ms on panels, and total addon memory in tooltip
-	["fps_ms"] = true,                		-- show fps and ms only
-	["Talents"] = 13,                       -- Show Your Talent's. Shift Click to change spec. 
-	["Profession"] = 17,  			  		-- Profession
-	["togglemenu"] = 0,  			  		-- minimenu
-	["Volume"] = 12,  			  			-- Volume
-	["Wowtime"] = 14,              			-- THIS IS BLOCKED TO FIXED POSITION! SO CAN'T BE CHANGED HERE! NUMBER MUST BE > 0, BUT DOESN'T USE UP A SPOT!
-	["Time24"] = true,            			-- set time to 24h format.
-	["Localtime"] = true,  					-- Show Local time instead of server time
+	["Armor"] = 0,								-- show your armor value against the level mob you are currently targeting	
+	["RunSpeed"] = 3,							-- show your current Run Speed
+	["Avd"] = 0,								-- show your current avoidance against the level of the mob your targeting
+	["Bags"] = 5,								-- show space used in bags on panels
+	["Battleground"] = true,					-- enable 3 stats in battleground only that replace stat1,stat2,stat3.
+	["Crit"] = 0,								-- show your crit rating on panels.
+	["Durability"] = 6,							-- show your equipment durability on panels.
+	["Friends"] = 9,							-- show number of friends connected.
+	["Gold"] = 4,								-- show your current gold on panels
+	["Guild"] = 11,								-- show number on guildmate connected on panels
+	["Haste"] = 2,								-- show your haste rating on panels.
+	["Versatility"] = 0,						-- show versatility
+	["location"] = 10,							-- show location
+	["showcoords"] = true,						-- show coordinates on location
+	["Mastery"] = 0,							-- show mastery rating
+	["Power"] = 1,								-- show your attackpower/spellpower/healpower/rangedattackpower whatever stat is higher gets displayed
+	["Regen"] = 0,								-- show mana regeneration
+	["System"] = 7,								-- show fps and ms on panels, and total addon memory in tooltip
+	["fps_ms"] = true,							-- show fps and ms only
+	["Talents"] = 13,							-- Show Your Talent's. Shift Click to change spec. 
+	["Profession"] = 17,						-- Profession
+	["togglemenu"] = 0,							-- minimenu
+	["Volume"] = 12,							-- Volume
+	["Wowtime"] = 14,							-- THIS IS BLOCKED TO FIXED POSITION! SO CAN'T BE CHANGED HERE! NUMBER MUST BE > 0, BUT DOESN'T USE UP A SPOT!
+	["Time24"] = true,							-- set time to 24h format.
+	["Localtime"] = true,						-- Show Local time instead of server time
 	["classcolor"] = true,
-	["color"] = { .7, .7, .7, 1 }, 			-- if ["classcolor"] = false
+	["color"] = { .7, .7, .7, 1 },				-- if ["classcolor"] = false
 	["CurrArchaeology"] = false,
 	["CurrCooking"] = false,
 	["CurrProfessions"] = false,
-	["CurrMiscellaneous"] = true, 
+	["CurrMiscellaneous"] = true,
 	["CurrPvP"] = true,
 	["CurrRaid"] = false,
 	["Quests"] = 15,
@@ -965,7 +969,7 @@ C["datatext"] = {
 --	Cooldown Timer for Actionbars
 ----------------------------------------------------------------------------------------
 C["cooldown"] = {
-	["enable"] = true,                     
+	["enable"] = true,
 }
 -----------------------------------------------------------------------------------------------------------
 -----------------------------------------------------------------------------------------------------------

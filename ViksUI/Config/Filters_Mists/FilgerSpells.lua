@@ -172,7 +172,7 @@ C["filger_spells"] = {
 		},
 		{
 			Name = "P_PROC_ICON",
-			Direction = "RIGHT",
+			Direction = "LEFT",
 			Mode = "ICON",
 			Interval = C.filger.buffs_space,
 			Alpha = 1,
@@ -716,7 +716,7 @@ C["filger_spells"] = {
 		--]]
 		{
 			Name = "COOLDOWN",
-			Direction = "RIGHT",
+			Direction = "LEFT",
 			Mode = "ICON",
 			Interval = C.filger.cooldown_space,
 			Alpha = 1,
@@ -869,7 +869,7 @@ C["filger_spells"] = {
 		},
 		{
 			Name = "P_PROC_ICON",
-			Direction = "RIGHT",
+			Direction = "LEFT",
 			Mode = "ICON",
 			Interval = C.filger.buffs_space,
 			Alpha = 1,
@@ -1749,7 +1749,7 @@ C["filger_spells"] = {
 		},
 		{
 			Name = "COOLDOWN",
-			Direction = "RIGHT",
+			Direction = "LEFT",
 			Mode = "ICON",
 			Interval = C.filger.cooldown_space,
 			Alpha = 1,
@@ -1934,7 +1934,7 @@ C["filger_spells"] = {
 		},
 		{
 			Name = "P_PROC_ICON",
-			Direction = "RIGHT",
+			Direction = "LEFT",
 			Mode = "ICON",
 			Interval = C.filger.buffs_space,
 			Alpha = 1,
@@ -2366,7 +2366,7 @@ C["filger_spells"] = {
 		},
 		{
 			Name = "COOLDOWN",
-			Direction = "RIGHT",
+			Direction = "LEFT",
 			Mode = "ICON",
 			Interval = C.filger.cooldown_space,
 			Alpha = 1,
@@ -2553,7 +2553,7 @@ C["filger_spells"] = {
 		},
 		{
 			Name = "P_PROC_ICON",
-			Direction = "RIGHT",
+			Direction = "LEFT",
 			Mode = "ICON",
 			Interval = C.filger.buffs_space,
 			Alpha = 1,
@@ -3097,7 +3097,7 @@ C["filger_spells"] = {
 		},
 		{
 			Name = "COOLDOWN",
-			Direction = "RIGHT",
+			Direction = "LEFT",
 			Mode = "ICON",
 			Interval = C.filger.cooldown_space,
 			Alpha = 1,
@@ -3268,7 +3268,7 @@ C["filger_spells"] = {
 		},
 		{
 			Name = "P_PROC_ICON",
-			Direction = "RIGHT",
+			Direction = "LEFT",
 			Mode = "ICON",
 			Interval = C.filger.buffs_space,
 			Alpha = 1,
@@ -4155,7 +4155,7 @@ C["filger_spells"] = {
 		},
 		{
 			Name = "COOLDOWN",
-			Direction = "RIGHT",
+			Direction = "LEFT",
 			Mode = "ICON",
 			Interval = C.filger.cooldown_space,
 			Alpha = 1,
@@ -4311,7 +4311,7 @@ C["filger_spells"] = {
 		},
 		{
 			Name = "P_PROC_ICON",
-			Direction = "RIGHT",
+			Direction = "LEFT",
 			Mode = "ICON",
 			Interval = C.filger.buffs_space,
 			Alpha = 1,
@@ -4850,7 +4850,7 @@ C["filger_spells"] = {
 		},
 		{
 			Name = "COOLDOWN",
-			Direction = "RIGHT",
+			Direction = "LEFT",
 			Mode = "ICON",
 			Interval = C.filger.cooldown_space,
 			Alpha = 1,
@@ -5007,7 +5007,7 @@ C["filger_spells"] = {
 		},
 		{
 			Name = "P_PROC_ICON",
-			Direction = "RIGHT",
+			Direction = "LEFT",
 			Mode = "ICON",
 			Interval = C.filger.buffs_space,
 			Alpha = 1,
@@ -5466,7 +5466,7 @@ C["filger_spells"] = {
 		},
 		{
 			Name = "COOLDOWN",
-			Direction = "RIGHT",
+			Direction = "LEFT",
 			Mode = "ICON",
 			Interval = C.filger.cooldown_space,
 			Alpha = 1,
@@ -5635,7 +5635,7 @@ C["filger_spells"] = {
 		},
 		{
 			Name = "P_PROC_ICON",
-			Direction = "RIGHT",
+			Direction = "LEFT",
 			Mode = "ICON",
 			Interval = C.filger.buffs_space,
 			Alpha = 1,
@@ -6441,7 +6441,7 @@ C["filger_spells"] = {
 		},
 		{
 			Name = "COOLDOWN",
-			Direction = "RIGHT",
+			Direction = "LEFT",
 			Mode = "ICON",
 			Interval = C.filger.cooldown_space,
 			Alpha = 1,
@@ -6584,7 +6584,7 @@ C["filger_spells"] = {
 		},
 		{
 			Name = "P_PROC_ICON",
-			Direction = "RIGHT",
+			Direction = "LEFT",
 			Mode = "ICON",
 			Interval = C.filger.buffs_space,
 			Alpha = 1,
@@ -7103,7 +7103,7 @@ C["filger_spells"] = {
 		},
 		{
 			Name = "COOLDOWN",
-			Direction = "RIGHT",
+			Direction = "LEFT",
 			Mode = "ICON",
 			Interval = C.filger.cooldown_space,
 			Alpha = 1,
@@ -7244,7 +7244,7 @@ C["filger_spells"] = {
 		},
 		{
 			Name = "P_PROC_ICON",
-			Direction = "RIGHT",
+			Direction = "LEFT",
 			Mode = "ICON",
 			Interval = C.filger.buffs_space,
 			Alpha = 1,
@@ -7843,7 +7843,7 @@ C["filger_spells"] = {
 		--]]
 		{
 			Name = "COOLDOWN",
-			Direction = "RIGHT",
+			Direction = "LEFT",
 			Mode = "ICON",
 			Interval = C.filger.cooldown_space,
 			Alpha = 1,

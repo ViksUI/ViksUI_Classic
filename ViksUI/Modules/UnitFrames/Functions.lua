@@ -902,14 +902,23 @@ local CountOffSets = {
 
 T.CreateAuraWatchIcon = function(_, icon)
 	icon:CreateBorder(nil, true)
-	if T.Classic then
-		icon.icon:SetPoint("TOPLEFT", icon, 0, 0)
-		icon.icon:SetPoint("BOTTOMRIGHT", icon, 0, 0)
-	end
+	--if T.Classic and not T.Mists then
+		--icon.icon:SetPoint("TOPLEFT", icon, 0, 0)
+		--icon.icon:SetPoint("BOTTOMRIGHT", icon, 0, 0)
+	--end
 	icon.icon:SetTexCoord(0.1, 0.9, 0.1, 0.9)
 	icon.icon:SetDrawLayer("ARTWORK")
 	if icon.cd then
 		icon.cd:SetReverse(true)
+		icon.cd:SetHideCountdownNumbers(true)
+		if C.unitframe.plugins_buffs_timer then
+			icon.parent = CreateFrame("Frame", nil, icon)
+			icon.parent:SetFrameLevel(icon.cd:GetFrameLevel() + 1)
+			icon.remaining = T.SetFontString(icon.parent, C.font.auras_font, C.font.auras_font_size, C.font.auras_font_style)
+			icon.remaining:SetShadowOffset(C.font.auras_font_shadow and 1 or 0, C.font.auras_font_shadow and -1 or 0)
+			icon.remaining:SetPoint("CENTER", icon, "CENTER", 1, 0)
+			icon.remaining:SetJustifyH("CENTER")
+		end
 	end
 end
 
