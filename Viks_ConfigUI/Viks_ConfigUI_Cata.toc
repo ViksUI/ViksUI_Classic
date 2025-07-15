@@ -1,4 +1,4 @@
-## Interface: 40400
+## Interface: 50500
 ## Title: ViksUI (Classic) Config
 ## Notes: In-game configuration for ViksUI
 ## Author: Viks
@@ -6,11 +6,12 @@
 ## X-Curse-Project-ID: 468754
 ## X-WoWI-ID: 25934
 ## X-Wago-ID: WqKQbyGx
-## RequiredDeps: ViksUI
+
 ## SavedVariables: ViksUIOptionsGlobal, ViksUIOptions
 ## SavedVariablesPerCharacter: ViksUIOptionsPerChar
+## IconTexture: Interface\AddOns\ViksUI\Media\Textures\viksicon.blp
 
-## X-Website: https://github.com/EsreverWoW/ShestakUI_Classic
+## X-Website: https://github.com/ViksUI/ViksUI_Classic
 ## X-Credits: Haleth, Solor
 ## X-Thanks: Tryllemann, Wetxius
 

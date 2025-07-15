@@ -9,7 +9,7 @@
 ## Credits to: Wetxius, Tukz, Dawn, Shestak, Haste, Roth, P3lim, Monolit, AlleyKat.
 ## Author: Viks, Tryllemann
 ## Version: 11.12
-## RequiredDeps: ViksUI
+
 ## SavedVariables: ViksUIOptionsGlobal, ViksUIOptions
 ## SavedVariablesPerCharacter: ViksUIOptionsPerChar
 ## IconTexture: Interface\AddOns\ViksUI\Media\Textures\viksicon.blp
