@@ -1,4 +1,4 @@
-## Interface: 50500
+## Interface: 40402
 ## Title: ViksUI (Classic) Config
 ## Notes: In-game configuration for ViksUI
 ## Author: Viks

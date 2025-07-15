@@ -1,4 +1,4 @@
-## Interface: 50506
+## Interface: 50500
 ## Title: ViksUI (Classic MoP) Config
 ## Notes: In-game configuration for ViksUI
 ## Author: Viks

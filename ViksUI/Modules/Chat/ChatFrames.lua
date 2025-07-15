@@ -73,8 +73,13 @@ local function SetChatStyle(frame)
 
 	-- Move the chat edit box
 	_G[chat.."EditBox"]:ClearAllPoints()
-	_G[chat.."EditBox"]:SetPoint("BOTTOMLEFT", ChatFrame1, "TOPLEFT", -10, 23)
-	_G[chat.."EditBox"]:SetPoint("BOTTOMRIGHT", ChatFrame1, "TOPRIGHT", 11, 23)
+	if C.panels.NoPanels then
+		_G[chat.."EditBox"]:SetPoint("BOTTOMLEFT", ChatFrame1, "TOPLEFT", -16, 50)
+		_G[chat.."EditBox"]:SetPoint("BOTTOMRIGHT", ChatFrame1, "TOPRIGHT", 17, 50)
+	else
+		_G[chat.."EditBox"]:SetPoint("BOTTOMLEFT", ChatFrame1, "TOPLEFT", -9, 32)
+		_G[chat.."EditBox"]:SetPoint("BOTTOMRIGHT", ChatFrame1, "TOPRIGHT", 11, 32)
+	end
 
 	-- Hide textures
 	for j = 1, #CHAT_FRAME_TEXTURES do
@@ -187,16 +192,17 @@ local function SetChatStyle(frame)
 
 	-- Rename combat log tab
 	if _G[chat] == _G["ChatFrame2"] then
+		FCF_SetWindowName(_G[chat], GUILD_BANK_LOG)
 		CombatLogQuickButtonFrame_Custom:StripTextures()
 		CombatLogQuickButtonFrame_Custom:CreateBackdrop("Transparent")
 		CombatLogQuickButtonFrame_Custom.backdrop:SetPoint("TOPLEFT", 1, -4)
-		CombatLogQuickButtonFrame_Custom.backdrop:SetPoint("BOTTOMRIGHT", -22, 0)
+		CombatLogQuickButtonFrame_Custom.backdrop:SetPoint("BOTTOMRIGHT", 0, 0)
 		T.SkinCloseButton(CombatLogQuickButtonFrame_CustomAdditionalFilterButton, CombatLogQuickButtonFrame_Custom.backdrop, " ", true)
 		CombatLogQuickButtonFrame_CustomAdditionalFilterButton:SetSize(12, 12)
 		CombatLogQuickButtonFrame_CustomAdditionalFilterButton:SetHitRectInsets (0, 0, 0, 0)
 		CombatLogQuickButtonFrame_CustomProgressBar:ClearAllPoints()
-		CombatLogQuickButtonFrame_CustomProgressBar:SetPoint("TOPLEFT", CombatLogQuickButtonFrame_Custom.backdrop, 2, -2)
-		CombatLogQuickButtonFrame_CustomProgressBar:SetPoint("BOTTOMRIGHT", CombatLogQuickButtonFrame_Custom.backdrop, -2, 2)
+		CombatLogQuickButtonFrame_CustomProgressBar:SetPoint("TOPLEFT", CombatLogQuickButtonFrame_Custom.backdrop, 1, -4)
+		CombatLogQuickButtonFrame_CustomProgressBar:SetPoint("BOTTOMRIGHT", CombatLogQuickButtonFrame_Custom.backdrop, -22, 0)
 		CombatLogQuickButtonFrame_CustomProgressBar:SetStatusBarTexture(C.media.texture)
 		CombatLogQuickButtonFrameButton1:SetPoint("BOTTOM", 0, 0)
 	end
@@ -250,6 +256,7 @@ local function SetupChatPosAndFont()
 		local chat = _G[format("ChatFrame%s", i)]
 		local id = chat:GetID()
 		local _, fontSize = FCF_GetChatWindowInfo(id)
+		ChatFrame1:SetFrameLevel(LChat:GetFrameLevel()+2)    --//Force correct strata. Quick Fix for text hidden at start.
 
 		-- Min. size for chat font
 		if fontSize < 11 then
@@ -265,11 +272,29 @@ local function SetupChatPosAndFont()
 		-- Force chat position
 		if i == 1 then
 			chat:ClearAllPoints()
-			chat:SetSize(C.chat.width, C.chat.height)
+			chat:SetSize(C.chat.width-20, C.chat.height-5)
 			if C.chat.background == true then
 				chat:SetPoint(C.position.chat[1], C.position.chat[2], C.position.chat[3], C.position.chat[4], C.position.chat[5] + 4)
 			else
 				chat:SetPoint(C.position.chat[1], C.position.chat[2], C.position.chat[3], C.position.chat[4], C.position.chat[5])
+			end
+			if C.panels.NoPanels == true then
+				chat:SetSize(C.chat.width-20, C.chat.height-8)
+				chat:SetPoint(C.position.chat[1], C.position.chat[2], C.position.chat[3], C.position.chat[4]+10, C.position.chat[5] + 4)
+			end
+			FCF_SavePositionAndDimensions(chat)
+		elseif i == 4 then
+			chat:ClearAllPoints()
+			chat:SetSize(C.chat.width-20, C.chat.height)
+			if C.panels.NoPanels == true then
+				chat:SetSize(C.chat.width-20, C.chat.height-8)
+				chat:SetPoint("BOTTOMLEFT",RChat,"BOTTOMLEFT",4,4)
+				chat:SetPoint("TOPRIGHT",RChat,"TOPRIGHT",-4,-25)
+			else
+				chat:SetWidth(RChat:GetWidth()-8)
+				chat:SetHeight(RChat:GetHeight()-8)
+				chat:SetPoint("BOTTOMLEFT",RChat,"BOTTOMLEFT",4,4)
+				chat:SetPoint("TOPRIGHT",RChat,"TOPRIGHT",-4,-2)
 			end
 			FCF_SavePositionAndDimensions(chat)
 		elseif i == 2 then
@@ -477,13 +502,24 @@ end
 --	Prevent reposition ChatFrame
 ----------------------------------------------------------------------------------------
 hooksecurefunc(ChatFrame1, "SetPoint", function(self, _, _, _, x)
-	if x ~= C.position.chat[4] then
+	if x == 1 then
 		self:ClearAllPoints()
-		self:SetSize(C.chat.width, C.chat.height)
 		if C.chat.background == true then
 			self:SetPoint(C.position.chat[1], C.position.chat[2], C.position.chat[3], C.position.chat[4], C.position.chat[5] + 4)
 		else
 			self:SetPoint(C.position.chat[1], C.position.chat[2], C.position.chat[3], C.position.chat[4], C.position.chat[5])
+		end
+		if C.panels.NoPanels == true then
+			self:SetPoint(C.position.chat[1], C.position.chat[2], C.position.chat[3], C.position.chat[4]+10, C.position.chat[5] + 4)
+		end
+	elseif x == 4 then
+		self:ClearAllPoints()
+		if C.panels.NoPanels == true then
+			self:SetPoint("BOTTOMLEFT",RChat,"BOTTOMLEFT",4,4)
+			self:SetPoint("TOPRIGHT",RChat,"TOPRIGHT",-4,-25)
+		else
+			self:SetPoint("BOTTOMLEFT",RChat,"BOTTOMLEFT",4,4)
+			self:SetPoint("TOPRIGHT",RChat,"TOPRIGHT",-4,-2)
 		end
 	end
 end)

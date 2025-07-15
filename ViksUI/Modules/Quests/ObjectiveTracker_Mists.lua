@@ -16,6 +16,8 @@ end
 WatchFrame:ClearAllPoints()
 WatchFrame:SetPoint("TOPLEFT", frame, "TOPLEFT", 20, 0)
 WatchFrame:SetHeight(T.screenHeight / 1.6)
+WatchFrameTitle:Hide()
+WatchFrameCollapseExpandButton:Hide()
 
 hooksecurefunc(WatchFrame, "SetPoint", function(_, _, parent)
 	if parent ~= frame then
@@ -76,6 +78,7 @@ hooksecurefunc("WatchFrame_Update", function()
 			end
 		end
 	end
+	WatchFrameCollapseExpandButton:Hide()
 end)
 
 hooksecurefunc("WatchFrameLinkButtonTemplate_Highlight", function(self, onEnter)

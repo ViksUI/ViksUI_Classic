@@ -58,7 +58,7 @@ if C.datatext.Quests and C.datatext.Quests > 0 then
 		QuestWatchFrame:Hide()
 		QuestWatchFrameHeader:Hide()
 		end
-		if T.Cata then
+		if T.Cata or T.Mists then
 		_G.WatchFrame:Hide()
 		_G.WatchFrame:Hide()
 		end
@@ -76,7 +76,7 @@ if C.datatext.Quests and C.datatext.Quests > 0 then
 		QuestWatchFrame:Show()
 		QuestWatchFrameHeader:Show()
 		end
-		if T.Cata then
+		if T.Cata or T.Mists then
 		_G.WatchFrame:Show()
 		_G.WatchFrame:Show()
 		end
