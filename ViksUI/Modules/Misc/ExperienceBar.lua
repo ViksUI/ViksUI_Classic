@@ -9,87 +9,54 @@ local Panels = CreateFrame("Frame")
 local BarSelected
 local Bars = 20
 local barTex = C.media.texture
-local MaxRenown = 80
 
 Experience.NumBars = 2
 Experience.RestedColor = {75 / 255, 175 / 255, 76 / 255}
 Experience.XPColor = {0 / 255, 144 / 255, 255 / 255}
 Experience.PetXPColor = {255 / 255, 255 / 255, 105 / 255}
-Experience.AZColor = {229 / 255, 204 / 255, 127 / 255}
-Experience.HNColor = {222 / 255, 22 / 255, 22 / 255}
-Experience.AnimaColor = {153 / 255, 204 / 255, 255 / 255}														 
+Experience.HonorColor = {222 / 255, 22 / 255, 22 / 255}
+Experience.RepColor = {0.6, 0.4, 0.1}
+
 Experience.Menu = {
-	{
-		text = XP,
-		func = function()
-			BarSelected.BarType = "XP"
-			
-			Experience:Update()
-			
-			ViksUISettingsPerChar.experiencebar[BarSelected:GetName()] = BarSelected.BarType
-		end,
-		notCheckable = true
-	},
-	{
-		text = HONOR,
-		func = function()
-			BarSelected.BarType = "HONOR"
-			
-			Experience:Update()
-			ViksUISettingsPerChar.experiencebar[BarSelected:GetName()] = BarSelected.BarType
-		end,
-		notCheckable = true
-	},
-	{
-		text = "Azerite",
-		func = function()
-			BarSelected.BarType = "AZERITE"
-			
-			Experience:Update()
-			ViksUISettingsPerChar.experiencebar[BarSelected:GetName()] = BarSelected.BarType
-		end,
-		notCheckable = true,
-		disabled = true,
-	},
-	{
-		text = PET.." "..XP,
-		func = function()
-			BarSelected.BarType = "PETXP"
-			
-			Experience:Update()
-			ViksUISettingsPerChar.experiencebar[BarSelected:GetName()] = BarSelected.BarType
-		end,
-		notCheckable = true,
-		disabled = true,
-	},
-	{
-		text = REPUTATION,
-		func = function()
-			BarSelected.BarType = "REP"
-			
-			Experience:Update()
-
-			ViksUISettingsPerChar.experiencebar[BarSelected:GetName()] = BarSelected.BarType
-		end,
-		notCheckable = true,
-		disabled = true,
-	},
-	{
-		text = ANIMA_DIVERSION_CURRENCY_TOOLTIP_TITLE,
-		func = function()
-			BarSelected.BarType = "ANIMA"
-			
-			Experience:Update()
-
-			ViksUISettingsPerChar.experiencebar[BarSelected:GetName()] = BarSelected.BarType
-		end,
-		notCheckable = true,
-		disabled = true,
-	},
+    {
+        text = XP,
+        func = function()
+            BarSelected.BarType = "XP"
+            Experience:Update()
+            ViksUISettingsPerChar.experiencebar[BarSelected:GetName()] = BarSelected.BarType
+        end,
+        notCheckable = true
+    },
+    {
+        text = HONOR,
+        func = function()
+            BarSelected.BarType = "HONOR"
+            Experience:Update()
+            ViksUISettingsPerChar.experiencebar[BarSelected:GetName()] = BarSelected.BarType
+        end,
+        notCheckable = true
+    },
+    {
+        text = PET.." "..XP,
+        func = function()
+            BarSelected.BarType = "PETXP"
+            Experience:Update()
+            ViksUISettingsPerChar.experiencebar[BarSelected:GetName()] = BarSelected.BarType
+        end,
+        notCheckable = true
+    },
+    {
+        text = REPUTATION,
+        func = function()
+            BarSelected.BarType = "REP"
+            Experience:Update()
+            ViksUISettingsPerChar.experiencebar[BarSelected:GetName()] = BarSelected.BarType
+        end,
+        notCheckable = true
+    },
 }
 
 Experience.Standing = {
-    [0] = UNKNOWN,
     [1] = FACTION_STANDING_LABEL1,
     [2] = FACTION_STANDING_LABEL2,
     [3] = FACTION_STANDING_LABEL3,
@@ -101,416 +68,194 @@ Experience.Standing = {
 }
 
 function Experience:SetTooltip()
-	local BarType = self.BarType
-	local Current, Max, Pts
+    local BarType = self.BarType
+    local Current, Max
 
-	if (self == Experience.XPBar1) then
-		GameTooltip:SetOwner(self, "ANCHOR_TOPLEFT", -1, 5)
-	else
-		GameTooltip:SetOwner(self, "ANCHOR_TOPRIGHT", 1, 5)
+    if (self == Experience.XPBar1) then
+        GameTooltip:SetOwner(self, "ANCHOR_TOPLEFT", -1, 5)
+    else
+        GameTooltip:SetOwner(self, "ANCHOR_TOPRIGHT", 1, 5)
+    end
+
+    if BarType == "XP" then
+        local Rested = GetXPExhaustion()
+        Current, Max = Experience:GetExperience()
+        if Max == 0 then return end
+        GameTooltip:AddLine("Experience:")
+        GameTooltip:AddLine("|cffA335EE"..XP..": " .. Current .. " / " .. Max .. " (" .. math.floor(Current / Max * 100) .. "%)")
+        if Rested and Rested > 0 then
+            GameTooltip:AddLine("|cff0090FF"..TUTORIAL_TITLE26..": +" .. Rested .." (" .. math.floor(Rested / Max * 100) .. "%)|r")
+        end
+    elseif BarType == "PETXP" then
+        Current, Max = GetPetExperience()
+        if Max == 0 then return end
+        GameTooltip:AddLine("|cff0090FF"..PET.." "..XP..":|r " .. Current .. " / " .. Max .. " (" .. math.floor(Current / Max * 100) .. "%)")
+    elseif BarType == "REP" then
+        local name, standing, min, max, value = GetWatchedFactionInfo()
+        if not name then return end
+        GameTooltip:AddLine(name)
+        GameTooltip:AddLine("|cffffffff" .. (value-min) .. " / " .. (max-min) .. "|r")
+        GameTooltip:AddLine(Experience.Standing[standing] or "")
+	elseif BarType == "HONOR" then
+		local honor, maxHonor = Experience:GetHonor()
+		GameTooltip:AddLine(HONOR .. ": " .. honor .. " / " .. maxHonor)
 	end
-
-	if BarType == "XP" then
-		local Rested = GetXPExhaustion()
-		local IsRested = GetRestState()
-
-		Current, Max = Experience:GetExperience()
-
-		if Max == 0 then
-			return
-		end
-
-		GameTooltip:AddLine("Experience:")
-		GameTooltip:AddLine("Current experience and rested state", 1, 1, 1, 1, 1, 1)
-		GameTooltip:AddLine(" ")
-		GameTooltip:AddLine("|cffA335EE"..XP..": " .. Current .. " / " .. Max .. " (" .. floor(Current / Max * 100) .. "% - " .. floor(Bars - (Bars * (Max - Current) / Max)) .. "/" .. Bars .. ")|r")
-	
-		if (IsRested == 1 and Rested) then
-			GameTooltip:AddLine("|cff0090FF"..TUTORIAL_TITLE26..": +" .. Rested .." (" .. floor(Rested / Max * 100) .. "%)|r")
-		end
-	elseif BarType == "ANIMA" then
-		Current, Max = Experience:GetAnima()
-		
-		if Max == 0 then
-			return
-		end
-		
-		local Level = C_CovenantSanctumUI.GetRenownLevel()
-		
-		GameTooltip:AddDoubleLine("|cffFF3333"..COVENANT_SANCTUM_TAB_RENOWN.." "..LEVEL..": ", Level)
-		GameTooltip:AddDoubleLine("|cff99CCFF"..ANIMA_DIVERSION_CURRENCY_TOOLTIP_TITLE..": ", Current .. " / " .. Max .. " (" .. floor(Current / Max * 100) .. "%)")
-	elseif BarType == "PETXP" then
-		Current, Max = GetPetExperience()
-
-		if Max == 0 then
-			return
-		end
-
-		GameTooltip:AddDoubleLine("|cff0090FF"..PET.." "..XP..":|r", Current .. " / " .. Max .. " (" .. floor(Current / Max * 100) .. "%)")
-	elseif BarType == "AZERITE" then
-		Current, Max, Level, Items = Experience:GetAzerite()
-
-		if Max == 0 then
-			return
-		end
-
-		local RemainingXP = Max - Current
-		local AzeriteItem = Item:CreateFromItemLocation(Items)
-		local ItemName = AzeriteItem:GetItemName()
-
-		GameTooltip:AddDoubleLine(ItemName..' ('..Level..')', format(ISLANDS_QUEUE_WEEKLY_QUEST_PROGRESS, Current, Max), 0.90, 0.80, 0.50)
-		GameTooltip:AddLine(' ')
-		GameTooltip:AddLine(AZERITE_POWER_TOOLTIP_BODY:format(ItemName))
-
-	elseif BarType == "REP" then
-		local Name, Standing, Min, Max, Value, Faction = C_Reputation.GetWatchedFactionData()
-		local Current, Max, Standing = Experience:GetReputation()
-		local Name, ID = C_Reputation.GetWatchedFactionData()
-		local Colors = FACTION_BAR_COLORS
-		local Hex = T.RGBToHex(Colors[ID].r, Colors[ID].g, Colors[ID].b)
-		local majorFactionData = C_MajorFactions.GetMajorFactionData(Faction)
-		
-		GameTooltip:AddLine(Name)
-        GameTooltip:AddLine("|cffffffff" .. Current .. " / " .. Max .. "|r")
-		
-		if C_Reputation.IsFactionParagon(Faction) then
-			local cur, nextThreshold, _, hasRewardPending = C_Reputation.GetFactionParagonInfo(Faction)
-			if(cur) then
-				Value = cur % nextThreshold
-				Min = 0
-				Max = nextThreshold
-				pendingReward = hasRewardPending
-				Standing = MAX_REPUTATION_REACTION + 1 -- force paragon's color
-				standingText = PARAGON
-			end
-			GameTooltip:AddLine(Hex .. Value .. " / " .. Max .. "|r")
-		elseif C_Reputation.IsMajorFaction(Faction) then
-			GameTooltip:AddLine(RENOWN_LEVEL_LABEL .. majorFactionData.renownLevel .. "|r")
-		else
-			GameTooltip:AddLine(Hex .. Standing .. "|r")
-		end
-	else
-		local Level = UnitHonorLevel("player")
-
-		Current, Max = Experience:GetHonor()
-
-		if Max == 0 then
-			GameTooltip:AddLine(PVP_HONOR_PRESTIGE_AVAILABLE)
-			GameTooltip:AddLine(PVP_HONOR_XP_BAR_CANNOT_PRESTIGE_HERE)
-		else
-			GameTooltip:AddDoubleLine("|cffee2222"..HONOR..":|r", Current .. " / " .. Max .. " (" .. floor(Current / Max * 100) .. "%)")
-			GameTooltip:AddDoubleLine("|cffee2222"..RANK..":|r", Level)
-		end
-	end
-
-	GameTooltip:Show()
+    GameTooltip:Show()
 end
 
 function Experience:GetExperience()
-	return UnitXP("player"), UnitXPMax("player")
-end
-
-function Experience:GetAzerite()
-	local AzeriteItems = C_AzeriteItem.FindActiveAzeriteItem()
-	local InBank = AzeriteUtil.IsAzeriteItemLocationBankBag(AzeriteItems)
-	local XP, TotalXP, Level
-	
-	if InBank then
-		XP, TotalXP = 0, 0
-		Level = 0
-	else
-		XP, TotalXP = C_AzeriteItem.GetAzeriteItemXPInfo(AzeriteItems)
-		Level = C_AzeriteItem.GetPowerLevel(AzeriteItems)
-	end
-	
-	return XP, TotalXP, Level, AzeriteItems
+    return UnitXP("player"), UnitXPMax("player")
 end
 
 function Experience:GetHonor()
-	return UnitHonor("player"), UnitHonorMax("player")
+    local info = C_CurrencyInfo.GetCurrencyInfo and C_CurrencyInfo.GetCurrencyInfo(392)
+    if info then
+        return info.quantity, info.maxQuantity or 4000 -- 4000 is cap in MoP
+    else
+        return 0, 4000
+    end
 end
-
-local paragonStrings = {
-	deDE = 'Huldigend',
-	esES = 'Baluarte',
-	frFR = 'Parangon',
-	itIT = 'Eccellenza',
-	ptBR = 'Parag\195\163o',
-	ruRU = '\208\152\208\180\208\181\208\176\208\187',
-	koKR = '\235\182\136\235\169\184\236\157\152 \235\143\153\235\167\185',
-	zhCN = '\229\183\133\229\179\176',
-}
-
-paragonStrings.esMX = paragonStrings.esES
-paragonStrings.zhTW = paragonStrings.zhCN
-
-_G.PARAGON = paragonStrings[GetLocale()] or 'Paragon'
 
 function Experience:GetReputation()
-	local pendingReward, standingText
-	local Name, Standing, Min, Max, Value, Faction = C_Reputation.GetWatchedFactionData()
-	
-	local reputationInfo = C_GossipInfo.GetFriendshipReputation(Faction)
-	local friendshipID = reputationInfo and reputationInfo.friendshipFactionID
-    
-	if C_Reputation.IsFactionParagon(Faction) then
-		local cur, nextThreshold, _, hasRewardPending = C_Reputation.GetFactionParagonInfo(Faction)
-		if(cur) then
-			Value = cur % nextThreshold
-			Min = 0
-			Max = nextThreshold
-			pendingReward = hasRewardPending
-			Standing = MAX_REPUTATION_REACTION + 1 -- force paragon's color
-			standingText = PARAGON
-		end
-	elseif C_Reputation.IsMajorFaction(Faction) then
-		local majorFactionData = C_MajorFactions.GetMajorFactionData(Faction)
-		Min, Max = 0, majorFactionData.renownLevelThreshold
-		Value = C_MajorFactions.HasMaximumRenown(Faction) and majorFactionData.renownLevelThreshold or majorFactionData.renownReputationEarned or 0
-	elseif friendshipID and friendshipID > 0 then
-		local repInfo = C_GossipInfo.GetFriendshipReputation(Faction)
-		standingText = repInfo.reaction
-		if repInfo.nextThreshold then
-			Min, Max, Value = repInfo.reactionThreshold, repInfo.nextThreshold, repInfo.standing
-		else
-			Min, Max, Value = 0, 1, 1 -- force a full bar when maxed out
-		end
-		Standing = 5 -- force friends' color
-	end
-	
-	local BarMax = Max - Min
-    local BarValue = Value - Min
-    local BarStanding = Experience.Standing[Standing]
-	
-	standingText = standingText or GetText('FACTION_STANDING_LABEL' .. Standing, UnitSex('player'))
-	return BarValue, BarMax, BarStanding
-end
-
-function Experience:GetAnima()
-	local CurrencyID, MaxDisplayableValue = C_CovenantSanctumUI.GetAnimaInfo()
-	local CurrencyInfo = C_CurrencyInfo.GetCurrencyInfo(CurrencyID)
-	local Current = CurrencyInfo.quantity 
-	local Max = CurrencyInfo.maxQuantity
-	
-	return Current, Max
-end
-
-function Experience:VerifyMenu()
-	local AzeriteItem = C_AzeriteItem.FindActiveAzeriteItem()
-	local Honor = UnitHonorLevel										  
-	local HavePetXP = select(2, HasPetUI())
-	local WatchedFaction = C_Reputation.GetWatchedFactionData()
-	local AnimaCurrency = C_CovenantSanctumUI.GetAnimaInfo()
-	local AnimaCurrencyInfo = C_CurrencyInfo.GetCurrencyInfo(AnimaCurrency)
-	
-	if AzeriteItem then
-		Experience.Menu[3].disabled = false
-	else
-		Experience.Menu[3].disabled = true
-	end
-
-	if HavePetXP then
-		Experience.Menu[4].disabled = false
-	else
-		Experience.Menu[4].disabled = true
-	end
-
-	if WatchedFaction then
-		Experience.Menu[5].disabled = false
-	else
-		Experience.Menu[5].disabled = true
-	end
-	
-	if AnimaCurrency and AnimaCurrencyInfo.quantity ~= 0 and AnimaCurrencyInfo.maxQuantity ~= 0 then
-		Experience.Menu[6].disabled = false
-	else
-		Experience.Menu[6].disabled = true
-	end
+    local name, standing, min, max, value = GetWatchedFactionInfo()
+    return (value-min), (max-min), Experience.Standing[standing]
 end
 
 function Experience:Update()
-	local Current, Max
-	local Rested = GetXPExhaustion()
-	local IsRested = GetRestState()
-	local AnimaCurrency = C_CovenantSanctumUI.GetAnimaInfo()
-	local AnimaCurrencyInfo = C_CurrencyInfo.GetCurrencyInfo(AnimaCurrency)
-	local RenownLevel = C_CovenantSanctumUI.GetRenownLevel()
-	local AzeriteItem = C_AzeriteItem.FindActiveAzeriteItem()
-	local HavePetXP = select(2, HasPetUI())
-	local WatchedFaction = C_Reputation.GetWatchedFactionData()
+    local Current, Max
+    local Rested = GetXPExhaustion()
 
-	for i = 1, self.NumBars do
-		local Bar = self["XPBar"..i]
-		local RestedBar = self["RestedBar"..i]
-		local R, G, B
-		
-		if (Bar.BarType == "AZERITE" and not AzeriteItem) or (Bar.BarType == "PETXP" and not HavePetXP) or (Bar.BarType == "REP" and not WatchedFaction) or (Bar.BarType == "ANIMA" and AnimaCurrency and AnimaCurrencyInfo.quantity == 0 and AnimaCurrencyInfo.maxQuantity == 0) then
-			Bar.BarType = "XP"
-		end
+    for i = 1, self.NumBars do
+        local Bar = self["XPBar"..i]
+        local RestedBar = self["RestedBar"..i]
+        local R, G, B
 
-		if Bar.BarType == "HONOR" then
-			Current, Max = self:GetHonor()
-			
-			R, G, B = unpack(self.HNColor)
-		elseif Bar.BarType == "ANIMA" then
-			Current = RenownLevel
-			Max = MaxRenown
-			
-			R, G, B = unpack(self.AnimaColor)
-		elseif Bar.BarType == "PETXP" then
-			Current, Max = GetPetExperience()
-			
-			R, G, B = unpack(self.PetXPColor)
-		elseif Bar.BarType == "AZERITE" then
-			Current, Max = self:GetAzerite()
-			
-			R, G, B = unpack(self.AZColor)
-		elseif Bar.BarType == "REP" then
-			Current, Max = self:GetReputation()
-			
-			local Colors = FACTION_BAR_COLORS
-			local ID = select(2, C_Reputation.GetWatchedFactionData())
-			
-			R, G, B = Colors[ID].r, Colors[ID].g, Colors[ID].b
-		else
-			Current, Max = self:GetExperience()
-			
-			R, G, B = unpack(self.XPColor)
-		end
+        if Bar.BarType == "HONOR" then
+            Current, Max = self:GetHonor()
+            R, G, B = unpack(self.HonorColor)
+        elseif Bar.BarType == "PETXP" then
+            Current, Max = GetPetExperience()
+            R, G, B = unpack(self.PetXPColor)
+        elseif Bar.BarType == "REP" then
+            Current, Max = self:GetReputation()
+            R, G, B = unpack(self.RepColor)
+        else
+            Current, Max = self:GetExperience()
+            R, G, B = unpack(self.XPColor)
+        end
 
-		Bar:SetMinMaxValues(0, Max)
-		Bar:SetValue(Current)
+        Bar:SetMinMaxValues(0, Max)
+        Bar:SetValue(Current)
 
-		if (Bar.BarType == "XP" and IsRested == 1 and Rested) then
-			RestedBar:Show()
-			RestedBar:SetMinMaxValues(0, Max)
-			RestedBar:SetValue(Rested + Current)
-		else
-			RestedBar:Hide()
-		end
+        if (Bar.BarType == "XP" and Rested and Rested > 0) then
+            RestedBar:Show()
+            RestedBar:SetMinMaxValues(0, Max)
+            RestedBar:SetValue(Rested + Current)
+        else
+            RestedBar:Hide()
+        end
 
-		Bar:SetStatusBarColor(R, G, B)
-	end
+        Bar:SetStatusBarColor(R, G, B)
+    end
 end
 
 function Experience:DisplayMenu()
-	BarSelected = self
-	
-	Experience:VerifyMenu()
-	
-	EasyMenu(Experience.Menu, Menu, "cursor", 0, 0, "MENU")
-
+    BarSelected = self
+    EasyMenu(Experience.Menu, Menu, "cursor", 0, 0, "MENU")
 end
 
 function Experience:Create()
-	for i = 1, self.NumBars do
-		local XPBar = CreateFrame("StatusBar", "ViksUIExperienceBar" .. i, UIParent)
-		local RestedBar = CreateFrame("StatusBar", nil, XPBar)
-		local Data = ViksUISettingsPerChar
-		XPBar:SetStatusBarTexture(barTex)
-		XPBar:EnableMouse()
-		XPBar:SetFrameStrata("MEDIUM")
-		XPBar:SetFrameLevel(2)
-		XPBar:CreateBackdrop()
-		XPBar:SetScript("OnEnter", Experience.SetTooltip)
-		XPBar:SetScript("OnLeave", HideTooltip)
-		XPBar:SetScript("OnMouseUp", Experience.DisplayMenu)
+    for i = 1, self.NumBars do
+        local XPBar = CreateFrame("StatusBar", "ViksUIExperienceBar" .. i, UIParent)
+        local RestedBar = CreateFrame("StatusBar", nil, XPBar)
+        XPBar:SetStatusBarTexture(barTex)
+        XPBar:EnableMouse()
+        XPBar:SetFrameStrata("MEDIUM")
+        XPBar:SetFrameLevel(2)
+        XPBar:CreateBackdrop()
+        XPBar:SetScript("OnEnter", Experience.SetTooltip)
+        XPBar:SetScript("OnLeave", HideTooltip)
+        XPBar:SetScript("OnMouseUp", Experience.DisplayMenu)
 
-		RestedBar:SetStatusBarTexture(barTex)
-		RestedBar:SetFrameStrata("MEDIUM")
-		RestedBar:SetStatusBarColor(unpack(self.RestedColor))
-		RestedBar:SetAllPoints(XPBar)
-		RestedBar:SetOrientation("HORIZONTAL")
-		RestedBar:SetFrameLevel(XPBar:GetFrameLevel() - 1)
-		RestedBar:SetAlpha(.5)
-		RestedBar:SetReverseFill(i == 2 and true)
-		if C.panels.NoPanels == true then
-			XPBar:SetSize(i == 1 and (LEFTChatline:GetWidth()-4) or (RIGHTChatline:GetWidth()-4), 6)
-			XPBar:Point("BOTTOMLEFT", i == 1 and LEFTChatline or RIGHTChatline, "TOPLEFT", 2, 6)
-		else
-			XPBar:SetSize(i == 1 and (LChat:GetWidth()-4) or (RChat:GetWidth()-4), 6)
-			XPBar:Point("BOTTOMLEFT", i == 1 and LChatTab or RChatTab, "TOPLEFT", 2, 4)
-		end
-		XPBar.backdrop:SetFrameLevel(XPBar:GetFrameLevel() - 2)
-		XPBar.backdrop:SetOutside()
-		XPBar:SetReverseFill(i == 2 and true)
-		-- Default settings
-		if ViksUISettingsPerChar.experiencebar["ViksUIExperienceBar" .. i] ~= nil then
-			if i == 1 then
-				XPBar.BarType = ViksUISettingsPerChar.experiencebar["ViksUIExperienceBar1"]
-			else
-				XPBar.BarType = ViksUISettingsPerChar.experiencebar["ViksUIExperienceBar2"]
-			end
-		else
-			if i == 1 then
-				XPBar.BarType = "XP"
-			else
-				XPBar.BarType = "HONOR"
-			end
-		end
+        RestedBar:SetStatusBarTexture(barTex)
+        RestedBar:SetFrameStrata("MEDIUM")
+        RestedBar:SetStatusBarColor(unpack(self.RestedColor))
+        RestedBar:SetAllPoints(XPBar)
+        RestedBar:SetOrientation("HORIZONTAL")
+        RestedBar:SetFrameLevel(XPBar:GetFrameLevel() - 1)
+        RestedBar:SetAlpha(.5)
+        RestedBar:SetReverseFill(i == 2 and true)
+        if C.panels.NoPanels == true then
+            XPBar:SetSize(i == 1 and (LEFTChatline:GetWidth()-4) or (RIGHTChatline:GetWidth()-4), 6)
+            XPBar:Point("BOTTOMLEFT", i == 1 and LEFTChatline or RIGHTChatline, "TOPLEFT", 2, 6)
+        else
+            XPBar:SetSize(i == 1 and (LChat:GetWidth()-4) or (RChat:GetWidth()-4), 6)
+            XPBar:Point("BOTTOMLEFT", i == 1 and LChatTab or RChatTab, "TOPLEFT", 2, 4)
+        end
+        XPBar.backdrop:SetFrameLevel(XPBar:GetFrameLevel() - 2)
+        XPBar.backdrop:SetOutside()
+        XPBar:SetReverseFill(i == 2 and true)
+        -- Default settings
+        if ViksUISettingsPerChar.experiencebar["ViksUIExperienceBar" .. i] ~= nil then
+            XPBar.BarType = ViksUISettingsPerChar.experiencebar["ViksUIExperienceBar" .. i]
+        else
+            XPBar.BarType = (i == 1) and "XP" or "HONOR"
+        end
 
-		self["XPBar"..i] = XPBar
-		self["RestedBar"..i] = RestedBar
-	end
-	
-	self:RegisterEvent("PLAYER_XP_UPDATE")
-	self:RegisterEvent("UPDATE_FACTION")
-	self:RegisterEvent("PLAYER_LEVEL_UP")
-	self:RegisterEvent("UPDATE_EXHAUSTION")
-	self:RegisterEvent("PLAYER_ENTERING_WORLD")
-	self:RegisterEvent("PLAYER_UPDATE_RESTING")
-	self:RegisterEvent("HONOR_XP_UPDATE")
-	self:RegisterEvent("HONOR_LEVEL_UPDATE")
-	self:RegisterEvent("AZERITE_ITEM_EXPERIENCE_CHANGED")
-	self:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
-	self:RegisterEvent("PLAYER_MONEY")
-	self:RegisterEvent("UNIT_PET")
-	self:RegisterEvent("UNIT_PET_EXPERIENCE")
-	self:RegisterEvent("BAG_UPDATE")								 
-	self:RegisterEvent("CURRENCY_DISPLAY_UPDATE")	
-	self:RegisterEvent("ADDON_LOADED")	
+        self["XPBar"..i] = XPBar
+        self["RestedBar"..i] = RestedBar
+    end
 
-	self:SetScript("OnEvent", self.Update)
+    self:RegisterEvent("PLAYER_XP_UPDATE")
+    self:RegisterEvent("UPDATE_FACTION")
+    self:RegisterEvent("PLAYER_LEVEL_UP")
+    self:RegisterEvent("UPDATE_EXHAUSTION")
+    self:RegisterEvent("PLAYER_ENTERING_WORLD")
+    self:RegisterEvent("PLAYER_UPDATE_RESTING")
+    self:RegisterEvent("UNIT_PET")
+    self:RegisterEvent("UNIT_PET_EXPERIENCE")
+    self:RegisterEvent("ADDON_LOADED")
+    self:SetScript("OnEvent", self.Update)
 end
 
 function Experience:Enable()
-	if not ExperienceEnable then
-		return
-	end
+    if not ExperienceEnable then
+        return
+    end
 
-	if not self.XPBar1 then
-		self:Create()
-	end
+    if not self.XPBar1 then
+        self:Create()
+    end
 
-	for i = 1, self.NumBars do
-		if not self["XPBar"..i]:IsShown() then
-			self["XPBar"..i]:Show()
-		end
+    for i = 1, self.NumBars do
+        if not self["XPBar"..i]:IsShown() then
+            self["XPBar"..i]:Show()
+        end
 
-		if not self["RestedBar"..i]:IsShown() then
-			self["RestedBar"..i]:Show()
-		end
-	end
+        if not self["RestedBar"..i]:IsShown() then
+            self["RestedBar"..i]:Show()
+        end
+    end
 end
 
 function Experience:Disable()
-	for i = 1, self.NumBars do
-		if self["XPBar"..i]:IsShown() then
-			self["XPBar"..i]:Hide()
-		end
+    for i = 1, self.NumBars do
+        if self["XPBar"..i]:IsShown() then
+            self["XPBar"..i]:Hide()
+        end
 
-		if self["RestedBar"..i]:IsShown() then
-			self["RestedBar"..i]:Hide()
-		end
-	end
+        if self["RestedBar"..i]:IsShown() then
+            self["RestedBar"..i]:Hide()
+        end
+    end
 end
 
 -- Force update after login
 local frame = CreateFrame("Frame")
 frame:RegisterEvent("PLAYER_LOGIN")
 frame:SetScript("OnEvent", function()
-	Experience:Enable()
-	Experience:Update()
+    Experience:Enable()
+    Experience:Update()
 end)
 
 C.Experience = Experience
