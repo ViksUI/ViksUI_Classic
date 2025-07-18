@@ -9,7 +9,7 @@ C["position"] = {
 	["vehicle_bar"] = {"BOTTOMRIGHT", ActionButton1, "BOTTOMLEFT", -3, 0},			-- Vehicle button
 	["extra_button"] = {"BOTTOMRIGHT", ActionButton1, "BOTTOMLEFT", -3, 0},			-- Extra action button
 	["zone_button"] = {"BOTTOMRIGHT", ActionButton1, "BOTTOMLEFT", -3, 0},			-- Zone action button
-	["micro_menu"] = {"BOTTOMRIGHT", UIParent, "BOTTOMRIGHT", -4, 200},					-- Micro menu
+	["micro_menu"] = {"BOTTOMRIGHT", UIParent, "BOTTOMRIGHT", -40, 216},				-- Micro menu
 	-- UnitFrame positions
 	unitframes = {
 		["player"] = {"TOPRIGHT", UIParent, "BOTTOM", -158, 320},					-- Player frame
