@@ -3187,6 +3187,276 @@ C["filger_spells"] = {
 			{slotID = 14, filter = "CD"},
 		},
 	},
+	["MONK"] = {
+		{
+			Name = "P_BUFF_ICON",
+			Direction = "LEFT",
+			Mode = "ICON",
+			Interval = C.filger.buffs_space,
+			Alpha = 1,
+			IconSize = C.filger.buffs_size,
+			Position = {"TOP", P_BUFF_ICON_Anchor},
+
+			-- Guard
+			{spellID = 115295, unitID = "player", caster = "player", filter = "BUFF"},
+			-- Fortifying Brew
+			{spellID = 120954, unitID = "player", caster = "player", filter = "BUFF"},
+			-- Elusive Brew
+			{spellID = 115308, unitID = "player", caster = "player", filter = "BUFF", absID = true},
+			-- Tigereye Brew
+			{spellID = 116740, unitID = "player", caster = "player", filter = "BUFF", absID = true},
+			-- Touch of Karma
+			{spellID = 125174, unitID = "player", caster = "player", filter = "BUFF"},
+			-- Avert Harm
+			{spellID = 115213, unitID = "player", caster = "player", filter = "BUFF"},
+			-- Diffuse Magic
+			{spellID = 122783, unitID = "player", caster = "player", filter = "BUFF"},
+			-- Energizing Brew
+			{spellID = 115288, unitID = "player", caster = "player", filter = "BUFF"},
+			-- Momentum
+			{spellID = 119085, unitID = "player", caster = "player", filter = "BUFF"},
+		},
+		{
+			Name = "P_PROC_ICON",
+			Direction = "LEFT",
+			Mode = "ICON",
+			Interval = C.filger.buffs_space,
+			Alpha = 1,
+			IconSize = C.filger.buffs_size,
+			Position = {"TOP", P_PROC_ICON_Anchor},
+
+			-- Buffs
+			-- Tiger Power
+			{spellID = 125359, unitID = "player", caster = "player", filter = "BUFF"},
+			-- Combo Breaker: Blackout Kick
+			{spellID = 116768, unitID = "player", caster = "player", filter = "BUFF"},
+			-- Combo Breaker: Tiger Palm
+			{spellID = 118864, unitID = "player", caster = "player", filter = "BUFF"},
+			-- Power Guard
+			{spellID = 118636, unitID = "player", caster = "player", filter = "BUFF"},
+			-- Shuffle
+			{spellID = 115307, unitID = "player", caster = "player", filter = "BUFF"},
+			-- Vital Mists
+			{spellID = 118674, unitID = "player", caster = "player", filter = "BUFF"},
+			-- Serpent's Zeal
+			{spellID = 127722, unitID = "player", caster = "player", filter = "BUFF"},
+
+			-- Trinkets
+			-- General
+			-- Darkmoon Cards (Proc)
+			{spellID = 128985, unitID = "player", caster = "player", filter = "BUFF"},
+			-- PvP Trinkets (Health, Use)
+			{spellID = 126697, unitID = "player", caster = "player", filter = "BUFF"},
+			-- Tank
+			-- Rook's Unlucky Talisman (Reduces damage, Use)
+			{spellID = 146343, unitID = "player", caster = "player", filter = "BUFF"},
+			-- Resolve of Niuzao (Dodge, Use)
+			{spellID = 146344, unitID = "player", caster = "player", filter = "BUFF"},
+			-- Steadfast Talisman of the Shado-Pan Assault (Dodge, Use)
+			{spellID = 138728, unitID = "player", caster = "player", filter = "BUFF"},
+			-- Delicate Vial of the Sanguinaire (Mastery, Proc)
+			{spellID = 138864, unitID = "player", caster = "player", filter = "BUFF"},
+			-- Stuff of Nightmares (Dodge, Proc)
+			{spellID = 126646, unitID = "player", caster = "player", filter = "BUFF"},
+			-- Vial of Dragon's Blood (Dodge, Proc)
+			{spellID = 126533, unitID = "player", caster = "player", filter = "BUFF"},
+			-- Jade Warlord Figurine (Mastery, Use)
+			{spellID = 126597, unitID = "player", caster = "player", filter = "BUFF"},
+			-- Physical Agility DPS
+			-- Assurance of Consequence (Agility, Proc)
+			{spellID = 146308, unitID = "player", caster = "player", filter = "BUFF"},
+			-- Haromm's Talisman (Agility, Proc)
+			{spellID = 148903, unitID = "player", caster = "player", filter = "BUFF"},
+			-- Sigil of Rampage (Agility, Proc)
+			{spellID = 148896, unitID = "player", caster = "player", filter = "BUFF"},
+			-- Ticking Ebon Detonator (Agility, Proc)
+			{spellID = 146310, unitID = "player", caster = "player", filter = "BUFF"},
+			-- Discipline of Xuen (Crit, Proc)
+			{spellID = 146312, unitID = "player", caster = "player", filter = "BUFF"},
+			-- Vicious Talisman of the Shado-Pan Assault (Agility, Proc)
+			{spellID = 138699, unitID = "player", caster = "player", filter = "BUFF"},
+			-- Bad Juju (Agility, Proc)
+			{spellID = 138938, unitID = "player", caster = "player", filter = "BUFF"},
+			-- Talisman of Bloodlust (Haste, Proc)
+			{spellID = 138895, unitID = "player", caster = "player", filter = "BUFF"},
+			-- Rune of Re-Origination (Convert, Proc)
+			{spellID = 139120, unitID = "player", caster = "player", filter = "BUFF"},
+			-- Renataki's Soul Charm (Agility, Proc)
+			{spellID = 138756, unitID = "player", caster = "player", filter = "BUFF"},
+			-- Arrowflight Medallion (Crit, Use)
+			{spellID = 136086, unitID = "player", caster = "player", filter = "BUFF"},
+			-- Terror in the Mists (Crit, Proc)
+			{spellID = 126649, unitID = "player", caster = "player", filter = "BUFF"},
+			-- Jade Bandit Figurine (Haste, Use)
+			{spellID = 126599, unitID = "player", caster = "player", filter = "BUFF"},
+			-- Bottle of Infinite Stars (Agility, Proc)
+			{spellID = 126554, unitID = "player", caster = "player", filter = "BUFF"},
+			-- PvP Trinkets (Agility, Use)
+			{spellID = 126690, unitID = "player", caster = "player", filter = "BUFF"},
+			-- PvP Trinkets (Agility, Proc)
+			{spellID = 126707, unitID = "player", caster = "player", filter = "BUFF"},
+			-- Caster General
+			-- Shock-Charger Medallion Figurine (Intellect, Use)
+			{spellID = 136082, unitID = "player", caster = "player", filter = "BUFF"},
+			-- Jade Magistrate Figurine (Crit, Use)
+			{spellID = 126605, unitID = "player", caster = "player", filter = "BUFF"},
+			-- PvP Trinkets (Spell Power, Use)
+			{spellID = 126683, unitID = "player", caster = "player", filter = "BUFF"},
+			-- PvP Trinkets (Spell Power, Proc)
+			{spellID = 126705, unitID = "player", caster = "player", filter = "BUFF"},
+			-- Caster Heal
+			-- Prismatic Prison of Pride (Intellect, Proc)
+			{spellID = 146314, unitID = "player", caster = "player", filter = "BUFF"},
+			-- Nazgrim's Burnished Insignia (Intellect, Proc)
+			{spellID = 148908, unitID = "player", caster = "player", filter = "BUFF"},
+			-- Thok's Acid-Grooved Tooth (Intellect, Proc)
+			{spellID = 148911, unitID = "player", caster = "player", filter = "BUFF"},
+			-- Qin-xi's Polarizing Seal (Intellect, Proc)
+			{spellID = 126588, unitID = "player", caster = "player", filter = "BUFF"},
+
+			-- Enchants
+			-- General
+			-- Tank
+			-- River's Song (Dodge)
+			{spellID = 116660, unitID = "player", caster = "all", filter = "BUFF"},
+			-- Physical General
+			-- Swordguard Embroidery (Attack Power)
+			{spellID = 125489, unitID = "player", caster = "player", filter = "BUFF"},
+			-- Physical Melee
+			-- Dancing Steel (Agility)
+			{spellID = 120032, unitID = "player", caster = "all", filter = "BUFF"},
+			-- Caster General
+			-- Jade Spirit (Intellect + Spirit)
+			{spellID = 104993, unitID = "player", caster = "all", filter = "BUFF"},
+			-- Lightweave (Intellect)
+			{spellID = 125487, unitID = "player", caster = "player", filter = "BUFF"},
+			-- Caster Heal
+
+			-- Legendary Meta Gems
+			-- Indomitable Primal Diamond (Tank)
+			{spellID = 137593, unitID = "player", caster = "all", filter = "BUFF", absID = true},
+			-- Courageous Primal Diamond (Caster Heal)
+			{spellID = 137288, unitID = "player", caster = "all", filter = "BUFF"},
+
+			-- Legendary Cloak
+			-- Spirit of Chi-Ji
+			{spellID = 146200, unitID = "player", caster = "all", filter = "BUFF"},
+		},
+		{
+			Name = "T_DEBUFF_ICON",
+			Direction = "RIGHT",
+			Mode = "ICON",
+			Interval = C.filger.buffs_space,
+			Alpha = 1,
+			IconSize = C.filger.buffs_size,
+			Position = {"TOP", T_DEBUFF_ICON_Anchor},
+
+			-- Heavy Stagger
+			{spellID = 124273, unitID = "player", caster = "player", filter = "DEBUFF"},
+			-- Dizzying Haze
+			{spellID = 116330, unitID = "target", caster = "player", filter = "DEBUFF"},
+			-- Breath of Fire
+			{spellID = 123725, unitID = "target", caster = "player", filter = "DEBUFF"},
+
+
+		},
+		{
+			Name = "COOLDOWN",
+			Direction = "LEFT",
+			Mode = "ICON",
+			Interval = C.filger.cooldown_space,
+			Alpha = 1,
+			IconSize = C.filger.cooldown_size,
+			Position = {"TOP", COOLDOWN_Anchor},
+
+			-- Self
+			-- Detox
+			{spellID = 115450, filter = "CD"},
+			-- Spear Hand Strike
+			{spellID = 116705, filter = "CD"},
+			-- Paralysis
+			{spellID = 115078, filter = "CD"},
+			-- Expel Harm
+			{spellID = 115072, filter = "CD"},
+			-- Rising Sun Kick
+			{spellID = 107428, filter = "CD"},
+			-- Provoke
+			{spellID = 115546, filter = "CD"},
+			-- Zen Sphere
+			{spellID = 124081, filter = "CD"},
+			-- Chi Wave
+			{spellID = 115098, filter = "CD"},
+			-- Fists of Fury
+			{spellID = 113656, filter = "CD"},
+			-- Chi Burst
+			{spellID = 123986, filter = "CD"},
+			-- Guard
+			{spellID = 115295, filter = "CD"},
+			-- Charging Ox Wave
+			{spellID = 119392, filter = "CD"},
+			-- Clash
+			{spellID = 122057, filter = "CD"},
+			-- Ring of Peace
+			{spellID = 116844, filter = "CD"},
+			-- Dampen Harm
+			{spellID = 122278, filter = "CD"},
+			-- Roll
+			{spellID = 109132, filter = "CD"},
+			-- Flying Serpent Kick
+			{spellID = 101545, filter = "CD"},
+			-- Energizing Brew
+			{spellID = 115288, filter = "CD"},
+			-- Touch of Karma
+			{spellID = 122470, filter = "CD"},
+			-- Touch of Death
+			{spellID = 115080, filter = "CD"},
+			-- Nimble Brew
+			{spellID = 137562, filter = "CD"},
+			-- Life Cocoon
+			{spellID = 116849, filter = "CD"},
+			-- Invoke Xuen, the White Tiger
+			{spellID = 123904, filter = "CD"},
+
+			-- Racial
+			-- Every Man for Himself (Human)
+			{spellID = 59752, filter = "CD"},
+			-- Stoneform (Dwarf)
+			{spellID = 20594, filter = "CD"},
+			-- Shadowmeld (Night Elf)
+			{spellID = 58984, filter = "CD"},
+			-- Escape Artist (Gnome)
+			{spellID = 20589, filter = "CD"},
+			-- Gift of the Naaru (Draenei)
+			{spellID = 28880, filter = "CD"},
+			-- Blood Fury (Orc)
+			{spellID = 20572, filter = "CD"},
+			-- Will of the Forsaken (Forsaken)
+			{spellID = 7744, filter = "CD"},
+			-- Cannibalize (Forsaken)
+			{spellID = 20577, filter = "CD"},
+			-- War Stomp (Tauren)
+			{spellID = 20549, filter = "CD"},
+			-- Berserking (Troll)
+			{spellID = 26297, filter = "CD"},
+			-- Arcane Torrent (Blood Elf)
+			{spellID = 69179, filter = "CD"},
+			-- Quaking Palm (Pandaren)
+			{spellID = 107079, filter = "CD"},
+
+			-- Items
+			-- Gloves
+			{slotID = 10, filter = "CD"},
+			-- Belt
+			{slotID = 6, filter = "CD"},
+			-- Back
+			{slotID = 15, filter = "CD"},
+			-- Trinkets
+			{slotID = 13, filter = "CD"},
+			{slotID = 14, filter = "CD"},
+
+			-- Internal
+		},
+	},
 	["PALADIN"] = {
 		{
 			Name = "P_BUFF_ICON",
