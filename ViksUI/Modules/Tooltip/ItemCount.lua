@@ -7,11 +7,11 @@ if C.tooltip.enable ~= true or C.tooltip.item_count ~= true then return end
 local function OnTooltipSetItem(self, data)
 	if self ~= GameTooltip or self:IsForbidden() then return end
 	local num
-	if T.Classic then
+	if T.Classic and not T.Mists then
 		local _, link = self:GetItem()
-		num = GetItemCount(link, true)
+		num = C_Item.GetItemCount(link, true)
 	else
-		num = GetItemCount(data.id, true)
+		num = C_Item.GetItemCount(data.id, true)
 	end
 
 	if num > 1 then
@@ -19,7 +19,7 @@ local function OnTooltipSetItem(self, data)
 	end
 end
 
-if T.Classic then
+if T.Classic and not T.Mists then
 	GameTooltip:HookScript("OnTooltipSetItem", OnTooltipSetItem)
 else
 	TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Item, OnTooltipSetItem)

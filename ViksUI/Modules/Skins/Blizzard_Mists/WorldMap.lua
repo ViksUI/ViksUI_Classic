@@ -19,6 +19,7 @@ local function LoadSkin()
 	T.SkinDropDownBox(WorldMapContinentDropdown)
 	T.SkinDropDownBox(WorldMapZoneDropdown)
 	T.SkinDropDownBox(WorldMapZoneMinimapDropdown)
+	T.SkinDropDownBox(WorldMapFrame.WorldMapOptionsDropDown)
 	T.SkinCheckBox(WorldMapTrackQuest)
 
 
@@ -31,13 +32,15 @@ local function LoadSkin()
 	WorldMapZoomOutButton:SkinButton()
 	
 	T.SkinMaxMinFrame(WorldMapFrame.MaximizeMinimizeFrame)
-
+	
 	if WorldMapMixin:IsMaximized() then 
 		T.SkinCloseButton(WorldMapFrameCloseButton, WorldMapMixin.BorderFrame)
 	else 
 		T.SkinCloseButton(WorldMapFrameCloseButton, MiniBorderRight)
 	end
-	-- WorldMapFrameCloseButton:SetPoint("TOPRIGHT", WorldMapFrame.BorderFrame, "TOPRIGHT", 5, 4);
+	
+	-- WorldMapFrameCloseButton:SetPoint("TOPRIGHT", WorldMapFrame.BorderFrame, "TOPRIGHT", -4, -4)
+	WorldMapFrame.MaxMinButtonFrame:SetPoint("TOPRIGHT", WorldMapFrameCloseButton, "TOPLEFT", -5, 0)
 
 	if Questie_Toggle then
 		Questie_Toggle:SkinButton()

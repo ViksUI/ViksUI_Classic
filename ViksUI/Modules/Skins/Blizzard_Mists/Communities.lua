@@ -16,12 +16,15 @@ local function LoadSkin()
 		CommunitiesAvatarPickerDialog.ScrollBar,
 		CommunitiesFrame.Chat.ScrollBar,
 		CommunitiesFrame.GuildBenefitsFrame.Rewards.ScrollBar,
+		CommunitiesFrame.GuildBenefitsFrame.Perks.ScrollBar,
 		CommunitiesFrame.MemberList.ScrollBar,
 		CommunitiesFrame.NotificationSettingsDialog.ScrollFrame.ScrollBar,
 		CommunitiesFrame.RecruitmentDialog.RecruitmentMessageFrame.RecruitmentMessageInput.ScrollBar,
 		CommunitiesFrameCommunitiesList.ScrollBar,
 		CommunitiesFrameGuildDetailsFrameNews.ScrollBar,
 		CommunitiesFrameGuildDetailsFrameNews.ScrollBar,
+		CommunitiesFrameGuildDetailsFrameInfo.DetailsFrame.ScrollBar,
+		CommunitiesFrameGuildDetailsFrameInfo.MOTDScrollFrame.ScrollBar,
 		CommunitiesFrame.ApplicantList.ScrollBar,
 		CommunitiesGuildLogFrame.Container.ScrollFrame.ScrollBar
 	}

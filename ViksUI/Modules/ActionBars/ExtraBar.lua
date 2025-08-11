@@ -75,7 +75,7 @@ local button = ExtraActionButton1
 local texture = button.style
 local disableTexture = function(style, texture)
 	if texture then
-		style:SetTexture(0)
+		style:SetTexture(nil)
 	end
 end
 button.style:SetTexture(0)

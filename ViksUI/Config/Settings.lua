@@ -92,7 +92,7 @@ end
 ----------------------------------------------------------------------------------------
 C["minimap"] = {
 	["enable"] = true,
-	["tracking_icon"] = false,				-- Tracking icon
+	["tracking_icon"] = true,				-- Tracking icon
 	["garrison_icon"] = false,				-- Expansion Summary icon
 	["size"] = 136,							-- Minimap size
 	["toggle_menu"] = false,				-- Show toggle menu
@@ -104,6 +104,7 @@ C["minimap"] = {
 	["minimb2"] = true,						-- Background for Minimap bottom left
 	["zoneMapMultilplier"] = 1,				-- Multiplier for zoneMap (NOT scale)
 	["zoneMapScale"] = 1, 					-- Scale zonemap
+	["fog_of_war"] = true,						-- Remove fog of war on World Map
 }
 
 ----------------------------------------------------------------------------------------

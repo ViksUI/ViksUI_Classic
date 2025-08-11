@@ -2968,9 +2968,14 @@ do
 	local bg_map_stylization = ns.CreateCheckBox(parent, "bg_map_stylization")
 	bg_map_stylization:SetPoint("TOPLEFT", subheader, "BOTTOMLEFT", 0, -8)
 
+	local fog_of_war = ns.CreateCheckBox(parent, "fog_of_war")
+	fog_of_war:SetPoint("TOPLEFT", bg_map_stylization, "BOTTOMLEFT", 0, 0)
+	
 	local minimb1 = ns.CreateCheckBox(parent, "minimb1", L_GUI_MINIMAP_MINIBT_1)
-	minimb1:SetPoint("TOPLEFT", bg_map_stylization, "BOTTOMLEFT", 0, -8)
+	minimb1:SetPoint("TOPLEFT", fog_of_war, "BOTTOMLEFT", 0, -8)
 
+	local fog_of_war = ns.CreateCheckBox(parent, "fog_of_war")
+	fog_of_war:SetPoint("TOPLEFT", bg_map_stylization, "BOTTOMLEFT", 0, 0)
 	local minimb2 = ns.CreateCheckBox(parent, "minimb2", L_GUI_MINIMAP_MINIBT_2)
 	minimb2:SetPoint("TOPLEFT", minimb1, "BOTTOMLEFT", 0, -8)
 
@@ -2979,6 +2984,14 @@ do
 
 	local zoneMapScale = ns.CreateNumberSlider(parent, "zoneMapScale", nil, nil, 0, 2, 0.01, true, zoneMapScale)
 	zoneMapScale:SetPoint("TOPLEFT", zoneMapMultilplier, "BOTTOMLEFT", 0, -20)
+
+	local classic = {
+		garrison_icon
+	}
+
+	if IsClassicBuild() then
+		HideOptions(classic)
+	end
 end
 
 -- Loot

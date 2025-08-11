@@ -172,7 +172,7 @@ LevelUpdater:SetScript("OnEvent", CheckLevel)
 ----------------------------------------------------------------------------------------
 --	Pet Battle Hider
 ----------------------------------------------------------------------------------------
-if T.Mainline then
+if T.Mainline or T.Mists then
 T_PetBattleFrameHider = CreateFrame("Frame", "ViksUI_PetBattleFrameHider", UIParent, "SecureHandlerStateTemplate")
 	T_PetBattleFrameHider:SetAllPoints()
 	T_PetBattleFrameHider:SetFrameStrata("LOW")

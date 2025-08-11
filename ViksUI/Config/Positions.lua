@@ -9,7 +9,7 @@ C["position"] = {
 	["vehicle_bar"] = {"BOTTOMRIGHT", ActionButton1, "BOTTOMLEFT", -3, 0},			-- Vehicle button
 	["extra_button"] = {"BOTTOMRIGHT", ActionButton1, "BOTTOMLEFT", -3, 0},			-- Extra action button
 	["zone_button"] = {"BOTTOMRIGHT", ActionButton1, "BOTTOMLEFT", -3, 0},			-- Zone action button
-	["micro_menu"] = {"BOTTOMRIGHT", UIParent, "BOTTOMRIGHT", -40, 216},				-- Micro menu
+	["micro_menu"] = {"BOTTOMRIGHT", UIParent, "BOTTOMRIGHT", -66, 216},				-- Micro menu
 	-- UnitFrame positions
 	unitframes = {
 		["player"] = {"TOPRIGHT", UIParent, "BOTTOM", -158, 320},					-- Player frame
@@ -70,7 +70,7 @@ C["position"] = {
 	["chatr"] = {"BOTTOMLEFT", RChat, "BOTTOMLEFT", 5, 21},							-- Chat
 	["bn_popup"] = {"BOTTOMLEFT", UIParent, "BOTTOMLEFT", 5, (C.panels.CPTextheight+(C.panels.CPbarsheight*2))+40},					-- Battle.net popup
 	["bn_popup_line"] = {"BOTTOMLEFT", UIParent, "BOTTOMLEFT", 40, 280},			-- Battle.net popup with line style
-	["map"] = {"BOTTOM", UIParent, "BOTTOM", -120, 320},							-- Map
+	["map"] = {"TOP", UIParent, "TOP", 0, -25},										-- Map
 	["quest"] = {"TOPLEFT", Minimap, "BOTTOMLEFT", 0, -25},							-- Quest log
 	["loot"] = {"TOPLEFT", UIParent, "TOPLEFT", 245, -220},							-- Loot
 	["group_loot"] = {"BOTTOMLEFT", "oUF_Player", "TOPLEFT", -2, 173},				-- Group roll loot

@@ -84,9 +84,9 @@ frame:SetScript("OnEvent", function(_, _, addon)
 			end
 			AdventureJournal_Reward_OnEnter(rewardFrame)
 		end
-		_G.EncounterJournal.suggestFrame.Suggestion1.reward:HookScript("OnEnter", replacement)
-		_G.EncounterJournal.suggestFrame.Suggestion2.reward:HookScript("OnEnter", replacement)
-		_G.EncounterJournal.suggestFrame.Suggestion3.reward:HookScript("OnEnter", replacement)
+		-- _G.EncounterJournal.suggestFrame.Suggestion1.reward:HookScript("OnEnter", replacement)
+		-- _G.EncounterJournal.suggestFrame.Suggestion2.reward:HookScript("OnEnter", replacement)
+		-- _G.EncounterJournal.suggestFrame.Suggestion3.reward:HookScript("OnEnter", replacement)
 	elseif addon == "Blizzard_Communities" then
 		local dialog = _G.CommunitiesFrame.NotificationSettingsDialog
 		if dialog then

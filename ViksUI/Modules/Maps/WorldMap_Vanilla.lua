@@ -80,6 +80,19 @@ WorldMapFrame:HookScript("OnUpdate", function()
 	end
 end)
 
+----------------------------------------------------------------------------------------
+--	Change position
+----------------------------------------------------------------------------------------
+hooksecurefunc(WorldMapFrame, "SynchronizeDisplayState", function()
+	-- if CharacterFrame:IsShown() or SpellBookFrame:IsShown() or (PlayerTalentFrame and PlayerTalentFrame:IsShown()) or (ChannelFrame and ChannelFrame:IsShown()) or PVEFrame:IsShown() or (MacroFrame and MacroFrame:IsShown()) or (GarrisonLandingPage and GarrisonLandingPage:IsShown()) then return end
+	-- if not WorldMapFrame:IsMaximized() then
+		WorldMapFrame:ClearAllPoints()
+		WorldMapFrame:SetPoint(unpack(C.position.map))
+		-- WorldMapFrame:SetPoint("TOP", UIParent, "TOP", 0, -25)
+	-- end
+end)
+WorldMapFrame:SetClampedToScreen(true)
+
 coords:RegisterEvent("PLAYER_ENTERING_WORLD")
 coords:SetScript("OnEvent", function(self, event)
 	self:UnregisterEvent(event)

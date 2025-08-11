@@ -57,7 +57,7 @@ local moreMembersOnlineString = join("", "+ %d ", FRIENDS_LIST_ONLINE, "...")
 local noteString = join("", "|cff999999   ", LABEL_NOTE, ":|r %s")
 local officerNoteString = join("", "|cff999999   ", GUILD_RANK1_DESC, ":|r %s")
 local friendOnline, friendOffline = gsub(ERR_FRIEND_ONLINE_SS,"\124Hplayer:%%s\124h%[%%s%]\124h",""), gsub(ERR_FRIEND_OFFLINE_S,"%%s","")
-local guildTable, guildMotD = {}, {}, ""
+local guildTable, guildMotD = {}, ""
 
 local Stat = CreateFrame("Frame", "DataTextGuild", UIParent)
 Stat:EnableMouse(true)
